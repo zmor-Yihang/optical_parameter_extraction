@@ -128,6 +128,9 @@ class THzAnalyzerApp(QMainWindow):
         # 存储计算结果
         self.results_data = None
         
+        # 存储吸收系数弹出窗口的引用
+        self.absorption_window = None
+        
         # 设置窗口
         self.setWindowTitle("THz 时域光谱分析系统")
         self.setMinimumSize(1200, 800)
@@ -301,7 +304,7 @@ class THzAnalyzerApp(QMainWindow):
         left_layout.addStretch()
         
         # 版权信息
-        version_label = QLabel("By NUAA THz Group v4.5")
+        version_label = QLabel("By NUAA THz Group v4.5.1")
         version_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
         version_label.setStyleSheet("color: #666666; font-size: 15px;")
         left_layout.addWidget(version_label)
@@ -494,10 +497,53 @@ class THzAnalyzerApp(QMainWindow):
         """)
         tukey_layout = QVBoxLayout(tukey_group)
         
-        # 添加开关
-        self.use_window_checkbox = QCheckBox("启用Tukey窗函数")
-        self.use_window_checkbox.setStyleSheet("color: #333333;")
-        tukey_layout.addWidget(self.use_window_checkbox)
+        # 添加开关样式的按钮
+        switch_layout = QHBoxLayout()
+        
+        self.use_window_checkbox = QCheckBox()
+        self.use_window_checkbox.setStyleSheet("""
+            QCheckBox {
+                spacing: 0px;
+            }
+            QCheckBox::indicator {
+                width: 40px;
+                height: 20px;
+                border-radius: 10px;
+                background-color: #CCCCCC;
+                border: 2px solid #999999;
+            }
+            QCheckBox::indicator:checked {
+                background-color: #4CAF50;
+                border: 2px solid #45a049;
+            }
+            QCheckBox::indicator:hover {
+                border: 2px solid #666666;
+            }
+            QCheckBox::indicator:checked:hover {
+                border: 2px solid #3d8b40;
+            }
+        """)
+        switch_layout.addWidget(self.use_window_checkbox)
+        
+        # 状态标签
+        self.window_status_label = QLabel("关")
+        self.window_status_label.setStyleSheet("""
+            QLabel {
+                color: #999999;
+                font-weight: bold;
+                padding: 2px 5px;
+                font-size: 9pt;
+            }
+        """)
+        switch_layout.addWidget(self.window_status_label)
+        
+        switch_label = QLabel("启用Tukey窗函数")
+        switch_label.setStyleSheet("color: #333333; font-weight: bold; margin-left: 5px;")
+        switch_layout.addWidget(switch_label)
+        
+        switch_layout.addStretch()
+        
+        tukey_layout.addLayout(switch_layout)
         
         # 设置每个信号的窗函数参数按钮
         signal_window_button_layout = QHBoxLayout()
@@ -522,8 +568,13 @@ class THzAnalyzerApp(QMainWindow):
             QPushButton:pressed {
                 background-color: #2E5FA3;
             }
+            QPushButton:disabled {
+                background-color: #CCCCCC;
+                color: #666666;
+            }
         """)
         self.set_signal_window_btn.clicked.connect(self.open_signal_window_dialog)
+        self.set_signal_window_btn.setEnabled(False)  # 初始状态禁用
         signal_window_button_layout.addWidget(self.set_signal_window_btn)
         signal_window_button_layout.addStretch()
         
@@ -547,8 +598,8 @@ class THzAnalyzerApp(QMainWindow):
         
         # 所有窗函数组件创建完成后,连接信号并设置初始状态
         self.use_window_checkbox.toggled.connect(self.toggle_window_params)
-        # 从配置读取是否启用窗函数
-        self.use_window_checkbox.setChecked(self.config.get("use_window", False))
+        # 初始状态设为不开启
+        self.use_window_checkbox.setChecked(False)
         
         # 样品厚度设置
         thickness_layout = QHBoxLayout()
@@ -662,7 +713,10 @@ class THzAnalyzerApp(QMainWindow):
     
     def _create_button_section(self, parent_layout):
         """创建按钮区域"""
-        button_layout = QHBoxLayout()
+        button_layout = QVBoxLayout()
+        
+        # 第一行按钮
+        first_row_layout = QHBoxLayout()
         
         run_btn = AnimatedButton("  运行分析")
         run_btn.setIcon(self.run_icon)
@@ -713,8 +767,43 @@ class THzAnalyzerApp(QMainWindow):
         self.save_btn.clicked.connect(self.save_results)
         self.save_btn.setEnabled(False)
         
-        button_layout.addWidget(run_btn)
-        button_layout.addWidget(self.save_btn)
+        first_row_layout.addWidget(run_btn)
+        first_row_layout.addWidget(self.save_btn)
+        
+        # 第二行按钮
+        second_row_layout = QHBoxLayout()
+        
+        self.show_absorption_btn = AnimatedButton("  弹出吸收系数图")
+        self.show_absorption_btn.setIcon(self.chart_icon)
+        self.show_absorption_btn.setIconSize(QSize(18, 18))
+        self.show_absorption_btn.setStyleSheet("""
+            QPushButton {
+                padding: 8px 15px;
+                background-color: #6F42C1;
+                color: white;
+                border-radius: 4px;
+                border: none;
+                font-weight: bold;
+                text-align: left;
+            }
+            QPushButton:hover {
+                background-color: #5A32A3;
+            }
+            QPushButton:pressed {
+                background-color: #4A2890;
+            }
+            QPushButton:disabled {
+                background-color: #EEEEEE;
+                color: #999999;
+            }
+        """)
+        self.show_absorption_btn.clicked.connect(self.show_absorption_plot)
+        self.show_absorption_btn.setEnabled(False)
+        
+        second_row_layout.addWidget(self.show_absorption_btn)
+        
+        button_layout.addLayout(first_row_layout)
+        button_layout.addLayout(second_row_layout)
         parent_layout.addLayout(button_layout)
     
     def _create_right_panel(self):
@@ -970,8 +1059,27 @@ class THzAnalyzerApp(QMainWindow):
     
     def toggle_window_params(self, enabled):
         """切换窗函数参数输入框的启用状态"""
-        # 现在已移除全局参数输入框，此方法仅作占位符
-        pass
+        # 更新状态标签
+        if enabled:
+            self.window_status_label.setText("开")
+            self.window_status_label.setStyleSheet("""
+                QLabel {
+                    color: #4CAF50;
+                    font-weight: bold;
+                    padding: 2px 8px;
+                }
+            """)
+            self.set_signal_window_btn.setEnabled(True)
+        else:
+            self.window_status_label.setText("关")
+            self.window_status_label.setStyleSheet("""
+                QLabel {
+                    color: #999999;
+                    font-weight: bold;
+                    padding: 2px 8px;
+                }
+            """)
+            self.set_signal_window_btn.setEnabled(False)
     
     def _update_window_params_indicator(self):
         """更新窗函数参数设置状态指示"""
@@ -1013,19 +1121,260 @@ class THzAnalyzerApp(QMainWindow):
         
         # 创建对话框
         dialog = QMainWindow()
-        dialog.setWindowTitle("每个信号的窗函数参数设置")
-        dialog.setMinimumSize(850, 700)
+        dialog.setWindowTitle("Tukey窗函数参数设置")
+        dialog.setMinimumSize(900, 750)
         
         central_widget = QWidget()
         dialog.setCentralWidget(central_widget)
         layout = QVBoxLayout(central_widget)
+        layout.setContentsMargins(15, 15, 15, 15)
+        layout.setSpacing(10)
+        
+        # 顶部工具栏 - 快速设置区域
+        toolbar_group = QGroupBox("🚀 快速设置")
+        toolbar_group.setStyleSheet("""
+            QGroupBox {
+                border: 2px solid #4A90E2;
+                border-radius: 6px;
+                margin-top: 10px;
+                padding: 15px;
+                background-color: #E8F4FD;
+                font-weight: bold;
+                font-size: 11pt;
+            }
+            QGroupBox::title {
+                subcontrol-origin: margin;
+                left: 15px;
+                padding: 0 8px;
+                color: #4A90E2;
+            }
+        """)
+        toolbar_layout = QVBoxLayout(toolbar_group)
+        
+        # 参考信号快速设置
+        ref_quick_group = QGroupBox("📍 参考信号参数")
+        ref_quick_group.setStyleSheet("""
+            QGroupBox {
+                border: 1px solid #28A745;
+                border-radius: 4px;
+                margin-top: 8px;
+                padding: 10px;
+                background-color: #F0F8F4;
+                font-weight: bold;
+            }
+            QGroupBox::title {
+                subcontrol-origin: margin;
+                left: 10px;
+                padding: 0 5px;
+                color: #28A745;
+            }
+        """)
+        ref_quick_layout = QHBoxLayout(ref_quick_group)
+        
+        # 参考信号 - 起始时间
+        ref_quick_layout.addWidget(QLabel("起始时间:"))
+        self.quick_ref_t_start = QLineEdit("0.0")
+        self.quick_ref_t_start.setFixedWidth(70)
+        self.quick_ref_t_start.setStyleSheet("""
+            QLineEdit {
+                padding: 5px;
+                border: 2px solid #CCCCCC;
+                border-radius: 4px;
+                background-color: #FFFFFF;
+                font-size: 10pt;
+            }
+            QLineEdit:focus {
+                border: 2px solid #28A745;
+            }
+        """)
+        ref_quick_layout.addWidget(self.quick_ref_t_start)
+        ref_quick_layout.addWidget(QLabel("ps"))
+        
+        ref_quick_layout.addSpacing(10)
+        
+        # 参考信号 - 结束时间
+        ref_quick_layout.addWidget(QLabel("结束时间:"))
+        self.quick_ref_t_end = QLineEdit("30.0")
+        self.quick_ref_t_end.setFixedWidth(70)
+        self.quick_ref_t_end.setStyleSheet("""
+            QLineEdit {
+                padding: 5px;
+                border: 2px solid #CCCCCC;
+                border-radius: 4px;
+                background-color: #FFFFFF;
+                font-size: 10pt;
+            }
+            QLineEdit:focus {
+                border: 2px solid #28A745;
+            }
+        """)
+        ref_quick_layout.addWidget(self.quick_ref_t_end)
+        ref_quick_layout.addWidget(QLabel("ps"))
+        
+        ref_quick_layout.addSpacing(10)
+        
+        # 参考信号 - alpha参数
+        ref_quick_layout.addWidget(QLabel("α参数:"))
+        self.quick_ref_alpha = QLineEdit("0.5")
+        self.quick_ref_alpha.setFixedWidth(70)
+        self.quick_ref_alpha.setStyleSheet("""
+            QLineEdit {
+                padding: 5px;
+                border: 2px solid #CCCCCC;
+                border-radius: 4px;
+                background-color: #FFFFFF;
+                font-size: 10pt;
+            }
+            QLineEdit:focus {
+                border: 2px solid #28A745;
+            }
+        """)
+        ref_quick_layout.addWidget(self.quick_ref_alpha)
+        
+        ref_quick_layout.addSpacing(15)
+        
+        # 参考信号应用按钮
+        apply_ref_btn = AnimatedButton("  应用")
+        apply_ref_btn.setStyleSheet("""
+            QPushButton {
+                background-color: #28A745;
+                color: white;
+                border-radius: 4px;
+                padding: 6px 16px;
+                border: none;
+                font-weight: bold;
+                font-size: 10pt;
+            }
+            QPushButton:hover {
+                background-color: #218838;
+            }
+            QPushButton:pressed {
+                background-color: #1e7e34;
+            }
+        """)
+        apply_ref_btn.clicked.connect(self._apply_quick_params_to_ref)
+        ref_quick_layout.addWidget(apply_ref_btn)
+        
+        ref_quick_layout.addStretch()
+        
+        toolbar_layout.addWidget(ref_quick_group)
+        
+        # 样品信号快速设置
+        sam_quick_group = QGroupBox("📦 样品信号参数（应用到所有样品）")
+        sam_quick_group.setStyleSheet("""
+            QGroupBox {
+                border: 1px solid #007BFF;
+                border-radius: 4px;
+                margin-top: 8px;
+                padding: 10px;
+                background-color: #E8F4FD;
+                font-weight: bold;
+            }
+            QGroupBox::title {
+                subcontrol-origin: margin;
+                left: 10px;
+                padding: 0 5px;
+                color: #007BFF;
+            }
+        """)
+        sam_quick_layout = QHBoxLayout(sam_quick_group)
+        
+        # 样品信号 - 起始时间
+        sam_quick_layout.addWidget(QLabel("起始时间:"))
+        self.quick_sam_t_start = QLineEdit("0.0")
+        self.quick_sam_t_start.setFixedWidth(70)
+        self.quick_sam_t_start.setStyleSheet("""
+            QLineEdit {
+                padding: 5px;
+                border: 2px solid #CCCCCC;
+                border-radius: 4px;
+                background-color: #FFFFFF;
+                font-size: 10pt;
+            }
+            QLineEdit:focus {
+                border: 2px solid #007BFF;
+            }
+        """)
+        sam_quick_layout.addWidget(self.quick_sam_t_start)
+        sam_quick_layout.addWidget(QLabel("ps"))
+        
+        sam_quick_layout.addSpacing(10)
+        
+        # 样品信号 - 结束时间
+        sam_quick_layout.addWidget(QLabel("结束时间:"))
+        self.quick_sam_t_end = QLineEdit("30.0")
+        self.quick_sam_t_end.setFixedWidth(70)
+        self.quick_sam_t_end.setStyleSheet("""
+            QLineEdit {
+                padding: 5px;
+                border: 2px solid #CCCCCC;
+                border-radius: 4px;
+                background-color: #FFFFFF;
+                font-size: 10pt;
+            }
+            QLineEdit:focus {
+                border: 2px solid #007BFF;
+            }
+        """)
+        sam_quick_layout.addWidget(self.quick_sam_t_end)
+        sam_quick_layout.addWidget(QLabel("ps"))
+        
+        sam_quick_layout.addSpacing(10)
+        
+        # 样品信号 - alpha参数
+        sam_quick_layout.addWidget(QLabel("α参数:"))
+        self.quick_sam_alpha = QLineEdit("0.5")
+        self.quick_sam_alpha.setFixedWidth(70)
+        self.quick_sam_alpha.setStyleSheet("""
+            QLineEdit {
+                padding: 5px;
+                border: 2px solid #CCCCCC;
+                border-radius: 4px;
+                background-color: #FFFFFF;
+                font-size: 10pt;
+            }
+            QLineEdit:focus {
+                border: 2px solid #007BFF;
+            }
+        """)
+        sam_quick_layout.addWidget(self.quick_sam_alpha)
+        
+        sam_quick_layout.addSpacing(15)
+        
+        # 样品信号应用按钮
+        apply_sam_btn = AnimatedButton("  应用到所有样品")
+        apply_sam_btn.setStyleSheet("""
+            QPushButton {
+                background-color: #007BFF;
+                color: white;
+                border-radius: 4px;
+                padding: 6px 16px;
+                border: none;
+                font-weight: bold;
+                font-size: 10pt;
+            }
+            QPushButton:hover {
+                background-color: #0056B3;
+            }
+            QPushButton:pressed {
+                background-color: #004085;
+            }
+        """)
+        apply_sam_btn.clicked.connect(self._apply_quick_params_to_samples)
+        sam_quick_layout.addWidget(apply_sam_btn)
+        
+        sam_quick_layout.addStretch()
+        
+        toolbar_layout.addWidget(sam_quick_group)
+        
+        layout.addWidget(toolbar_group)
         
         # 添加说明标签
-        info_label = QLabel("为每个信号设置独立的Tukey窗函数参数。")
-        info_label.setStyleSheet("color: #666666; margin-bottom: 10px;")
+        info_label = QLabel("💡 提示：使用上方快速设置可分别为参考信号和样品信号一键应用参数，也可在下方单独调整")
+        info_label.setStyleSheet("color: #666666; margin: 5px 0; font-style: italic;")
         layout.addWidget(info_label)
         
-        # 创建滚动区域
+        # 创建滚动区域 - 单独设置
         scroll_area = QWidget()
         scroll_layout = QVBoxLayout(scroll_area)
         
@@ -1122,7 +1471,7 @@ class THzAnalyzerApp(QMainWindow):
         # 然后添加样品
         for i, sam_name in enumerate(self.sam_names):
             # 创建样品框
-            sample_group = QGroupBox(f"样品 {i+1}: {sam_name}")
+            sample_group = QGroupBox(f"📦 样品 {i+1}: {sam_name}")
             sample_group.setStyleSheet("""
                 QGroupBox {
                     border: 1px solid #CCCCCC;
@@ -1209,64 +1558,37 @@ class THzAnalyzerApp(QMainWindow):
         scroll_area_outer = QScrollArea()
         scroll_area_outer.setWidget(scroll_area)
         scroll_area_outer.setWidgetResizable(True)
+        scroll_area_outer.setStyleSheet("""
+            QScrollArea {
+                border: 1px solid #CCCCCC;
+                border-radius: 4px;
+                background-color: #FAFAFA;
+            }
+        """)
         layout.addWidget(scroll_area_outer)
-        
-        # 快速应用工具栏 - 将一组参数应用到所有样品
-        if len(self.sam_names) > 0:  # 仅当有样品时显示
-            quick_apply_layout = QHBoxLayout()
-            quick_apply_layout.setContentsMargins(0, 10, 0, 0)
-            
-            quick_apply_label = QLabel("快速应用:")
-            quick_apply_label.setStyleSheet("color: #333333; font-weight: bold;")
-            quick_apply_layout.addWidget(quick_apply_label)
-            
-            # 选择参考或样品作为模板
-            template_label = QLabel("选择模板")
-            template_label.setStyleSheet("color: #666666;")
-            quick_apply_layout.addWidget(template_label)
-            
-            template_combo = QComboBox()
-            template_combo.setStyleSheet("""
-                QComboBox {
-                    padding: 5px;
-                    border: 1px solid #CCCCCC;
-                    border-radius: 4px;
-                    background-color: #FFFFFF;
-                    color: #333333;
-                }
-            """)
-            template_combo.addItem("参考信号", "ref")
-            for i, sam_name in enumerate(self.sam_names):
-                template_combo.addItem(f"样品 {i+1}: {sam_name}", i)
-            quick_apply_layout.addWidget(template_combo)
-            
-            apply_to_all_btn = AnimatedButton("  应用到所有样品")
-            apply_to_all_btn.setStyleSheet("""
-                QPushButton {
-                    background-color: #007BFF;
-                    color: white;
-                    border-radius: 4px;
-                    padding: 5px 12px;
-                    border: none;
-                    font-weight: bold;
-                }
-                QPushButton:hover {
-                    background-color: #0056B3;
-                }
-                QPushButton:pressed {
-                    background-color: #003D82;
-                }
-            """)
-            apply_to_all_btn.clicked.connect(lambda: self._apply_template_to_all_samples(
-                template_combo.currentData()
-            ))
-            quick_apply_layout.addWidget(apply_to_all_btn)
-            quick_apply_layout.addStretch()
-            
-            layout.addLayout(quick_apply_layout)
         
         # 底部按钮
         button_layout = QHBoxLayout()
+        button_layout.setSpacing(10)
+        
+        reset_btn = AnimatedButton("  重置全部")
+        reset_btn.setStyleSheet("""
+            QPushButton {
+                background-color: #FFC107;
+                color: #333333;
+                border-radius: 4px;
+                padding: 8px 16px;
+                border: none;
+                font-weight: bold;
+            }
+            QPushButton:hover {
+                background-color: #FFB300;
+            }
+        """)
+        reset_btn.clicked.connect(self._reset_all_params)
+        button_layout.addWidget(reset_btn)
+        
+        button_layout.addStretch()
         
         confirm_btn = AnimatedButton("  确定")
         confirm_btn.setStyleSheet("""
@@ -1274,7 +1596,7 @@ class THzAnalyzerApp(QMainWindow):
                 background-color: #28A745;
                 color: white;
                 border-radius: 4px;
-                padding: 8px 16px;
+                padding: 8px 20px;
                 border: none;
                 font-weight: bold;
             }
@@ -1283,7 +1605,6 @@ class THzAnalyzerApp(QMainWindow):
             }
         """)
         confirm_btn.clicked.connect(lambda: self._save_signal_window_params(dialog))
-        button_layout.addStretch()
         button_layout.addWidget(confirm_btn)
         
         cancel_btn = AnimatedButton("  取消")
@@ -1292,7 +1613,7 @@ class THzAnalyzerApp(QMainWindow):
                 background-color: #6C757D;
                 color: white;
                 border-radius: 4px;
-                padding: 8px 16px;
+                padding: 8px 20px;
                 border: none;
                 font-weight: bold;
             }
@@ -1346,6 +1667,87 @@ class THzAnalyzerApp(QMainWindow):
         except ValueError as e:
             QMessageBox.warning(None, "参数错误", str(e))
     
+    def _apply_quick_params_to_ref(self):
+        """应用快速设置面板的参数到参考信号"""
+        try:
+            t_start = float(self.quick_ref_t_start.text())
+            t_end = float(self.quick_ref_t_end.text())
+            alpha = float(self.quick_ref_alpha.text())
+            
+            # 验证参数
+            if alpha < 0 or alpha > 1:
+                raise ValueError("α参数必须在0到1之间")
+            if t_end <= t_start:
+                raise ValueError("结束时间必须大于起始时间")
+            
+            # 应用到参考信号
+            if 'ref' in self.signal_window_inputs:
+                self.signal_window_inputs['ref']['t_start'].setText(str(t_start))
+                self.signal_window_inputs['ref']['t_end'].setText(str(t_end))
+                self.signal_window_inputs['ref']['alpha'].setText(str(alpha))
+                self.update_status("已将参数应用到参考信号", "ready")
+            else:
+                QMessageBox.warning(None, "警告", "未找到参考信号")
+        except ValueError as e:
+            QMessageBox.warning(None, "参数错误", str(e))
+        except Exception as e:
+            QMessageBox.warning(None, "错误", f"应用参数失败: {str(e)}")
+    
+    def _apply_quick_params_to_samples(self):
+        """应用快速设置面板的参数到所有样品信号"""
+        try:
+            t_start = float(self.quick_sam_t_start.text())
+            t_end = float(self.quick_sam_t_end.text())
+            alpha = float(self.quick_sam_alpha.text())
+            
+            # 验证参数
+            if alpha < 0 or alpha > 1:
+                raise ValueError("α参数必须在0到1之间")
+            if t_end <= t_start:
+                raise ValueError("结束时间必须大于起始时间")
+            
+            # 应用到所有样品信号（不包括参考信号）
+            count = 0
+            for key in self.signal_window_inputs:
+                if key != 'ref':  # 跳过参考信号
+                    self.signal_window_inputs[key]['t_start'].setText(str(t_start))
+                    self.signal_window_inputs[key]['t_end'].setText(str(t_end))
+                    self.signal_window_inputs[key]['alpha'].setText(str(alpha))
+                    count += 1
+            
+            if count > 0:
+                self.update_status(f"已将参数应用到 {count} 个样品信号", "ready")
+            else:
+                QMessageBox.warning(None, "警告", "没有找到样品信号")
+        except ValueError as e:
+            QMessageBox.warning(None, "参数错误", str(e))
+        except Exception as e:
+            QMessageBox.warning(None, "错误", f"应用参数失败: {str(e)}")
+    
+    def _reset_all_params(self):
+        """重置所有参数为默认值"""
+        reply = QMessageBox.question(
+            None, 
+            "确认重置", 
+            "确定要将所有信号的参数重置为默认值吗？\n(起始时间=0.0, 结束时间=30.0, α=0.5)",
+            QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No,
+            QMessageBox.StandardButton.No
+        )
+        
+        if reply == QMessageBox.StandardButton.Yes:
+            for key in self.signal_window_inputs:
+                self.signal_window_inputs[key]['t_start'].setText("0.0")
+                self.signal_window_inputs[key]['t_end'].setText("30.0")
+                self.signal_window_inputs[key]['alpha'].setText("0.5")
+            
+            # 同时重置快速设置面板
+            self.quick_ref_t_start.setText("0.0")
+            self.quick_ref_t_end.setText("30.0")
+            self.quick_ref_alpha.setText("0.5")
+            self.quick_sam_t_start.setText("0.0")
+            self.quick_sam_t_end.setText("30.0")
+            self.quick_sam_alpha.setText("0.5")
+    
     def _apply_template_to_all_samples(self, template_key):
         """将模板参数应用到所有样品信号"""
         try:
@@ -1378,11 +1780,16 @@ class THzAnalyzerApp(QMainWindow):
                 raise ValueError("模板的结束时间必须大于起始时间")
             
             # 应用到所有样品
+            count = 0
             for i in range(len(self.sam_names)):
                 if i in self.signal_window_inputs and i != template_key:
                     self.signal_window_inputs[i]['t_start'].setText(str(t_start))
                     self.signal_window_inputs[i]['t_end'].setText(str(t_end))
                     self.signal_window_inputs[i]['alpha'].setText(str(alpha))
+                    count += 1
+            
+            if count > 0:
+                self.update_status(f"已将模板参数应用到 {count} 个样品", "ready")
         except ValueError as e:
             QMessageBox.warning(None, "参数错误", str(e))
         except Exception as e:
@@ -1614,9 +2021,11 @@ class THzAnalyzerApp(QMainWindow):
                 self._display_charts(fig1, fig2, fig3)
                 self.update_status("计算完成", "ready")
                 self.save_btn.setEnabled(True)
+                self.show_absorption_btn.setEnabled(True)
             else:
                 self.update_status("计算失败", "error")
                 self.save_btn.setEnabled(False)
+                self.show_absorption_btn.setEnabled(False)
                 
         except ValueError as e:
             QMessageBox.critical(self, "输入错误", f"请输入有效的值: {str(e)}")
@@ -1653,6 +2062,68 @@ class THzAnalyzerApp(QMainWindow):
         self.tab3.layout().addWidget(toolbar3)
         self.tab3.layout().addWidget(canvas3)
     
+    def show_absorption_plot(self):
+        """弹出显示吸收系数图表的独立窗口"""
+        if self.results_data is None:
+            QMessageBox.warning(self, "警告", "没有可显示的数据，请先运行分析")
+            return
+        
+        # 如果窗口已经存在，先关闭
+        if self.absorption_window is not None:
+            try:
+                self.absorption_window.close()
+            except:
+                pass
+        
+        # 创建新窗口
+        self.absorption_window = QMainWindow()
+        self.absorption_window.setWindowTitle("吸收系数图表")
+        self.absorption_window.setMinimumSize(900, 600)
+        
+        # 创建中心部件
+        central_widget = QWidget()
+        self.absorption_window.setCentralWidget(central_widget)
+        layout = QVBoxLayout(central_widget)
+        layout.setContentsMargins(10, 10, 10, 10)
+        
+        # 创建吸收系数图表
+        fig = plt.figure(figsize=(10, 6))
+        fig.patch.set_facecolor('#F5F5F5')
+        
+        ax = fig.add_subplot(1, 1, 1)
+        ax.set_facecolor('#F8F8F8')
+        
+        # 定义颜色
+        colors = ['red', 'blue', 'green', 'purple', 'orange', 'brown', 'pink', 'gray', 'olive', 'cyan']
+        
+        # 绘制每个样品的吸收系数
+        F = self.results_data['F']
+        all_Asam = self.results_data['Asam']
+        sam_names = self.results_data['sam_names']
+        
+        for i in range(len(all_Asam)):
+            ax.plot(F, all_Asam[i], color=colors[i % len(colors)], linewidth=2.5, label=sam_names[i])
+        
+        ax.set_xlabel('频率 (THz)', fontsize=12)
+        ax.set_ylabel('吸收系数 (cm^-1)', fontsize=12)
+        ax.set_title('吸收系数对比', fontsize=14, fontweight='bold')
+        ax.legend(fontsize=10)
+        ax.grid(True, alpha=0.3)
+        ax.set_xlim(0, 5)
+        ax.autoscale(axis='y')
+        
+        fig.tight_layout()
+        
+        # 创建画布和工具栏
+        canvas = FigureCanvas(fig)
+        toolbar = NavigationToolbar(canvas, self.absorption_window)
+        
+        layout.addWidget(toolbar)
+        layout.addWidget(canvas)
+        
+        # 显示窗口
+        self.absorption_window.show()
+    
     def save_results(self):
         """保存计算结果到Excel文件"""
         if self.results_data is None:
@@ -1687,120 +2158,200 @@ class THzAnalyzerApp(QMainWindow):
     
     def show_help_dialog(self):
         """显示帮助对话框"""
-        help_dialog = QMessageBox(self)
-        help_dialog.setWindowTitle("📖 使用说明")
-        help_dialog.setIcon(QMessageBox.Icon.Information)
+        from PyQt6.QtWidgets import QDialog, QTextBrowser
         
-        help_text = """
-<h2 style="color: #2C3E50;">THz 时域光谱分析系统 - 使用指南</h2>
+        help_dialog = QDialog(self)
+        help_dialog.setWindowTitle("📖 使用说明")
+        help_dialog.setMinimumSize(650, 550)
+        help_dialog.setStyleSheet("QDialog { background-color: #FFFFFF; }")
+        
+        layout = QVBoxLayout(help_dialog)
+        layout.setContentsMargins(20, 20, 20, 20)
+        
+        text_browser = QTextBrowser()
+        text_browser.setOpenExternalLinks(True)
+        text_browser.setStyleSheet("QTextBrowser { border: none; background-color: #FFFFFF; font-size: 10pt; }")
+        
+        help_html = """
+<h2 style="color: #2C3E50; text-align: center; margin-bottom: 20px;">THz 时域光谱分析系统 - 使用指南</h2>
 
 <h3 style="color: #3498DB;">📋 基本流程</h3>
-<ol style="line-height: 1.8;">
-    <li><b>选择参考文件</b>：点击"添加文件"按钮选择参考信号文件（支持Excel和TXT格式）</li>
-    <li><b>添加样品文件</b>：点击"添加文件"添加一个或多个样品信号文件</li>
-    <li><b>设置参数</b>：
-        <ul>
-            <li>数据起始行：指定数据从文件的第几行开始（默认为1或2）</li>
-            <li>样品厚度：输入样品的厚度值（单位：mm）</li>
+<ol style="line-height: 1.8; margin-left: 20px;">
+    <li><b>选择参考文件</b>：点击"添加文件"按钮选择参考信号文件（空气或无样品的参考测量）
+        <ul style="margin-left: 15px; margin-top: 5px;">
+            <li>支持格式：Excel (.xlsx, .xls) 和文本文件 (.txt)</li>
+            <li>数据格式：第一列为时间(ps)，第二列为电场振幅</li>
         </ul>
     </li>
-    <li><b>运行分析</b>：点击"运行分析"按钮开始计算</li>
-    <li><b>保存结果</b>：分析完成后，点击"保存结果"导出Excel文件</li>
+    <li><b>添加样品文件</b>：点击"添加文件"或拖放文件到列表区域
+        <ul style="margin-left: 15px; margin-top: 5px;">
+            <li>支持批量添加多个样品文件</li>
+            <li>可随时删除或清空样品列表</li>
+        </ul>
+    </li>
+    <li><b>设置参数</b>：
+        <ul style="margin-left: 15px; margin-top: 5px;">
+            <li><b>数据起始行</b>：指定数据从文件的第几行开始（跳过表头）</li>
+            <li><b>样品厚度</b>：输入样品的厚度值（单位：mm），支持历史记录</li>
+        </ul>
+    </li>
+    <li><b>Tukey窗函数</b>（可选）：开启开关后可设置窗函数参数，用于去除多次反射</li>
+    <li><b>运行分析</b>：点击"运行分析"按钮开始计算光学参数</li>
+    <li><b>保存结果</b>：分析完成后，点击"保存结果"将数据导出为Excel文件</li>
 </ol>
 
-<h3 style="color: #3498DB;">🔧 Tukey窗函数</h3>
-<p style="line-height: 1.8;">
-• <b>起始时间</b>：窗函数作用的起始时间点（ps）<br>
-• <b>结束时间</b>：窗函数作用的结束时间点（ps）<br>
-• <b>α参数</b>：控制窗函数形状（0=矩形窗，1=汉宁窗，推荐0.3-0.7）<br>
-• 窗口外部的信号会被置零，窗口内部应用平滑处理
+<h3 style="color: #3498DB;">🔧 Tukey窗函数设置</h3>
+<p style="line-height: 1.8; margin-left: 10px;">
+Tukey窗函数用于截取时域信号的特定区域，去除多次反射干扰：<br><br>
+• <b>起始时间 (ps)</b>：窗函数作用的起始时间点，应在主脉冲之前<br>
+• <b>结束时间 (ps)</b>：窗函数作用的结束时间点，应在第一次反射脉冲之前<br>
+• <b>α参数 (0-1)</b>：控制窗函数边缘的平滑程度
+</p>
+<ul style="line-height: 1.6; margin-left: 30px;">
+    <li>α=0：矩形窗，边缘陡峭，频域旁瓣大</li>
+    <li>α=1：汉宁窗，边缘平滑，频域旁瓣小</li>
+    <li>推荐值：0.3-0.7，兼顾时域截断和频域特性</li>
+</ul>
+<p style="line-height: 1.8; margin-left: 10px;">
+<b>快速设置</b>：可分别为参考信号和样品信号设置不同的窗函数参数
 </p>
 
 <h3 style="color: #3498DB;">📊 结果查看</h3>
-<p style="line-height: 1.8;">
-分析完成后可查看三个标签页：<br>
-• <b>时域/频域图</b>：时域信号和频谱对比<br>
-• <b>光学参数</b>：折射率、消光系数、吸收系数<br>
-• <b>介电特性</b>：介电常数实部、虚部、介电损耗
+<p style="line-height: 1.8; margin-left: 10px;">
+分析完成后，右侧面板显示三个标签页：
+</p>
+<p style="line-height: 1.6; margin-left: 10px;">
+• <b>时域和频域信号</b>：上图为时域信号波形，下图为频域幅度谱(dB)<br>
+• <b>光学参数</b>：折射率n(ω)、消光系数k(ω)、吸收系数α(ω)<br>
+• <b>介电特性</b>：介电常数实部ε'、虚部ε''、介电损耗tanδ<br>
+• <b>弹出吸收系数图</b>：点击按钮可在独立窗口中查看吸收系数
 </p>
 
 <h3 style="color: #3498DB;">💡 快捷操作</h3>
-<p style="line-height: 1.8;">
-• 支持拖放文件到样品文件列表<br>
-• F1：打开帮助<br>
-• Ctrl+Q：退出程序<br>
-• 程序会自动保存参数设置到配置文件thz_config.json
+<p style="line-height: 1.8; margin-left: 10px;">
+• <b>拖放文件</b>：直接拖放文件到样品文件列表区域<br>
+• <b>F1</b>：打开本帮助对话框<br>
+• <b>Ctrl+Q</b>：退出程序<br>
+• <b>图表工具栏</b>：每个图表下方有导航工具栏，支持缩放、平移、保存图片<br>
+• <b>自动保存</b>：程序会自动保存参数设置到配置文件
 </p>
 
 <h3 style="color: #3498DB;">⚠️ 注意事项</h3>
-<p style="line-height: 1.8;">
-• 参考文件和样品文件的数据格式应一致<br>
-• 第一列为时间数据，第二列为振幅数据<br>
-• 样品厚度单位必须是毫米（mm）<br>
-• 数据点数不匹配时会自动截断
+<p style="line-height: 1.8; margin-left: 10px;">
+• <b>数据格式</b>：第一列为时间数据(ps)，第二列为电场振幅数据<br>
+• <b>数据一致性</b>：参考文件和样品文件的时间采样点数应一致<br>
+• <b>厚度单位</b>：样品厚度必须使用毫米(mm)为单位<br>
+• <b>频率范围</b>：默认显示0-5 THz范围，可通过工具栏调整
 </p>
 """
         
-        help_dialog.setText(help_text)
-        help_dialog.setStandardButtons(QMessageBox.StandardButton.Ok)
+        text_browser.setHtml(help_html)
+        layout.addWidget(text_browser)
         
-        # 设置对话框大小
-        help_dialog.setStyleSheet("""
-            QMessageBox {
-                min-width: 600px;
+        button_layout = QHBoxLayout()
+        button_layout.addStretch()
+        ok_btn = AnimatedButton("确定")
+        ok_btn.setStyleSheet("""
+            QPushButton {
+                background-color: #3498DB;
+                color: white;
+                border-radius: 4px;
+                padding: 8px 30px;
+                border: none;
+                font-weight: bold;
             }
-            QLabel {
-                min-width: 550px;
+            QPushButton:hover {
+                background-color: #2980B9;
             }
         """)
+        ok_btn.clicked.connect(help_dialog.accept)
+        button_layout.addWidget(ok_btn)
+        button_layout.addStretch()
+        layout.addLayout(button_layout)
         
         help_dialog.exec()
     
     def show_about_dialog(self):
         """显示关于对话框"""
-        about_dialog = QMessageBox(self)
-        about_dialog.setWindowTitle("ℹ️ 关于")
-        about_dialog.setIcon(QMessageBox.Icon.Information)
+        from PyQt6.QtWidgets import QDialog, QTextBrowser
         
-        about_text = """
-<h2 style="color: #2C3E50;">🔬 THz 时域光谱分析</h2>
+        about_dialog = QDialog(self)
+        about_dialog.setWindowTitle("ℹ️ 关于")
+        about_dialog.setMinimumSize(500, 420)
+        about_dialog.setStyleSheet("QDialog { background-color: #FFFFFF; }")
+        
+        layout = QVBoxLayout(about_dialog)
+        layout.setContentsMargins(20, 20, 20, 20)
+        
+        text_browser = QTextBrowser()
+        text_browser.setOpenExternalLinks(True)
+        text_browser.setStyleSheet("QTextBrowser { border: none; background-color: #FFFFFF; font-size: 10pt; }")
+        
+        about_html = """
+<div style="text-align: center;">
+    <h2 style="color: #2C3E50; margin-bottom: 10px;">🔬 THz 时域光谱分析系统</h2>
+    <p style="color: #7F8C8D; font-size: 12pt;">太赫兹光学参数提取工具</p>
+</div>
 
-<p style="line-height: 2.0; font-size: 11pt;">
-<b>版本</b>：v4.5<br>
-<b>更新日期</b>：2025年10月28日<br>
-</p>
+<hr style="border: 1px solid #EEEEEE; margin: 15px 0;">
 
-<h3 style="color: #3498DB;">✨ 主要功能</h3>
-<ul style="line-height: 1.8;">
-    <li>时域信号与频域信号分析</li>
-    <li>光学参数提取（折射率、消光系数、吸收系数）</li>
-    <li>介电特性计算（介电常数、介电损耗）</li>
-    <li>Tukey窗函数信号处理</li>
-    <li>批量样品分析</li>
-    <li>结果导出为Excel</li>
+<table style="width: 100%; margin: 10px 0;">
+    <tr><td style="width: 100px; color: #666666;"><b>版本</b></td><td>v4.5.1</td></tr>
+    <tr><td style="color: #666666;"><b>更新日期</b></td><td>2025年11月29日</td></tr>
+    <tr><td style="color: #666666;"><b>开发框架</b></td><td>Python 3 + PyQt6 + Matplotlib</td></tr>
+</table>
+
+<h3 style="color: #3498DB; margin-top: 20px;">✨ 主要功能</h3>
+<ul style="line-height: 1.8; margin-left: 10px;">
+    <li><b>时域/频域分析</b>：THz时域信号的FFT变换与频谱分析</li>
+    <li><b>光学参数提取</b>：基于传输函数法计算折射率n、消光系数k、吸收系数α</li>
+    <li><b>介电特性计算</b>：计算复介电常数ε'、ε''及介电损耗tanδ</li>
+    <li><b>Tukey窗函数</b>：可调参数的窗函数，去除多次反射干扰</li>
+    <li><b>批量处理</b>：支持同时分析多个样品，自动对比显示</li>
+    <li><b>结果导出</b>：将计算结果保存为Excel格式</li>
 </ul>
 
-<h3 style="color: #3498DB;">🏛️ 南京航空航天大学高电压与绝缘技术实验室</h3>
-<p style="line-height: 1.8;">
+<h3 style="color: #3498DB; margin-top: 15px;">🔬 技术原理</h3>
+<p style="line-height: 1.6; margin-left: 10px; color: #555555;">
+本软件基于THz-TDS（太赫兹时域光谱）技术，通过比较参考信号和样品信号的传输函数，利用相位信息提取折射率，利用幅度信息提取消光系数和吸收系数。
 </p>
 
-<p style="margin-top: 20px; color: #7F8C8D;">
+<hr style="border: 1px solid #EEEEEE; margin: 15px 0;">
+
+<div style="text-align: center; margin-top: 15px;">
+    <p style="color: #3498DB; font-weight: bold; font-size: 11pt;">南京航空航天大学</p>
+    <p style="color: #666666;">高电压与绝缘技术实验室</p>
+    <p style="color: #888888; font-size: 9pt; margin-top: 5px;">Nanjing University of Aeronautics and Astronautics</p>
+</div>
+
+<p style="text-align: center; margin-top: 20px; color: #999999; font-size: 9pt;">
 © 2025 THz光学参数分析系统. All rights reserved.
 </p>
 """
         
-        about_dialog.setText(about_text)
-        about_dialog.setStandardButtons(QMessageBox.StandardButton.Ok)
+        text_browser.setHtml(about_html)
+        layout.addWidget(text_browser)
         
-        # 设置对话框大小
-        about_dialog.setStyleSheet("""
-            QMessageBox {
-                min-width: 500px;
+        button_layout = QHBoxLayout()
+        button_layout.addStretch()
+        ok_btn = AnimatedButton("确定")
+        ok_btn.setStyleSheet("""
+            QPushButton {
+                background-color: #3498DB;
+                color: white;
+                border-radius: 4px;
+                padding: 8px 30px;
+                border: none;
+                font-weight: bold;
             }
-            QLabel {
-                min-width: 450px;
+            QPushButton:hover {
+                background-color: #2980B9;
             }
         """)
+        ok_btn.clicked.connect(about_dialog.accept)
+        button_layout.addWidget(ok_btn)
+        button_layout.addStretch()
+        layout.addLayout(button_layout)
         
         about_dialog.exec()
     
