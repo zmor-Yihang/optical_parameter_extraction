@@ -1,35 +1,110 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+"""
+光学参数计算模块
+
+提供THz时域光谱分析的核心计算功能
+"""
+
 import numpy as np
 import matplotlib.pyplot as plt
-from PyQt6.QtWidgets import QMessageBox
+from typing import List, Dict, Tuple, Optional, Callable, Any
+
+from utils import info, warning, error, exception
+from .exceptions import CalculationError
 
 
-def calculate_optical_params(ref_file, sam_files, sam_names, d, start_row=1, use_window=False, ref_window_params=None, per_sample_window_params=None):
+# 物理常量
+C_LIGHT = 3e8  # 光速 m/s
+
+
+class CalculationProgress:
+    """计算进度回调类"""
+    
+    def __init__(self, callback: Optional[Callable[[int, int, str], None]] = None):
+        """
+        初始化进度回调
+        
+        Args:
+            callback: 进度回调函数，参数为 (当前步骤, 总步骤, 描述)
+        """
+        self.callback = callback
+        self.total_steps = 0
+        self.current_step = 0
+    
+    def set_total(self, total: int):
+        """设置总步骤数"""
+        self.total_steps = total
+        self.current_step = 0
+    
+    def update(self, message: str):
+        """更新进度"""
+        self.current_step += 1
+        if self.callback:
+            self.callback(self.current_step, self.total_steps, message)
+
+
+class CalculationResult:
+    """计算结果类"""
+    
+    def __init__(self):
+        self.fig1: Optional[plt.Figure] = None  # 时域频域图
+        self.fig2: Optional[plt.Figure] = None  # 光学参数图
+        self.fig3: Optional[plt.Figure] = None  # 介电特性图
+        self.data: Optional[Dict[str, Any]] = None  # 计算数据
+        self.warnings: List[str] = []  # 警告信息列表
+        self.success: bool = False
+
+
+def calculate_optical_params(
+    ref_file: str,
+    sam_files: List[str],
+    sam_names: List[str],
+    d: float,
+    start_row: int = 1,
+    use_window: bool = False,
+    ref_window_params: Optional[Dict] = None,
+    per_sample_window_params: Optional[List[Optional[Dict]]] = None,
+    progress_callback: Optional[Callable[[int, int, str], None]] = None
+) -> CalculationResult:
     """
     计算THz光学参数
     
-    参数:
+    Args:
         ref_file: 参考信号文件路径
         sam_files: 样品信号文件路径列表
         sam_names: 样品名称列表
         d: 样品厚度(mm)
         start_row: 数据内容起始行（从1开始）
         use_window: 是否使用Tukey窗函数
-        ref_window_params: 参考信号的窗函数参数字典，包含 t_start, t_end, alpha
-        per_sample_window_params: 每个样品的窗函数参数列表，每个元素是一个字典
+        ref_window_params: 参考信号的窗函数参数字典
+        per_sample_window_params: 每个样品的窗函数参数列表
+        progress_callback: 进度回调函数
         
-    返回:
-        fig1, fig2, fig3: 三个图表对象
-        results_data: 计算结果数据字典
+    Returns:
+        CalculationResult: 计算结果对象
     """
+    result = CalculationResult()
+    progress = CalculationProgress(progress_callback)
+    
+    # 计算总步骤数: 读取参考 + 读取每个样品 + FFT计算 + 创建图表
+    total_steps = 1 + len(sam_files) + 1 + 3
+    progress.set_total(total_steps)
+    
     try:
         from .data_io import read_data_file
         
+        info(f"开始计算光学参数，样品数量: {len(sam_files)}")
+        
         # 读取参考信号数据
+        progress.update("读取参考信号...")
         refData = read_data_file(ref_file, start_row)
         reft = refData.iloc[:, 0].values.astype(float)
         refa = refData.iloc[:, 1].values.astype(float)
         
-        # 保存原始参考信号副本用于后续处理
+        info(f"参考信号读取完成，数据点数: {len(reft)}")
+        
+        # 保存原始参考信号副本
         refa_original = refa.copy()
         
         # 如果启用窗函数，应用Tukey窗函数到参考信号
@@ -42,6 +117,7 @@ def calculate_optical_params(ref_file, sam_files, sam_names, d, start_row=1, use
                 ref_window_params.get('t_end', reft[-1]), 
                 ref_window_params.get('alpha', 0.5)
             )
+            info("参考信号窗函数已应用")
         
         # 定义颜色
         colors = ['red', 'blue', 'green', 'purple', 'orange', 'brown', 'pink', 'gray', 'olive', 'cyan']
@@ -50,7 +126,6 @@ def calculate_optical_params(ref_file, sam_files, sam_names, d, start_row=1, use
         fig1 = plt.figure(figsize=(9, 7))
         fig1.patch.set_facecolor('#F5F5F5')
 
-        # 参考信号图像 - 先不绘制,等处理完所有样品后再绘制
         ax1 = fig1.add_subplot(2, 1, 1)
         ax1.set_facecolor('#F8F8F8')
 
@@ -58,13 +133,14 @@ def calculate_optical_params(ref_file, sam_files, sam_names, d, start_row=1, use
         all_Nsam = []
         all_Ksam = []
         all_Asam = []
-        all_Epsilon_real = []  # 介电常数实部
-        all_Epsilon_imag = []  # 介电常数虚部
-        all_TanDelta = []      # 介电损耗
+        all_Epsilon_real = []
+        all_Epsilon_imag = []
+        all_TanDelta = []
 
         # 读取每个样品数据
         for i, samFilePath in enumerate(sam_files):
-            # 读取样品数据
+            progress.update(f"读取样品 {sam_names[i]}...")
+            
             samData = read_data_file(samFilePath, start_row)
             
             # 处理数据长度不匹配的情况
@@ -75,18 +151,20 @@ def calculate_optical_params(ref_file, sam_files, sam_names, d, start_row=1, use
                     refa = refa[:min_length]
                     refa_original = refa_original[:min_length]
                 samData = samData.iloc[:min_length, :]
-                QMessageBox.warning(None, "警告", f"文件 {sam_names[i]} 的数据点数与参考文件不匹配，已自动截断至 {min_length} 个点")
+                
+                # 记录警告信息
+                warn_msg = f"文件 {sam_names[i]} 的数据点数与参考文件不匹配，已自动截断至 {min_length} 个点"
+                result.warnings.append(warn_msg)
+                warning(warn_msg)
             
             sama = samData.iloc[:, 1].values.astype(float)
             
             # 如果启用窗函数，应用Tukey窗函数到样品信号
             if use_window:
                 from .window_functions import apply_tukey_window
-                # 使用样品对应的窗函数参数
                 sample_idx = i
                 if per_sample_window_params and sample_idx < len(per_sample_window_params) and per_sample_window_params[sample_idx] is not None:
                     sample_params = per_sample_window_params[sample_idx]
-                    
                     sama = apply_tukey_window(
                         reft, 
                         sama, 
@@ -99,8 +177,9 @@ def calculate_optical_params(ref_file, sam_files, sam_names, d, start_row=1, use
             
             # 绘制样品信号
             ax1.plot(reft, sama, color=colors[i % len(colors)], label=f'{sam_names[i]} 信号')
+            info(f"样品 {sam_names[i]} 读取完成")
         
-        # 最后绘制参考信号,确保显示的是加窗后的数据
+        # 绘制参考信号
         ax1.plot(reft, refa, 'k', linewidth=2, label='参考信号')
         
         ax1.grid(True)
@@ -110,6 +189,7 @@ def calculate_optical_params(ref_file, sam_files, sam_names, d, start_row=1, use
         ax1.legend()
         
         # FFT计算
+        progress.update("执行FFT计算...")
         N = len(reft)
         fs = 1/(reft[1]-reft[0])
         df = fs/N
@@ -122,7 +202,6 @@ def calculate_optical_params(ref_file, sam_files, sam_names, d, start_row=1, use
         refFA = refFAAll[:Na]
         refFAdB = 20 * np.log10(refFA)
         
-        # 画出参考信号的FFT
         ax2 = fig1.add_subplot(2, 1, 2)
         ax2.set_facecolor('#F8F8F8')
         ax2.plot(F, refFAdB, 'k', linewidth=2, label='参考光谱')
@@ -143,17 +222,17 @@ def calculate_optical_params(ref_file, sam_files, sam_names, d, start_row=1, use
             phiu0 = np.unwrap(phi)
             
             # 计算折射率
-            nsam = 1 - phiu0 * 3e8 / (2 * np.pi * F * 1e12 * d * 1e-3)
+            nsam = 1 - phiu0 * C_LIGHT / (2 * np.pi * F * 1e12 * d * 1e-3)
             nsam[0] = nsam[1] if len(nsam) > 1 else 1
             all_Nsam.append(nsam)
             
             # 计算消光系数
-            ksam = np.log(4 * nsam / rho0 / ((nsam + 1) ** 2)) * 3e8 / (2 * np.pi * F * 1e12 * d * 10**(-3))
+            ksam = np.log(4 * nsam / rho0 / ((nsam + 1) ** 2)) * C_LIGHT / (2 * np.pi * F * 1e12 * d * 10**(-3))
             ksam[0] = ksam[1] if len(ksam) > 1 else 0
             all_Ksam.append(ksam)
             
             # 计算吸收系数(单位: cm^-1)
-            asam = 2 * 2 * np.pi * F * 1e12 * ksam / 3e8 / 100
+            asam = 2 * 2 * np.pi * F * 1e12 * ksam / C_LIGHT / 100
             asam[0] = asam[1] if len(asam) > 1 else 0
             all_Asam.append(asam)
             
@@ -182,13 +261,21 @@ def calculate_optical_params(ref_file, sam_files, sam_names, d, start_row=1, use
         fig1.tight_layout()
         
         # 创建光学参数图表
+        progress.update("生成光学参数图表...")
         fig2 = _create_optical_params_figure(F, all_Nsam, all_Ksam, all_Asam, sam_names, colors)
         
         # 创建介电特性图表
+        progress.update("生成介电特性图表...")
         fig3 = _create_dielectric_figure(F, all_Epsilon_real, all_Epsilon_imag, all_TanDelta, sam_names, colors)
         
-        # 返回计算结果数据
-        results_data = {
+        # 完成
+        progress.update("计算完成")
+        
+        # 组装结果
+        result.fig1 = fig1
+        result.fig2 = fig2
+        result.fig3 = fig3
+        result.data = {
             'F': F,
             'Nsam': all_Nsam,
             'Ksam': all_Ksam,
@@ -198,12 +285,14 @@ def calculate_optical_params(ref_file, sam_files, sam_names, d, start_row=1, use
             'TanDelta': all_TanDelta,
             'sam_names': sam_names
         }
+        result.success = True
         
-        return fig1, fig2, fig3, results_data
+        info("光学参数计算完成")
+        return result
         
     except Exception as e:
-        QMessageBox.critical(None, "计算错误", f"计算过程中出错: {str(e)}")
-        return None, None, None, None
+        exception(f"计算过程中出错: {str(e)}")
+        raise CalculationError(str(e))
 
 
 def _create_optical_params_figure(F, all_Nsam, all_Ksam, all_Asam, sam_names, colors):

@@ -1,6 +1,6 @@
-from PyQt5.QtCore import QPropertyAnimation, QEasingCurve, QParallelAnimationGroup, QSequentialAnimationGroup
-from PyQt5.QtWidgets import QGraphicsOpacityEffect, QGraphicsDropShadowEffect
-from PyQt5.QtGui import QColor
+from PyQt6.QtCore import QPropertyAnimation, QEasingCurve, QParallelAnimationGroup, QSequentialAnimationGroup
+from PyQt6.QtWidgets import QGraphicsOpacityEffect, QGraphicsDropShadowEffect
+from PyQt6.QtGui import QColor
 
 class AnimationConfig:
     """动画配置类"""
@@ -11,10 +11,10 @@ class AnimationConfig:
     SLOW_ANIMATION = 500
     
     # 缓动曲线
-    EASE_IN_OUT = QEasingCurve.InOutQuad
-    EASE_OUT = QEasingCurve.OutQuad
-    EASE_IN = QEasingCurve.InQuad
-    BOUNCE = QEasingCurve.OutBounce
+    EASE_IN_OUT = QEasingCurve.Type.InOutQuad
+    EASE_OUT = QEasingCurve.Type.OutQuad
+    EASE_IN = QEasingCurve.Type.InQuad
+    BOUNCE = QEasingCurve.Type.OutBounce
     
     # 透明度值
     OPACITY_NORMAL = 1.0
@@ -199,8 +199,8 @@ class EffectFactory:
         
         # 创建循环动画
         animation.finished.connect(lambda: animation.setDirection(
-            QPropertyAnimation.Backward if animation.direction() == QPropertyAnimation.Forward 
-            else QPropertyAnimation.Forward
+            QPropertyAnimation.Direction.Backward if animation.direction() == QPropertyAnimation.Direction.Forward 
+            else QPropertyAnimation.Direction.Forward
         ))
         animation.finished.connect(animation.start)
         

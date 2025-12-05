@@ -1,10 +1,13 @@
 import sys
 from PyQt6.QtWidgets import QApplication
-from utils import setup_matplotlib
+from utils import setup_matplotlib, info
 from gui import THzAnalyzerApp
 
 
 def main():
+    # 初始化日志
+    info("程序启动")
+    
     # 设置matplotlib中文支持
     setup_matplotlib()
     

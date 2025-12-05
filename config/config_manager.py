@@ -2,6 +2,8 @@ import os
 import sys
 import json
 
+from utils import info, warning, error
+
 
 def get_config_path():
     """获取配置文件的路径"""
@@ -23,9 +25,10 @@ def save_config(config_data):
     try:
         with open(get_config_path(), 'w') as f:
             json.dump(config_data, f)
+        info("配置已保存")
         return True
     except Exception as e:
-        print(f"保存配置时出错: {e}")
+        error(f"保存配置时出错: {e}")
         return False
 
 
@@ -61,9 +64,10 @@ def load_config():
                 config["window_t_end"] = 30.0
             if "window_alpha" not in config:
                 config["window_alpha"] = 0.5
+            info("配置已加载")
             return config
     except Exception as e:
-        print(f"读取配置时出错: {e}")
+        warning(f"读取配置时出错: {e}")
         return default_config
 
 

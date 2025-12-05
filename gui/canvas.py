@@ -1,6 +1,8 @@
+import matplotlib
+matplotlib.use('QtAgg')  # 使用Qt6兼容后端
 import matplotlib.pyplot as plt
 from matplotlib.figure import Figure
-from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
+from matplotlib.backends.backend_qtagg import FigureCanvasQTAgg as FigureCanvas
 
 
 class MplCanvas(FigureCanvas):

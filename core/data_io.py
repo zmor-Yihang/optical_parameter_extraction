@@ -6,7 +6,9 @@
 
 import os
 import pandas as pd
-from PyQt6.QtWidgets import QMessageBox
+
+from utils import info, error, exception
+from .exceptions import DataReadError, SaveError
 
 
 def read_data_file(file_path, start_row=1):
@@ -48,13 +50,17 @@ def read_data_file(file_path, start_row=1):
         
         # 确保数据至少有两列
         if len(data.columns) < 2:
-            raise ValueError("数据文件必须至少包含两列：时间和强度")
+            raise DataReadError(file_path, "数据文件必须至少包含两列：时间和强度")
         
+        info(f"成功读取文件: {file_path}")
         # 返回前两列（时间和强度）
         return data.iloc[:, :2]
         
+    except DataReadError:
+        raise
     except Exception as e:
-        raise Exception(f"读取文件 {file_path} 时出错: {str(e)}")
+        exception(f"读取文件 {file_path} 时出错")
+        raise DataReadError(file_path, str(e))
 
 
 def save_results_to_excel(results_data, filename):
@@ -67,8 +73,13 @@ def save_results_to_excel(results_data, filename):
         
     返回:
         bool: 是否保存成功
+        
+    Raises:
+        SaveError: 保存失败时抛出
     """
     try:
+        info(f"开始保存结果到: {filename}")
+        
         # 创建一个ExcelWriter对象
         with pd.ExcelWriter(filename, engine='openpyxl') as writer:
             # 获取数据
@@ -90,8 +101,9 @@ def save_results_to_excel(results_data, filename):
             # 创建DataFrame并保存到Excel的单个工作表中
             df = pd.DataFrame(data_dict)
             df.to_excel(writer, sheet_name='光学参数', index=False)
-            
+        
+        info(f"结果已成功保存到: {filename}")
         return True
     except Exception as e:
-        QMessageBox.critical(None, "保存错误", f"保存结果到Excel时出错: {str(e)}")
-        return False
+        exception(f"保存结果到Excel时出错: {str(e)}")
+        raise SaveError(filename, str(e))
