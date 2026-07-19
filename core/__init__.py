@@ -2,7 +2,12 @@
 THz光学参数分析系统 - 核心计算模块
 """
 
-from .calculator import calculate_optical_params, CalculationResult, CalculationProgress
+from .calculator import (
+    calculate_optical_params,
+    build_result_figures,
+    CalculationResult,
+    CalculationProgress,
+)
 from .data_io import read_data_file, save_results_to_excel
 from .exceptions import (
     THzAnalysisError,
@@ -16,6 +21,7 @@ from .exceptions import (
 
 __all__ = [
     'calculate_optical_params',
+    'build_result_figures',
     'CalculationResult',
     'CalculationProgress',
     'read_data_file',

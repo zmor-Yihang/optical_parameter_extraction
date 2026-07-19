@@ -10,6 +10,7 @@ from typing import List, Dict, Optional, Any
 from PyQt6.QtCore import QThread, pyqtSignal
 
 from core import calculate_optical_params, CalculationResult, save_results_to_excel
+from core.data_io import save_time_freq_domain_data_to_excel
 
 
 class CalculationWorker(QThread):
@@ -96,11 +97,19 @@ class SaveWorker(QThread):
         super().__init__(parent)
         self.results_data: Optional[Dict] = None
         self.file_path: str = ""
+        self.save_type: str = "optical"  # 'optical' 或 'time_freq'
     
-    def set_parameters(self, results_data: Dict, file_path: str):
-        """设置保存参数"""
+    def set_parameters(self, results_data: Dict, file_path: str, save_type: str = "optical"):
+        """设置保存参数
+        
+        参数:
+            results_data: 结果数据字典
+            file_path: 保存文件路径
+            save_type: 保存类型，'optical'=光学参数, 'time_freq'=时频域数据
+        """
         self.results_data = results_data
         self.file_path = file_path
+        self.save_type = save_type
     
     def run(self):
         """执行保存"""
@@ -113,7 +122,11 @@ class SaveWorker(QThread):
             
             self.progress_updated.emit(30, 100, "正在写入Excel文件...")
             
-            save_results_to_excel(self.results_data, self.file_path)
+            # 根据保存类型调用不同的保存函数
+            if self.save_type == "time_freq":
+                save_time_freq_domain_data_to_excel(self.results_data, self.file_path)
+            else:
+                save_results_to_excel(self.results_data, self.file_path)
             
             self.progress_updated.emit(100, 100, "保存完成")
             self.save_finished.emit(self.file_path)

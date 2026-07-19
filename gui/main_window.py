@@ -2,8 +2,6 @@
 # -*- coding: utf-8 -*-
 """
 THz光学参数分析系统主窗口
-
-重构版本 - 代码拆分为多个模块
 """
 
 import os
@@ -16,18 +14,23 @@ from PyQt6.QtWidgets import (
     QApplication, QMainWindow, QWidget, QVBoxLayout, QHBoxLayout, 
     QLabel, QLineEdit, QPushButton, QFileDialog, QGroupBox, 
     QMessageBox, QTabWidget, QCheckBox, QGridLayout,
-    QListWidget, QSplitter, QFrame, QComboBox, QScrollArea, 
+    QListWidget, QListWidgetItem, QSplitter, QFrame, QComboBox, QScrollArea, 
     QStyle, QDialog
 )
-from PyQt6.QtCore import Qt, QPoint, QRect, QSize
-from PyQt6.QtGui import QAction, QFont, QPalette, QColor
+from PyQt6.QtCore import Qt, QPoint, QRect
+from PyQt6.QtGui import QAction, QFont, QPalette, QColor, QBrush
 
 from config import load_config, save_config, update_thickness_history
 from core import calculate_optical_params, CalculationError, SaveError
-from utils.icon_helper import IconHelper
+from core.calculator import build_result_figures
+from core.plotting import (
+    enable_curve_hover,
+    create_single_series_figure,
+    sample_color,
+    short_display_name,
+)
 from utils import info, warning, error
 
-from .widgets import AnimatedButton
 from .worker import CalculationWorker, SaveWorker
 from .dialogs import HelpDialog, AboutDialog
 from .styles import get_main_window_style, get_menubar_style
@@ -77,9 +80,7 @@ class THzAnalyzerApp(QMainWindow):
         # 设置窗口
         self.setWindowTitle("THz 时域光谱分析系统")
         self.setMinimumSize(1200, 800)
-        
-        # 创建图标
-        self._create_icons()
+        self.setWindowIcon(QApplication.style().standardIcon(QStyle.StandardPixmap.SP_ComputerIcon))
         
         # 创建界面
         self._init_ui()
@@ -91,40 +92,6 @@ class THzAnalyzerApp(QMainWindow):
         
         info("THz分析系统初始化完成")
 
-    def _create_icons(self):
-        """创建应用程序使用的图标"""
-        style = QApplication.style()
-        
-        # 文件相关图标
-        self.folder_icon = IconHelper.create_file_icon("#4A90E2", 16)
-        self.file_icon = style.standardIcon(QStyle.StandardPixmap.SP_FileDialogDetailedView)
-        self.add_icon = IconHelper.create_text_icon("+", "#FFFFFF", "#28A745", 16)
-        self.delete_icon = IconHelper.create_text_icon("-", "#FFFFFF", "#DC3545", 16)
-        self.clear_icon = IconHelper.create_text_icon("×", "#FFFFFF", "#6C757D", 16)
-        
-        # 操作相关图标
-        self.run_icon = IconHelper.create_arrow_icon("right", "#FFFFFF", 18)
-        self.save_icon = IconHelper.create_file_icon("#17A2B8", 18)
-        self.settings_icon = style.standardIcon(QStyle.StandardPixmap.SP_ComputerIcon)
-        
-        # 标签页图标
-        self.chart_icon = IconHelper.create_chart_icon("#28A745", 16)
-        self.data_icon = IconHelper.create_text_icon("D", "#FFFFFF", "#007BFF", 16)
-        self.info_icon = IconHelper.create_text_icon("i", "#FFFFFF", "#6F42C1", 16)
-        
-        # 状态图标
-        self.ready_icon = IconHelper.create_colored_icon("#28A745", 16)
-        self.working_icon = IconHelper.create_colored_icon("#FFC107", 16)
-        self.error_icon = IconHelper.create_colored_icon("#DC3545", 16)
-        
-        # 参数图标
-        self.thickness_icon = IconHelper.create_text_icon("T", "#FFFFFF", "#6C757D", 16)
-        self.row_icon = IconHelper.create_text_icon("R", "#FFFFFF", "#6C757D", 16)
-        
-        # 窗口图标
-        self.window_icon = style.standardIcon(QStyle.StandardPixmap.SP_ComputerIcon)
-        self.setWindowIcon(self.window_icon)
-
     def _init_ui(self):
         """初始化用户界面"""
         self._setup_styles()
@@ -132,7 +99,7 @@ class THzAnalyzerApp(QMainWindow):
         
         # 创建中央窗口部件
         central_widget = QWidget()
-        central_widget.setStyleSheet("background-color: #F5F5F5;")
+        central_widget.setStyleSheet("background-color: #FFFFFF;")
         self.setCentralWidget(central_widget)
         
         # 创建主布局
@@ -181,7 +148,7 @@ class THzAnalyzerApp(QMainWindow):
         palette.setColor(QPalette.ColorRole.Text, QColor("#444444"))
         palette.setColor(QPalette.ColorRole.Button, QColor("#F8F8F8"))
         palette.setColor(QPalette.ColorRole.ButtonText, QColor("#444444"))
-        palette.setColor(QPalette.ColorRole.Highlight, QColor("#5C6BC0"))
+        palette.setColor(QPalette.ColorRole.Highlight, QColor("#5B7C99"))
         palette.setColor(QPalette.ColorRole.HighlightedText, QColor("#FFFFFF"))
         self.setPalette(palette)
         
@@ -198,22 +165,22 @@ class THzAnalyzerApp(QMainWindow):
         menubar.setStyleSheet(get_menubar_style())
         
         # 文件菜单
-        file_menu = menubar.addMenu("📁 文件")
+        file_menu = menubar.addMenu("文件")
         
-        exit_action = QAction("🚪 退出", self)
+        exit_action = QAction("退出", self)
         exit_action.setShortcut("Ctrl+Q")
         exit_action.triggered.connect(self.close)
         file_menu.addAction(exit_action)
         
         # 帮助菜单
-        help_menu = menubar.addMenu("❓ 帮助")
+        help_menu = menubar.addMenu("帮助")
         
-        user_guide_action = QAction("📖 使用说明", self)
+        user_guide_action = QAction("使用说明", self)
         user_guide_action.setShortcut("F1")
         user_guide_action.triggered.connect(self._show_help_dialog)
         help_menu.addAction(user_guide_action)
         
-        about_action = QAction("ℹ️ 关于", self)
+        about_action = QAction("关于", self)
         about_action.triggered.connect(self._show_about_dialog)
         help_menu.addAction(about_action)
     
@@ -225,11 +192,11 @@ class THzAnalyzerApp(QMainWindow):
         left_layout.setSpacing(10)
         
         # 程序标题
-        title_label = QLabel("🔬 THz 时域光谱分析系统")
+        title_label = QLabel("THz 时域光谱分析系统")
         title_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        title_font = QFont("微软雅黑", 14, QFont.Weight.Bold)
+        title_font = QFont("微软雅黑", 12, QFont.Weight.Bold)
         title_label.setFont(title_font)
-        title_label.setStyleSheet("color: #333333; margin-bottom: 10px;")
+        title_label.setStyleSheet("color: #333333; margin-bottom: 6px;")
         left_layout.addWidget(title_label)
         
         # 参数设置区
@@ -238,33 +205,33 @@ class THzAnalyzerApp(QMainWindow):
         left_layout.addStretch()
         
         # 版权信息
-        version_label = QLabel("By NUAA THz Group v4.6.0")
+        version_label = QLabel("NUAA THz Group  v4.6.0")
         version_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        version_label.setStyleSheet("color: #666666; font-size: 15px;")
+        version_label.setStyleSheet("color: #888888; font-size: 11px;")
         left_layout.addWidget(version_label)
     
     def _create_param_group(self):
         """创建参数设置组"""
-        param_group = QGroupBox("  ⚙️ 参数设置")
+        param_group = QGroupBox("参数设置")
         param_group.setStyleSheet("""
             QGroupBox {
                 font-weight: bold;
-                border: 2px solid #CCCCCC;
-                border-radius: 6px;
-                margin-top: 12px;
-                padding-top: 10px;
-                background-color: #F0F0F0;
+                border: 1px solid #D0D0D0;
+                border-radius: 4px;
+                margin-top: 10px;
+                padding-top: 8px;
+                background-color: #FAFAFA;
                 color: #333333;
             }
             QGroupBox::title {
                 subcontrol-origin: margin;
-                left: 10px;
-                padding: 0 5px;
-                color: #333333;
+                left: 8px;
+                padding: 0 4px;
+                color: #555555;
             }
         """)
         param_layout = QVBoxLayout(param_group)
-        param_layout.setSpacing(15)
+        param_layout.setSpacing(12)
         
         # 参考文件选择
         self._create_ref_file_section(param_layout)
@@ -283,46 +250,16 @@ class THzAnalyzerApp(QMainWindow):
     def _create_ref_file_section(self, parent_layout):
         """创建参考文件选择区域"""
         ref_layout = QVBoxLayout()
-        ref_label = QLabel("📂 参考文件:")
-        ref_label.setStyleSheet("font-weight: bold; color: #333333;")
+        ref_label = QLabel("参考文件")
+        ref_label.setStyleSheet("font-weight: bold; color: #444444;")
         ref_layout.addWidget(ref_label)
         
         ref_input_layout = QHBoxLayout()
         self.ref_file_edit = QLineEdit()
         self.ref_file_edit.setReadOnly(True)
-        self.ref_file_edit.setStyleSheet("""
-            QLineEdit {
-                padding: 5px;
-                border: 1px solid #CCCCCC;
-                border-radius: 4px;
-                background-color: #FFFFFF;
-                color: #333333;
-            }
-            QLineEdit:focus {
-                border: 1px solid #4A90E2;
-            }
-        """)
         ref_input_layout.addWidget(self.ref_file_edit)
         
-        ref_btn = AnimatedButton("  添加文件")
-        ref_btn.setIcon(self.folder_icon)
-        ref_btn.setIconSize(QSize(16, 16))
-        ref_btn.setStyleSheet("""
-            QPushButton {
-                padding: 5px 10px;
-                background-color: #E0E0E0;
-                color: #333333;
-                border-radius: 4px;
-                border: 1px solid #CCCCCC;
-                text-align: left;
-            }
-            QPushButton:hover {
-                background-color: #DDDDDD;
-            }
-            QPushButton:pressed {
-                background-color: #CCCCCC;
-            }
-        """)
+        ref_btn = QPushButton("添加")
         ref_btn.clicked.connect(self._select_ref_file)
         ref_input_layout.addWidget(ref_btn)
         
@@ -332,73 +269,27 @@ class THzAnalyzerApp(QMainWindow):
     def _create_sam_file_section(self, parent_layout):
         """创建样品文件选择区域"""
         sam_layout = QVBoxLayout()
-        sam_label = QLabel("📁 样品文件:")
-        sam_label.setStyleSheet("font-weight: bold; color: #333333;")
+        sam_label = QLabel("样品文件")
+        sam_label.setStyleSheet("font-weight: bold; color: #444444;")
         sam_layout.addWidget(sam_label)
         
         sam_list_layout = QHBoxLayout()
         self.sam_files_list = QListWidget()
         self.sam_files_list.setAcceptDrops(True)
         self.sam_files_list.setDragEnabled(True)
-        self.sam_files_list.setStyleSheet("""
-            QListWidget {
-                border: 1px solid #CCCCCC;
-                border-radius: 4px;
-                padding: 5px;
-                background-color: #FFFFFF;
-                min-height: 120px;
-                color: #333333;
-            }
-            QListWidget::item {
-                padding: 5px;
-                border-bottom: 1px solid #EEEEEE;
-            }
-            QListWidget::item:selected {
-                background-color: #4A90E2;
-                color: #FFFFFF;
-            }
-            QListWidget::item:hover {
-                background-color: #F0F0F0;
-            }
-        """)
+        self.sam_files_list.setMinimumHeight(120)
+        self.sam_files_list.setToolTip("列表显示短名称，悬停查看完整路径")
         sam_list_layout.addWidget(self.sam_files_list)
         
-        # 样品文件操作按钮
         sam_btn_layout = QVBoxLayout()
-        sam_btn_style = """
-            QPushButton {
-                padding: 5px 10px;
-                background-color: #F0F0F0;
-                color: #333333;
-                border-radius: 4px;
-                border: 1px solid #CCCCCC;
-                margin: 2px;
-            }
-            QPushButton:hover {
-                background-color: #E0E0E0;
-                border: 1px solid #999999;
-            }
-            QPushButton:pressed {
-                background-color: #DDDDDD;
-            }
-        """
         
-        add_sam_btn = AnimatedButton("  添加文件")
-        add_sam_btn.setIcon(self.add_icon)
-        add_sam_btn.setIconSize(QSize(16, 16))
-        add_sam_btn.setStyleSheet(sam_btn_style)
+        add_sam_btn = QPushButton("添加")
         add_sam_btn.clicked.connect(self._add_sam_file)
         
-        del_sam_btn = AnimatedButton("  删除选中")
-        del_sam_btn.setIcon(self.delete_icon)
-        del_sam_btn.setIconSize(QSize(16, 16))
-        del_sam_btn.setStyleSheet(sam_btn_style)
+        del_sam_btn = QPushButton("删除")
         del_sam_btn.clicked.connect(self._delete_selected_file)
         
-        clear_sam_btn = AnimatedButton("  清空列表")
-        clear_sam_btn.setIcon(self.clear_icon)
-        clear_sam_btn.setIconSize(QSize(16, 16))
-        clear_sam_btn.setStyleSheet(sam_btn_style)
+        clear_sam_btn = QPushButton("清空")
         clear_sam_btn.clicked.connect(self._clear_sam_files)
         
         sam_btn_layout.addWidget(add_sam_btn)
@@ -413,88 +304,27 @@ class THzAnalyzerApp(QMainWindow):
     def _create_parameter_section(self, parent_layout):
         """创建参数设置区域"""
         # Tukey窗函数设置
-        tukey_group = QGroupBox("Tukey窗函数设置")
-        tukey_group.setStyleSheet("""
-            QGroupBox {
-                border: 1px solid #CCCCCC;
-                border-radius: 4px;
-                margin-top: 8px;
-                padding-top: 8px;
-                background-color: #F8F8F8;
-            }
-            QGroupBox::title {
-                subcontrol-origin: margin;
-                left: 10px;
-                padding: 0 5px;
-                color: #333333;
-            }
-        """)
+        tukey_group = QGroupBox("Tukey 窗函数")
         tukey_layout = QVBoxLayout(tukey_group)
         
-        # 开关
         switch_layout = QHBoxLayout()
         
-        self.use_window_checkbox = QCheckBox()
-        self.use_window_checkbox.setStyleSheet("""
-            QCheckBox {
-                spacing: 0px;
-            }
-            QCheckBox::indicator {
-                width: 40px;
-                height: 20px;
-                border-radius: 10px;
-                background-color: #CCCCCC;
-                border: 2px solid #999999;
-            }
-            QCheckBox::indicator:checked {
-                background-color: #4CAF50;
-                border: 2px solid #45a049;
-            }
-        """)
+        self.use_window_checkbox = QCheckBox("启用")
         switch_layout.addWidget(self.use_window_checkbox)
         
         self.window_status_label = QLabel("关")
-        self.window_status_label.setStyleSheet("""
-            QLabel {
-                color: #999999;
-                font-weight: bold;
-                padding: 2px 5px;
-                font-size: 9pt;
-            }
-        """)
+        self.window_status_label.setStyleSheet("color: #888888; padding: 0 4px;")
         switch_layout.addWidget(self.window_status_label)
-        
-        switch_label = QLabel("启用Tukey窗函数")
-        switch_label.setStyleSheet("color: #333333; font-weight: bold; margin-left: 5px;")
-        switch_layout.addWidget(switch_label)
         switch_layout.addStretch()
         
         tukey_layout.addLayout(switch_layout)
         
-        # 设置按钮
         signal_window_button_layout = QHBoxLayout()
-        signal_window_label = QLabel("为每个信号设置窗函数参数:")
-        signal_window_label.setStyleSheet("color: #333333; font-weight: bold;")
+        signal_window_label = QLabel("按信号设置参数")
+        signal_window_label.setStyleSheet("color: #555555;")
         signal_window_button_layout.addWidget(signal_window_label)
         
-        self.set_signal_window_btn = AnimatedButton("  设置参数")
-        self.set_signal_window_btn.setStyleSheet("""
-            QPushButton {
-                background-color: #4A90E2;
-                color: white;
-                border-radius: 4px;
-                padding: 5px 10px;
-                border: none;
-                font-weight: bold;
-            }
-            QPushButton:hover {
-                background-color: #357ABD;
-            }
-            QPushButton:disabled {
-                background-color: #CCCCCC;
-                color: #666666;
-            }
-        """)
+        self.set_signal_window_btn = QPushButton("设置")
         self.set_signal_window_btn.clicked.connect(self._open_signal_window_dialog)
         self.set_signal_window_btn.setEnabled(False)
         signal_window_button_layout.addWidget(self.set_signal_window_btn)
@@ -502,17 +332,8 @@ class THzAnalyzerApp(QMainWindow):
         
         tukey_layout.addLayout(signal_window_button_layout)
         
-        # 参数指示
-        self.window_params_indicator = QLabel("✓ 参数已设置")
-        self.window_params_indicator.setStyleSheet("""
-            QLabel {
-                color: #28A745;
-                font-weight: bold;
-                padding: 5px;
-                background-color: #E8F5E9;
-                border-radius: 4px;
-            }
-        """)
+        self.window_params_indicator = QLabel("参数已设置")
+        self.window_params_indicator.setStyleSheet("color: #666666; padding: 2px 0;")
         self.window_params_indicator.setVisible(False)
         tukey_layout.addWidget(self.window_params_indicator)
         
@@ -524,35 +345,13 @@ class THzAnalyzerApp(QMainWindow):
         
         # 样品厚度设置
         thickness_layout = QHBoxLayout()
-        
-        thickness_label_layout = QHBoxLayout()
-        thickness_icon_label = QLabel()
-        thickness_icon_label.setPixmap(self.thickness_icon.pixmap(16, 16))
-        thickness_label = QLabel("样品厚度 (mm):")
-        thickness_label.setStyleSheet("font-weight: bold; color: #333333;")
-        
-        thickness_label_layout.addWidget(thickness_icon_label)
-        thickness_label_layout.addWidget(thickness_label)
-        thickness_label_layout.addStretch()
-        thickness_label_layout.setSpacing(5)
-        
-        thickness_label_widget = QWidget()
-        thickness_label_widget.setLayout(thickness_label_layout)
-        thickness_layout.addWidget(thickness_label_widget)
+        thickness_label = QLabel("样品厚度 (mm)")
+        thickness_label.setStyleSheet("font-weight: bold; color: #444444;")
+        thickness_layout.addWidget(thickness_label)
         
         self.thickness_combo = QComboBox()
         self.thickness_combo.setEditable(True)
-        self.thickness_combo.setStyleSheet("""
-            QComboBox {
-                padding: 5px;
-                border: 1px solid #CCCCCC;
-                border-radius: 4px;
-                background-color: #FFFFFF;
-                color: #333333;
-            }
-        """)
         
-        # 从配置读取历史厚度
         thickness_history = [str(x) for x in self.config.get("thickness_history", [0.5])]
         current_thickness = str(self.config.get("thickness", 0.5))
         if current_thickness in thickness_history:
@@ -561,48 +360,25 @@ class THzAnalyzerApp(QMainWindow):
         for t in thickness_history:
             self.thickness_combo.addItem(t)
         self.thickness_combo.setCurrentText(current_thickness)
-        thickness_layout.addWidget(self.thickness_combo)
+        thickness_layout.addWidget(self.thickness_combo, 1)
         thickness_layout.setSpacing(8)
-        thickness_layout.setStretch(1, 1)
         
         # 起始行设置
         start_row_layout = QHBoxLayout()
-        
-        start_row_label_layout = QHBoxLayout()
-        start_row_icon_label = QLabel()
-        start_row_icon_label.setPixmap(self.row_icon.pixmap(16, 16))
-        start_row_label = QLabel("数据起始行:")
-        start_row_label.setStyleSheet("font-weight: bold; color: #333333;")
-        
-        start_row_label_layout.addWidget(start_row_icon_label)
-        start_row_label_layout.addWidget(start_row_label)
-        start_row_label_layout.addStretch()
-        start_row_label_layout.setSpacing(5)
-        
-        start_row_label_widget = QWidget()
-        start_row_label_widget.setLayout(start_row_label_layout)
-        start_row_layout.addWidget(start_row_label_widget)
+        start_row_label = QLabel("数据起始行")
+        start_row_label.setStyleSheet("font-weight: bold; color: #444444;")
+        start_row_layout.addWidget(start_row_label)
         
         self.start_row_combo = QComboBox()
         self.start_row_combo.addItems(["1", "2", "3"])
         self.start_row_combo.setEditable(True)
-        self.start_row_combo.setStyleSheet("""
-            QComboBox {
-                padding: 5px;
-                border: 1px solid #CCCCCC;
-                border-radius: 4px;
-                background-color: #FFFFFF;
-                color: #333333;
-            }
-        """)
         idx = ["1", "2", "3"].index(str(self.config.get("start_row", 1))) if str(self.config.get("start_row", 1)) in ["1", "2", "3"] else -1
         if idx >= 0:
             self.start_row_combo.setCurrentIndex(idx)
         else:
             self.start_row_combo.setEditText(str(self.config.get("start_row", 1)))
-        start_row_layout.addWidget(self.start_row_combo)
+        start_row_layout.addWidget(self.start_row_combo, 1)
         start_row_layout.setSpacing(8)
-        start_row_layout.setStretch(1, 1)
         
         parent_layout.addLayout(start_row_layout)
         parent_layout.addLayout(thickness_layout)
@@ -611,105 +387,46 @@ class THzAnalyzerApp(QMainWindow):
         """创建按钮区域"""
         button_layout = QVBoxLayout()
         
-        # 第一行按钮
         first_row_layout = QHBoxLayout()
         
-        run_btn = AnimatedButton("  运行分析")
-        run_btn.setIcon(self.run_icon)
-        run_btn.setIconSize(QSize(18, 18))
-        run_btn.setStyleSheet("""
-            QPushButton {
-                padding: 8px 15px;
-                background-color: #198754;
-                color: white;
-                border-radius: 4px;
-                border: none;
-                font-weight: bold;
-                text-align: left;
-            }
-            QPushButton:hover {
-                background-color: #157347;
-            }
-            QPushButton:pressed {
-                background-color: #146c43;
-            }
-        """)
+        run_btn = QPushButton("运行分析")
         run_btn.clicked.connect(self._run_analysis)
         
-        self.save_btn = AnimatedButton("  保存结果")
-        self.save_btn.setIcon(self.save_icon)
-        self.save_btn.setIconSize(QSize(18, 18))
-        self.save_btn.setStyleSheet("""
-            QPushButton {
-                padding: 8px 15px;
-                background-color: #0D6EFD;
-                color: white;
-                border-radius: 4px;
-                border: none;
-                font-weight: bold;
-                text-align: left;
-            }
-            QPushButton:hover {
-                background-color: #0B5ED7;
-            }
-            QPushButton:disabled {
-                background-color: #EEEEEE;
-                color: #999999;
-            }
-        """)
+        self.save_btn = QPushButton("保存结果")
         self.save_btn.clicked.connect(self._save_results)
         self.save_btn.setEnabled(False)
         
+        self.save_time_freq_btn = QPushButton("保存时频数据")
+        self.save_time_freq_btn.clicked.connect(self._save_time_freq_data)
+        self.save_time_freq_btn.setEnabled(False)
+        
         first_row_layout.addWidget(run_btn)
         first_row_layout.addWidget(self.save_btn)
+        first_row_layout.addWidget(self.save_time_freq_btn)
         
         button_layout.addLayout(first_row_layout)
         
-        # 弹出图表按钮 - 使用紧凑的流式布局
-        popup_label = QLabel("弹出图表:")
-        popup_label.setStyleSheet("color: #666666; font-size: 10px; margin-top: 5px;")
+        popup_label = QLabel("弹出图表")
+        popup_label.setStyleSheet("color: #777777; font-size: 11px; margin-top: 4px;")
         button_layout.addWidget(popup_label)
         
-        popup_btn_style = """
-            QPushButton {
-                padding: 3px 8px;
-                background-color: #6F42C1;
-                color: white;
-                border-radius: 3px;
-                border: none;
-                font-size: 9px;
-            }
-            QPushButton:hover {
-                background-color: #5A32A3;
-            }
-            QPushButton:disabled {
-                background-color: #DDDDDD;
-                color: #999999;
-            }
-        """
-        
-        # 第一行：时域、频域、折射率、消光
         popup_row1 = QHBoxLayout()
-        popup_row1.setSpacing(3)
+        popup_row1.setSpacing(4)
         
         self.popup_time_btn = QPushButton("时域")
-        self.popup_time_btn.setStyleSheet(popup_btn_style)
         self.popup_time_btn.clicked.connect(lambda: self._show_single_chart("time"))
         self.popup_time_btn.setEnabled(False)
         
         self.popup_freq_btn = QPushButton("频域")
-        self.popup_freq_btn.setStyleSheet(popup_btn_style)
         self.popup_freq_btn.clicked.connect(lambda: self._show_single_chart("freq"))
         self.popup_freq_btn.setEnabled(False)
         
         self.popup_n_btn = QPushButton("n")
-        self.popup_n_btn.setStyleSheet(popup_btn_style)
         self.popup_n_btn.setToolTip("折射率")
         self.popup_n_btn.clicked.connect(lambda: self._show_single_chart("refractive"))
         self.popup_n_btn.setEnabled(False)
         
         self.popup_k_btn = QPushButton("k")
-        self.popup_k_btn.setStyleSheet(popup_btn_style)
         self.popup_k_btn.setToolTip("消光系数")
         self.popup_k_btn.clicked.connect(lambda: self._show_single_chart("extinction"))
         self.popup_k_btn.setEnabled(False)
@@ -721,30 +438,25 @@ class THzAnalyzerApp(QMainWindow):
         
         button_layout.addLayout(popup_row1)
         
-        # 第二行：吸收、介电实部、虚部、损耗
         popup_row2 = QHBoxLayout()
-        popup_row2.setSpacing(3)
+        popup_row2.setSpacing(4)
         
         self.popup_a_btn = QPushButton("α")
-        self.popup_a_btn.setStyleSheet(popup_btn_style)
         self.popup_a_btn.setToolTip("吸收系数")
         self.popup_a_btn.clicked.connect(lambda: self._show_single_chart("absorption"))
         self.popup_a_btn.setEnabled(False)
         
         self.popup_er_btn = QPushButton("ε'")
-        self.popup_er_btn.setStyleSheet(popup_btn_style)
         self.popup_er_btn.setToolTip("介电常数实部")
         self.popup_er_btn.clicked.connect(lambda: self._show_single_chart("epsilon_real"))
         self.popup_er_btn.setEnabled(False)
         
         self.popup_ei_btn = QPushButton("ε\"")
-        self.popup_ei_btn.setStyleSheet(popup_btn_style)
         self.popup_ei_btn.setToolTip("介电常数虚部")
         self.popup_ei_btn.clicked.connect(lambda: self._show_single_chart("epsilon_imag"))
         self.popup_ei_btn.setEnabled(False)
         
         self.popup_tan_btn = QPushButton("tanδ")
-        self.popup_tan_btn.setStyleSheet(popup_btn_style)
         self.popup_tan_btn.setToolTip("介电损耗")
         self.popup_tan_btn.clicked.connect(lambda: self._show_single_chart("tan_delta"))
         self.popup_tan_btn.setEnabled(False)
@@ -760,58 +472,24 @@ class THzAnalyzerApp(QMainWindow):
     def _create_right_panel(self):
         """创建右侧结果显示面板"""
         self.right_panel = QTabWidget()
-        self.right_panel.setStyleSheet("""
-            QTabWidget {
-                background-color: #F0F0F0;
-                border: 1px solid #CCCCCC;
-                border-radius: 6px;
-            }
-            QTabWidget::pane {
-                border: 1px solid #CCCCCC;
-                border-radius: 6px;
-                top: -1px;
-                background-color: #F0F0F0;
-            }
-            QTabBar::tab {
-                background-color: #E0E0E0;
-                border: 1px solid #CCCCCC;
-                border-bottom: none;
-                border-top-left-radius: 4px;
-                border-top-right-radius: 4px;
-                padding: 8px 12px;
-                margin-right: 2px;
-                color: #333333;
-            }
-            QTabBar::tab:selected {
-                background-color: #F0F0F0;
-                border-bottom: 1px solid #F0F0F0;
-                color: #4A90E2;
-                font-weight: bold;
-            }
-            QTabBar::tab:hover:!selected {
-                background-color: #DDDDDD;
-            }
-        """)
         
         # 创建标签页
         self.tab1 = QWidget()
         self.tab2 = QWidget()
         self.tab3 = QWidget()
         
-        # 为每个标签页设置布局
         tab1_layout = QVBoxLayout(self.tab1)
-        tab1_layout.setContentsMargins(10, 10, 10, 10)
+        tab1_layout.setContentsMargins(8, 8, 8, 8)
         
         tab2_layout = QVBoxLayout(self.tab2)
-        tab2_layout.setContentsMargins(10, 10, 10, 10)
+        tab2_layout.setContentsMargins(8, 8, 8, 8)
         
         tab3_layout = QVBoxLayout(self.tab3)
-        tab3_layout.setContentsMargins(10, 10, 10, 10)
+        tab3_layout.setContentsMargins(8, 8, 8, 8)
         
-        # 添加标签页
-        self.right_panel.addTab(self.tab1, self.chart_icon, "📊 时域和频域信号")
-        self.right_panel.addTab(self.tab2, self.data_icon, "📈 光学参数")
-        self.right_panel.addTab(self.tab3, self.info_icon, "⚡ 介电特性")
+        self.right_panel.addTab(self.tab1, "时域和频域")
+        self.right_panel.addTab(self.tab2, "光学参数")
+        self.right_panel.addTab(self.tab3, "介电特性")
     
     def _update_status(self, message: str, status_type: str = "ready"):
         """更新状态栏"""
@@ -822,11 +500,11 @@ class THzAnalyzerApp(QMainWindow):
         """切换窗函数参数"""
         if enabled:
             self.window_status_label.setText("开")
-            self.window_status_label.setStyleSheet("QLabel { color: #4CAF50; font-weight: bold; padding: 2px 8px; }")
+            self.window_status_label.setStyleSheet("color: #555555; padding: 0 4px;")
             self.set_signal_window_btn.setEnabled(True)
         else:
             self.window_status_label.setText("关")
-            self.window_status_label.setStyleSheet("QLabel { color: #999999; font-weight: bold; padding: 2px 8px; }")
+            self.window_status_label.setStyleSheet("color: #888888; padding: 0 4px;")
             self.set_signal_window_btn.setEnabled(False)
     
     def _select_ref_file(self):
@@ -844,7 +522,8 @@ class THzAnalyzerApp(QMainWindow):
             self.ref_file = file_path
             self.config["last_open_dir"] = os.path.dirname(file_path)
             file_name = os.path.basename(file_path)
-            self.ref_file_edit.setText(file_name)
+            self.ref_file_edit.setText(short_display_name(file_name))
+            self.ref_file_edit.setToolTip(file_path)
             self._update_status("已选择参考文件", "ready")
             info(f"选择参考文件: {file_path}")
     
@@ -866,14 +545,34 @@ class THzAnalyzerApp(QMainWindow):
                 self.sam_files.append(file_path)
                 file_name = os.path.splitext(os.path.basename(file_path))[0]
                 self.sam_names.append(file_name)
-                self.sam_files_list.addItem(file_name)
+                self._append_sample_list_item(file_path, file_name)
                 
                 idx = len(self.sam_names) - 1
                 self.per_sample_window_params[idx] = None
             
+            self._refresh_sample_list_colors()
             self._update_status(f"已添加 {len(file_paths)} 个样品文件", "ready")
             info(f"添加 {len(file_paths)} 个样品文件")
     
+    def _append_sample_list_item(self, file_path: str, sample_name: str):
+        """添加带短名称、颜色与路径提示的列表项。"""
+        item = QListWidgetItem(short_display_name(sample_name))
+        item.setToolTip(file_path)
+        item.setData(Qt.ItemDataRole.UserRole, file_path)
+        self.sam_files_list.addItem(item)
+
+    def _refresh_sample_list_colors(self):
+        """按样品索引刷新列表颜色标识。"""
+        for index in range(self.sam_files_list.count()):
+            item = self.sam_files_list.item(index)
+            if item is None:
+                continue
+            item.setForeground(QBrush(QColor(sample_color(index))))
+            if index < len(self.sam_names):
+                item.setText(short_display_name(self.sam_names[index]))
+            if index < len(self.sam_files):
+                item.setToolTip(self.sam_files[index])
+
     def _delete_selected_file(self):
         """删除选中的样品文件"""
         selected_items = self.sam_files_list.selectedItems()
@@ -896,6 +595,7 @@ class THzAnalyzerApp(QMainWindow):
                     new_params[k - 1] = self.per_sample_window_params[k]
             self.per_sample_window_params = new_params
         
+        self._refresh_sample_list_colors()
         self._update_status("已删除选中的样品文件", "ready")
     
     def _clear_sam_files(self):
@@ -962,20 +662,7 @@ class THzAnalyzerApp(QMainWindow):
         main_layout.addWidget(scroll, 1)
         
         # 快速设置区域
-        quick_group = QGroupBox("快速设置 - 应用到所有样品")
-        quick_group.setStyleSheet("""
-            QGroupBox {
-                font-weight: bold;
-                border: 1px solid #4A90E2;
-                border-radius: 4px;
-                margin-top: 8px;
-                padding-top: 8px;
-                background-color: #F0F7FF;
-            }
-            QGroupBox::title {
-                color: #4A90E2;
-            }
-        """)
+        quick_group = QGroupBox("快速设置（应用到所有样品）")
         quick_layout = QHBoxLayout(quick_group)
         quick_layout.setSpacing(8)
         
@@ -995,17 +682,6 @@ class THzAnalyzerApp(QMainWindow):
         quick_layout.addWidget(self.quick_alpha)
         
         apply_btn = QPushButton("应用到所有样品")
-        apply_btn.setStyleSheet("""
-            QPushButton {
-                background-color: #4A90E2;
-                color: white;
-                border-radius: 4px;
-                padding: 5px 10px;
-            }
-            QPushButton:hover {
-                background-color: #357ABD;
-            }
-        """)
         apply_btn.clicked.connect(self._apply_quick_params)
         quick_layout.addWidget(apply_btn)
         
@@ -1017,12 +693,10 @@ class THzAnalyzerApp(QMainWindow):
         button_layout.addStretch()
         
         ok_btn = QPushButton("确定")
-        ok_btn.setStyleSheet("QPushButton { background-color: #28A745; color: white; border-radius: 4px; padding: 8px 20px; }")
         ok_btn.clicked.connect(lambda: self._save_window_params(dialog))
         button_layout.addWidget(ok_btn)
         
         cancel_btn = QPushButton("取消")
-        cancel_btn.setStyleSheet("QPushButton { background-color: #6C757D; color: white; border-radius: 4px; padding: 8px 20px; }")
         cancel_btn.clicked.connect(dialog.reject)
         button_layout.addWidget(cancel_btn)
         
@@ -1033,22 +707,6 @@ class THzAnalyzerApp(QMainWindow):
     def _create_signal_param_group(self, title: str, key: str, existing_params: dict = None):
         """创建单个信号的参数设置组"""
         group = QGroupBox(title)
-        group.setStyleSheet("""
-            QGroupBox {
-                font-weight: bold;
-                border: 1px solid #CCCCCC;
-                border-radius: 4px;
-                margin-top: 6px;
-                padding: 8px;
-                background-color: #FAFAFA;
-            }
-            QGroupBox::title {
-                subcontrol-origin: margin;
-                left: 8px;
-                padding: 0 3px;
-                color: #333333;
-            }
-        """)
         
         layout = QHBoxLayout(group)
         layout.setSpacing(8)
@@ -1224,12 +882,22 @@ class THzAnalyzerApp(QMainWindow):
             self.status_bar.update_progress(current, total, message)
     
     def _on_calculation_finished(self, result):
-        """计算完成回调"""
+        """计算完成回调（主线程）：在此生成图表，避免 worker 线程创建 Figure。"""
         # 隐藏进度条
         if self.status_bar:
             self.status_bar.show_progress(False)
         
         if result.success:
+            try:
+                self._update_status("正在生成图表...", "working")
+                build_result_figures(result)
+            except Exception as exc:
+                self._update_status("图表生成失败", "error")
+                QMessageBox.critical(self, "图表错误", str(exc))
+                error(f"图表生成失败: {exc}")
+                self._set_popup_buttons_enabled(False)
+                return
+
             self.results_data = result.data
             # 保存图表引用
             self.fig1 = result.fig1
@@ -1247,6 +915,7 @@ class THzAnalyzerApp(QMainWindow):
     def _set_popup_buttons_enabled(self, enabled: bool):
         """设置弹出图表按钮的启用状态"""
         self.save_btn.setEnabled(enabled)
+        self.save_time_freq_btn.setEnabled(enabled)
         self.popup_time_btn.setEnabled(enabled)
         self.popup_freq_btn.setEnabled(enabled)
         self.popup_n_btn.setEnabled(enabled)
@@ -1287,18 +956,21 @@ class THzAnalyzerApp(QMainWindow):
         """显示图表"""
         # 显示时域和频域图表
         canvas1 = FigureCanvas(fig1)
+        enable_curve_hover(canvas1)
         toolbar1 = NavigationToolbar(canvas1, self.tab1)
         self.tab1.layout().addWidget(toolbar1)
         self.tab1.layout().addWidget(canvas1)
         
         # 显示光学参数图表
         canvas2 = FigureCanvas(fig2)
+        enable_curve_hover(canvas2)
         toolbar2 = NavigationToolbar(canvas2, self.tab2)
         self.tab2.layout().addWidget(toolbar2)
         self.tab2.layout().addWidget(canvas2)
         
         # 显示介电特性图表
         canvas3 = FigureCanvas(fig3)
+        enable_curve_hover(canvas3)
         toolbar3 = NavigationToolbar(canvas3, self.tab3)
         self.tab3.layout().addWidget(toolbar3)
         self.tab3.layout().addWidget(canvas3)
@@ -1396,6 +1068,7 @@ class THzAnalyzerApp(QMainWindow):
             return
         
         canvas = FigureCanvas(fig)
+        enable_curve_hover(canvas)
         toolbar = NavigationToolbar(canvas, popup_window)
         
         layout.addWidget(toolbar)
@@ -1407,73 +1080,58 @@ class THzAnalyzerApp(QMainWindow):
     
     def _create_single_figure(self, chart_type: str, config: dict):
         """创建单个图表"""
-        colors = ['red', 'blue', 'green', 'purple', 'orange', 'brown', 'pink', 'gray', 'olive', 'cyan']
-        
-        fig = plt.figure(figsize=(10, 6))
-        fig.patch.set_facecolor('#F5F5F5')
-        
-        ax = fig.add_subplot(1, 1, 1)
-        ax.set_facecolor('#F8F8F8')
-        
         F = self.results_data['F']
         sam_names = self.results_data['sam_names']
         
         # 特殊处理时域和频域信号（需要从fig1中提取）
         if chart_type == 'time':
-            # 时域信号需要从原始图表中获取数据
             if self.fig1 is None:
                 return None
-            # 复制时域子图数据
             try:
-                original_ax = self.fig1.axes[0]
-                for line in original_ax.get_lines():
-                    ax.plot(line.get_xdata(), line.get_ydata(), 
-                           color=line.get_color(), 
-                           linewidth=line.get_linewidth(),
-                           label=line.get_label())
-                ax.legend()
-                ax.grid(True)
-            except:
+                return create_single_series_figure(
+                    title=config['title'],
+                    xlabel=config['xlabel'],
+                    ylabel=config['ylabel'],
+                    frequency=None,
+                    series=(),
+                    sample_names=sam_names,
+                    xlim=None,
+                    source_lines=self.fig1.axes[0].get_lines(),
+                )
+            except Exception:
                 return None
                 
-        elif chart_type == 'freq':
-            # 频域信号
+        if chart_type == 'freq':
             if self.fig1 is None:
                 return None
             try:
-                original_ax = self.fig1.axes[1]
-                for line in original_ax.get_lines():
-                    ax.plot(line.get_xdata(), line.get_ydata(), 
-                           color=line.get_color(), 
-                           linewidth=line.get_linewidth(),
-                           label=line.get_label())
-                ax.legend()
-                ax.grid(True)
-                ax.set_xlim(0, 5)
-            except:
+                return create_single_series_figure(
+                    title=config['title'],
+                    xlabel=config['xlabel'],
+                    ylabel=config['ylabel'],
+                    frequency=None,
+                    series=(),
+                    sample_names=sam_names,
+                    xlim=(0, 5),
+                    source_lines=self.fig1.axes[1].get_lines(),
+                )
+            except Exception:
                 return None
-        else:
-            # 其他图表从results_data中获取
-            data_key = config['data_key']
-            if data_key not in self.results_data:
-                return None
-            
-            data_list = self.results_data[data_key]
-            for i, data in enumerate(data_list):
-                ax.plot(F, data, color=colors[i % len(colors)], 
-                       linewidth=2.5, label=sam_names[i])
-            
-            ax.legend(fontsize=10)
-            ax.grid(True, alpha=0.3)
-            ax.set_xlim(0, 5)
-            ax.autoscale(axis='y')
-        
-        ax.set_xlabel(config['xlabel'], fontsize=12)
-        ax.set_ylabel(config['ylabel'], fontsize=12)
-        ax.set_title(config['title'], fontsize=14, fontweight='bold')
-        
-        fig.tight_layout()
-        return fig
+
+        data_key = config['data_key']
+        if data_key not in self.results_data:
+            return None
+
+        data_list = self.results_data[data_key]
+        return create_single_series_figure(
+            title=config['title'],
+            xlabel=config['xlabel'],
+            ylabel=config['ylabel'],
+            frequency=F,
+            series=data_list,
+            sample_names=sam_names,
+            xlim=(0, 5),
+        )
     
     def _save_results(self):
         """保存计算结果"""
@@ -1547,6 +1205,73 @@ class THzAnalyzerApp(QMainWindow):
         QMessageBox.critical(self, "保存错误", error_message)
         error(f"保存失败: {error_message}")
     
+    def _on_save_time_freq_finished(self, file_path: str):
+        """保存时频域数据完成回调"""
+        if self.status_bar:
+            self.status_bar.show_progress(False)
+        
+        self.save_time_freq_btn.setEnabled(True)
+        self._update_status(f"时频域数据已保存到: {os.path.basename(file_path)}", "success")
+        QMessageBox.information(self, "保存成功", f"时频域数据（包括频域）已保存到:\n{file_path}")
+        info(f"时频域数据已保存到: {file_path}")
+    
+    def _on_save_time_freq_error(self, error_message: str):
+        """保存时频域数据错误回调"""
+        if self.status_bar:
+            self.status_bar.show_progress(False)
+        
+        self.save_time_freq_btn.setEnabled(True)
+        self._update_status("保存失败", "error")
+        QMessageBox.critical(self, "保存错误", error_message)
+        error(f"保存时频域数据失败: {error_message}")
+    
+    def _save_time_freq_data(self):
+        """保存加窗后的时频域数据（包括频域）为Excel文件"""
+        if self.results_data is None:
+            QMessageBox.warning(self, "警告", "没有可保存的时频域数据，请先运行分析")
+            return
+        
+        # 检查是否正在保存
+        if self.save_worker is not None and self.save_worker.isRunning():
+            QMessageBox.warning(self, "警告", "正在保存中，请稍候...")
+            return
+        
+        initial_dir = self.config.get("last_save_dir", "")
+        if not initial_dir or not os.path.exists(initial_dir):
+            initial_dir = os.getcwd()
+        
+        file_path, _ = QFileDialog.getSaveFileName(
+            self, "保存时频域数据", initial_dir,
+            "Excel文件 (*.xlsx);;所有文件 (*.*)"
+        )
+        
+        if file_path:
+            if not file_path.lower().endswith('.xlsx'):
+                file_path += '.xlsx'
+            
+            self.config["last_save_dir"] = os.path.dirname(file_path)
+            
+            # 显示进度条
+            self._update_status("正在保存时频域数据...", "working")
+            if self.status_bar:
+                self.status_bar.show_progress(True)
+            
+            # 禁用保存按钮防止重复点击
+            self.save_time_freq_btn.setEnabled(False)
+            
+            # 创建保存工作线程，指定保存类型为time_freq
+            self.save_worker = SaveWorker()
+            self.save_worker.set_parameters(self.results_data, file_path, save_type="time_freq")
+            
+            # 连接信号
+            self.save_worker.progress_updated.connect(self._on_save_progress)
+            self.save_worker.save_finished.connect(self._on_save_time_freq_finished)
+            self.save_worker.save_error.connect(self._on_save_time_freq_error)
+            
+            # 启动保存
+            self.save_worker.start()
+            info("开始异步保存时频域数据（包括频域）")
+    
     def _show_help_dialog(self):
         """显示帮助对话框"""
         dialog = HelpDialog(self)
@@ -1580,19 +1305,25 @@ class THzAnalyzerApp(QMainWindow):
                 file_path = urls[0].toLocalFile()
                 if os.path.isfile(file_path) and file_path.lower().endswith(('.xlsx', '.xls', '.txt')):
                     self.ref_file = file_path
-                    self.ref_file_edit.setText(os.path.basename(file_path))
+                    self.ref_file_edit.setText(short_display_name(os.path.basename(file_path)))
+                    self.ref_file_edit.setToolTip(file_path)
                     self._update_status("已选择参考文件", "ready")
         else:
+            added = 0
             for url in urls:
                 file_path = url.toLocalFile()
                 if os.path.isfile(file_path) and file_path.lower().endswith(('.xlsx', '.xls', '.txt')):
                     self.sam_files.append(file_path)
                     file_name = os.path.splitext(os.path.basename(file_path))[0]
                     self.sam_names.append(file_name)
-                    self.sam_files_list.addItem(file_name)
+                    self._append_sample_list_item(file_path, file_name)
+                    idx = len(self.sam_names) - 1
+                    self.per_sample_window_params[idx] = None
+                    added += 1
             
-            if urls:
-                self._update_status(f"已添加 {len(urls)} 个样品文件", "ready")
+            if added:
+                self._refresh_sample_list_colors()
+                self._update_status(f"已添加 {added} 个样品文件", "ready")
     
     def _on_closing(self, event):
         """窗口关闭事件"""

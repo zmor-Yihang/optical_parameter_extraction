@@ -1,0 +1,390 @@
+2026-07-19 16:48:33 [INFO] [logger:63] 日志系统初始化完成
+2026-07-19 16:48:33 [INFO] [logger:106] 程序启动
+2026-07-19 16:48:33 [INFO] [logger:106] 正在初始化THz分析系统...
+2026-07-19 16:48:33 [INFO] [logger:106] 配置已加载
+2026-07-19 16:48:33 [INFO] [logger:106] THz分析系统初始化完成
+2026-07-19 16:48:46 [INFO] [logger:106] 配置已保存
+2026-07-19 16:48:46 [INFO] [logger:106] 程序关闭
+2026-07-19 16:53:55 [INFO] [logger:63] 日志系统初始化完成
+2026-07-19 16:53:55 [INFO] [logger:106] 程序启动
+2026-07-19 16:53:55 [INFO] [logger:106] 正在初始化THz分析系统...
+2026-07-19 16:53:55 [INFO] [logger:106] 配置已加载
+2026-07-19 16:53:55 [INFO] [logger:106] THz分析系统初始化完成
+2026-07-19 16:54:40 [INFO] [logger:106] 选择参考文件: C:/Users/30495/Desktop/12h间隔未加窗/南航10.25-1/reference.txt
+2026-07-19 16:54:45 [INFO] [logger:106] 添加 3 个样品文件
+2026-07-19 16:54:51 [INFO] [logger:106] 开始异步计算
+2026-07-19 16:54:51 [INFO] [logger:106] 开始计算光学参数，样品数量: 3
+2026-07-19 16:54:51 [INFO] [logger:106] 成功读取文件: C:/Users/30495/Desktop/12h间隔未加窗/南航10.25-1/reference.txt
+2026-07-19 16:54:51 [INFO] [logger:106] 参考信号读取完成，数据点数: 9000
+2026-07-19 16:54:51 [INFO] [logger:106] 成功读取文件: C:/Users/30495/Desktop/12h间隔未加窗/南航10.25-1/1-6day-5_20200824143841_Time_processed.txt
+2026-07-19 16:54:51 [INFO] [logger:106] 样品 1-6day-5_20200824143841_Time_processed 读取完成
+2026-07-19 16:54:51 [INFO] [logger:106] 成功读取文件: C:/Users/30495/Desktop/12h间隔未加窗/南航10.25-1/1-6day-2_20200824142844_Time_processed.txt
+2026-07-19 16:54:51 [INFO] [logger:106] 样品 1-6day-2_20200824142844_Time_processed 读取完成
+2026-07-19 16:54:51 [INFO] [logger:106] 成功读取文件: C:/Users/30495/Desktop/12h间隔未加窗/南航10.25-1/1-5day-12h-4_20200824141922_Time_processed.txt
+2026-07-19 16:54:51 [INFO] [logger:106] 样品 1-5day-12h-4_20200824141922_Time_processed 读取完成
+2026-07-19 16:54:51 [INFO] [logger:106] 光学参数计算完成
+2026-07-19 16:54:51 [INFO] [logger:106] 计算完成
+2026-07-19 16:55:45 [INFO] [logger:106] 配置已保存
+2026-07-19 16:55:45 [INFO] [logger:106] 程序关闭
+2026-07-19 16:58:35 [INFO] [logger:63] 日志系统初始化完成
+2026-07-19 16:58:35 [INFO] [logger:106] 程序启动
+2026-07-19 16:58:35 [INFO] [logger:106] 正在初始化THz分析系统...
+2026-07-19 16:58:35 [INFO] [logger:106] 配置已加载
+2026-07-19 16:58:35 [INFO] [logger:106] THz分析系统初始化完成
+2026-07-19 16:59:08 [INFO] [logger:106] 选择参考文件: C:/Users/30495/Desktop/12h间隔未加窗/南航10.25-1/reference.txt
+2026-07-19 16:59:09 [INFO] [logger:106] 添加 1 个样品文件
+2026-07-19 16:59:16 [INFO] [logger:106] 添加 1 个样品文件
+2026-07-19 16:59:47 [INFO] [logger:106] 开始异步计算
+2026-07-19 16:59:47 [INFO] [logger:106] 开始计算光学参数，样品数量: 1
+2026-07-19 16:59:47 [INFO] [logger:106] 成功读取文件: C:/Users/30495/Desktop/12h间隔未加窗/南航10.25-1/reference.txt
+2026-07-19 16:59:47 [INFO] [logger:106] 参考信号读取完成，数据点数: 9000
+2026-07-19 16:59:47 [INFO] [logger:106] 成功读取文件: C:/Users/30495/Desktop/12h间隔未加窗/南航10.25-1/1-6day-5_20200824143841_Time_processed.txt
+2026-07-19 16:59:47 [INFO] [logger:106] 样品 1-6day-5_20200824143841_Time_processed 读取完成
+2026-07-19 16:59:47 [INFO] [logger:106] 光学参数计算完成
+2026-07-19 16:59:47 [INFO] [logger:106] 计算完成
+2026-07-19 17:00:42 [INFO] [logger:106] 配置已保存
+2026-07-19 17:00:42 [INFO] [logger:106] 程序关闭
+2026-07-19 17:07:22 [INFO] [logger:63] 日志系统初始化完成
+2026-07-19 17:07:22 [INFO] [logger:106] 程序启动
+2026-07-19 17:07:22 [INFO] [logger:106] 正在初始化THz分析系统...
+2026-07-19 17:07:22 [INFO] [logger:106] 配置已加载
+2026-07-19 17:07:22 [INFO] [logger:106] THz分析系统初始化完成
+2026-07-19 17:07:48 [INFO] [logger:106] 配置已保存
+2026-07-19 17:07:48 [INFO] [logger:106] 程序关闭
+2026-07-19 17:14:05 [INFO] [logger:63] 日志系统初始化完成
+2026-07-19 17:14:05 [INFO] [logger:106] 程序启动
+2026-07-19 17:14:05 [INFO] [logger:106] 正在初始化THz分析系统...
+2026-07-19 17:14:05 [INFO] [logger:106] 配置已加载
+2026-07-19 17:14:05 [INFO] [logger:106] THz分析系统初始化完成
+2026-07-19 17:14:11 [INFO] [logger:106] 选择参考文件: C:/Users/30495/Desktop/12h间隔未加窗/南航10.25-1/reference.txt
+2026-07-19 17:14:14 [INFO] [logger:106] 添加 1 个样品文件
+2026-07-19 17:14:15 [INFO] [logger:106] 开始异步计算
+2026-07-19 17:14:15 [INFO] [logger:106] 开始计算光学参数，样品数量: 1
+2026-07-19 17:14:15 [INFO] [logger:106] 成功读取文件: C:/Users/30495/Desktop/12h间隔未加窗/南航10.25-1/reference.txt
+2026-07-19 17:14:15 [INFO] [logger:106] 参考信号读取完成，数据点数: 9000
+2026-07-19 17:14:15 [INFO] [logger:106] 成功读取文件: C:/Users/30495/Desktop/12h间隔未加窗/南航10.25-1/1-0day-12h-2_20200824111243_Time_processed.txt
+2026-07-19 17:14:15 [INFO] [logger:106] 样品 1-0day-12h-2_20200824111243_Time_processed 读取完成
+2026-07-19 17:14:16 [INFO] [logger:106] 光学参数计算完成
+2026-07-19 17:14:16 [INFO] [logger:106] 计算完成
+2026-07-19 17:14:19 [INFO] [logger:106] 开始异步计算
+2026-07-19 17:14:19 [INFO] [logger:106] 开始计算光学参数，样品数量: 1
+2026-07-19 17:14:19 [INFO] [logger:106] 成功读取文件: C:/Users/30495/Desktop/12h间隔未加窗/南航10.25-1/reference.txt
+2026-07-19 17:14:19 [INFO] [logger:106] 参考信号读取完成，数据点数: 9000
+2026-07-19 17:14:19 [INFO] [logger:106] 成功读取文件: C:/Users/30495/Desktop/12h间隔未加窗/南航10.25-1/1-0day-12h-2_20200824111243_Time_processed.txt
+2026-07-19 17:14:19 [INFO] [logger:106] 样品 1-0day-12h-2_20200824111243_Time_processed 读取完成
+2026-07-19 17:14:19 [INFO] [logger:106] 光学参数计算完成
+2026-07-19 17:14:19 [INFO] [logger:106] 计算完成
+2026-07-19 17:14:26 [INFO] [logger:106] 添加 64 个样品文件
+2026-07-19 17:14:27 [INFO] [logger:106] 开始异步计算
+2026-07-19 17:14:27 [INFO] [logger:106] 开始计算光学参数，样品数量: 65
+2026-07-19 17:14:27 [INFO] [logger:106] 成功读取文件: C:/Users/30495/Desktop/12h间隔未加窗/南航10.25-1/reference.txt
+2026-07-19 17:14:27 [INFO] [logger:106] 参考信号读取完成，数据点数: 9000
+2026-07-19 17:14:27 [INFO] [logger:106] 成功读取文件: C:/Users/30495/Desktop/12h间隔未加窗/南航10.25-1/1-0day-12h-2_20200824111243_Time_processed.txt
+2026-07-19 17:14:27 [INFO] [logger:106] 样品 1-0day-12h-2_20200824111243_Time_processed 读取完成
+2026-07-19 17:14:27 [INFO] [logger:106] 成功读取文件: C:/Users/30495/Desktop/12h间隔未加窗/南航10.25-1/1-6day-5_20200824143841_Time_processed.txt
+2026-07-19 17:14:27 [INFO] [logger:106] 样品 1-6day-5_20200824143841_Time_processed 读取完成
+2026-07-19 17:14:27 [INFO] [logger:106] 成功读取文件: C:/Users/30495/Desktop/12h间隔未加窗/南航10.25-1/1-6day-4_20200824143512_Time_processed.txt
+2026-07-19 17:14:27 [INFO] [logger:106] 样品 1-6day-4_20200824143512_Time_processed 读取完成
+2026-07-19 17:14:27 [INFO] [logger:106] 成功读取文件: C:/Users/30495/Desktop/12h间隔未加窗/南航10.25-1/1-6day-3_20200824143158_Time_processed.txt
+2026-07-19 17:14:27 [INFO] [logger:106] 样品 1-6day-3_20200824143158_Time_processed 读取完成
+2026-07-19 17:14:27 [INFO] [logger:106] 成功读取文件: C:/Users/30495/Desktop/12h间隔未加窗/南航10.25-1/1-6day-2_20200824142844_Time_processed.txt
+2026-07-19 17:14:27 [INFO] [logger:106] 样品 1-6day-2_20200824142844_Time_processed 读取完成
+2026-07-19 17:14:27 [INFO] [logger:106] 成功读取文件: C:/Users/30495/Desktop/12h间隔未加窗/南航10.25-1/1-6day-1_20200824142545_Time_processed.txt
+2026-07-19 17:14:27 [INFO] [logger:106] 样品 1-6day-1_20200824142545_Time_processed 读取完成
+2026-07-19 17:14:27 [INFO] [logger:106] 成功读取文件: C:/Users/30495/Desktop/12h间隔未加窗/南航10.25-1/1-5day-12h-5_20200824142233_Time_processed.txt
+2026-07-19 17:14:27 [INFO] [logger:106] 样品 1-5day-12h-5_20200824142233_Time_processed 读取完成
+2026-07-19 17:14:27 [INFO] [logger:106] 成功读取文件: C:/Users/30495/Desktop/12h间隔未加窗/南航10.25-1/1-5day-12h-4_20200824141922_Time_processed.txt
+2026-07-19 17:14:27 [INFO] [logger:106] 样品 1-5day-12h-4_20200824141922_Time_processed 读取完成
+2026-07-19 17:14:27 [INFO] [logger:106] 成功读取文件: C:/Users/30495/Desktop/12h间隔未加窗/南航10.25-1/1-5day-12h-3_20200824141602_Time_processed.txt
+2026-07-19 17:14:27 [INFO] [logger:106] 样品 1-5day-12h-3_20200824141602_Time_processed 读取完成
+2026-07-19 17:14:27 [INFO] [logger:106] 成功读取文件: C:/Users/30495/Desktop/12h间隔未加窗/南航10.25-1/1-5day-12h-2_20200824141303_Time_processed.txt
+2026-07-19 17:14:27 [INFO] [logger:106] 样品 1-5day-12h-2_20200824141303_Time_processed 读取完成
+2026-07-19 17:14:27 [INFO] [logger:106] 成功读取文件: C:/Users/30495/Desktop/12h间隔未加窗/南航10.25-1/1-5day-12h-1_20200824140944_Time_processed.txt
+2026-07-19 17:14:27 [INFO] [logger:106] 样品 1-5day-12h-1_20200824140944_Time_processed 读取完成
+2026-07-19 17:14:27 [INFO] [logger:106] 成功读取文件: C:/Users/30495/Desktop/12h间隔未加窗/南航10.25-1/1-5day-4_20200824140550_Time_processed.txt
+2026-07-19 17:14:27 [INFO] [logger:106] 样品 1-5day-4_20200824140550_Time_processed 读取完成
+2026-07-19 17:14:27 [INFO] [logger:106] 成功读取文件: C:/Users/30495/Desktop/12h间隔未加窗/南航10.25-1/1-5day-3_20200824140239_Time_processed.txt
+2026-07-19 17:14:27 [INFO] [logger:106] 样品 1-5day-3_20200824140239_Time_processed 读取完成
+2026-07-19 17:14:27 [INFO] [logger:106] 成功读取文件: C:/Users/30495/Desktop/12h间隔未加窗/南航10.25-1/1-5day-2_20200824135936_Time_processed.txt
+2026-07-19 17:14:27 [INFO] [logger:106] 样品 1-5day-2_20200824135936_Time_processed 读取完成
+2026-07-19 17:14:27 [INFO] [logger:106] 成功读取文件: C:/Users/30495/Desktop/12h间隔未加窗/南航10.25-1/1-5day-1_20200824135628_Time_processed.txt
+2026-07-19 17:14:27 [INFO] [logger:106] 样品 1-5day-1_20200824135628_Time_processed 读取完成
+2026-07-19 17:14:27 [INFO] [logger:106] 成功读取文件: C:/Users/30495/Desktop/12h间隔未加窗/南航10.25-1/1-4day-12h-5_20200824135319_Time_processed.txt
+2026-07-19 17:14:27 [INFO] [logger:106] 样品 1-4day-12h-5_20200824135319_Time_processed 读取完成
+2026-07-19 17:14:27 [INFO] [logger:106] 成功读取文件: C:/Users/30495/Desktop/12h间隔未加窗/南航10.25-1/1-4day-12h-4_20200824135011_Time_processed.txt
+2026-07-19 17:14:27 [INFO] [logger:106] 样品 1-4day-12h-4_20200824135011_Time_processed 读取完成
+2026-07-19 17:14:28 [INFO] [logger:106] 成功读取文件: C:/Users/30495/Desktop/12h间隔未加窗/南航10.25-1/1-4day-12h-3_20200824134702_Time_processed.txt
+2026-07-19 17:14:28 [INFO] [logger:106] 样品 1-4day-12h-3_20200824134702_Time_processed 读取完成
+2026-07-19 17:14:28 [INFO] [logger:106] 成功读取文件: C:/Users/30495/Desktop/12h间隔未加窗/南航10.25-1/1-4day-12h-2_20200824134342_Time_processed.txt
+2026-07-19 17:14:28 [INFO] [logger:106] 样品 1-4day-12h-2_20200824134342_Time_processed 读取完成
+2026-07-19 17:14:28 [INFO] [logger:106] 成功读取文件: C:/Users/30495/Desktop/12h间隔未加窗/南航10.25-1/1-4day-12h-1_20200824134022_Time_processed.txt
+2026-07-19 17:14:28 [INFO] [logger:106] 样品 1-4day-12h-1_20200824134022_Time_processed 读取完成
+2026-07-19 17:14:28 [INFO] [logger:106] 成功读取文件: C:/Users/30495/Desktop/12h间隔未加窗/南航10.25-1/1-4day-5_20200824133721_Time_processed.txt
+2026-07-19 17:14:28 [INFO] [logger:106] 样品 1-4day-5_20200824133721_Time_processed 读取完成
+2026-07-19 17:14:28 [INFO] [logger:106] 成功读取文件: C:/Users/30495/Desktop/12h间隔未加窗/南航10.25-1/1-4day-4_20200824133411_Time_processed.txt
+2026-07-19 17:14:28 [INFO] [logger:106] 样品 1-4day-4_20200824133411_Time_processed 读取完成
+2026-07-19 17:14:28 [INFO] [logger:106] 成功读取文件: C:/Users/30495/Desktop/12h间隔未加窗/南航10.25-1/1-4day-3_20200824133113_Time_processed.txt
+2026-07-19 17:14:28 [INFO] [logger:106] 样品 1-4day-3_20200824133113_Time_processed 读取完成
+2026-07-19 17:14:28 [INFO] [logger:106] 成功读取文件: C:/Users/30495/Desktop/12h间隔未加窗/南航10.25-1/1-4day-2_20200824132752_Time_processed.txt
+2026-07-19 17:14:28 [INFO] [logger:106] 样品 1-4day-2_20200824132752_Time_processed 读取完成
+2026-07-19 17:14:28 [INFO] [logger:106] 成功读取文件: C:/Users/30495/Desktop/12h间隔未加窗/南航10.25-1/1-4day-1_20200824132457_Time_processed.txt
+2026-07-19 17:14:28 [INFO] [logger:106] 样品 1-4day-1_20200824132457_Time_processed 读取完成
+2026-07-19 17:14:28 [INFO] [logger:106] 成功读取文件: C:/Users/30495/Desktop/12h间隔未加窗/南航10.25-1/1-3day-12h-5_20200824132132_Time_processed.txt
+2026-07-19 17:14:28 [INFO] [logger:106] 样品 1-3day-12h-5_20200824132132_Time_processed 读取完成
+2026-07-19 17:14:28 [INFO] [logger:106] 成功读取文件: C:/Users/30495/Desktop/12h间隔未加窗/南航10.25-1/1-3day-12h-4_20200824131814_Time_processed.txt
+2026-07-19 17:14:28 [INFO] [logger:106] 样品 1-3day-12h-4_20200824131814_Time_processed 读取完成
+2026-07-19 17:14:28 [INFO] [logger:106] 成功读取文件: C:/Users/30495/Desktop/12h间隔未加窗/南航10.25-1/1-3day-12h-3_20200824131413_Time_processed.txt
+2026-07-19 17:14:28 [INFO] [logger:106] 样品 1-3day-12h-3_20200824131413_Time_processed 读取完成
+2026-07-19 17:14:28 [INFO] [logger:106] 成功读取文件: C:/Users/30495/Desktop/12h间隔未加窗/南航10.25-1/1-3day-12h-2_20200824131111_Time_processed.txt
+2026-07-19 17:14:28 [INFO] [logger:106] 样品 1-3day-12h-2_20200824131111_Time_processed 读取完成
+2026-07-19 17:14:28 [INFO] [logger:106] 成功读取文件: C:/Users/30495/Desktop/12h间隔未加窗/南航10.25-1/1-3day-12h-1_20200824130813_Time_processed.txt
+2026-07-19 17:14:28 [INFO] [logger:106] 样品 1-3day-12h-1_20200824130813_Time_processed 读取完成
+2026-07-19 17:14:28 [INFO] [logger:106] 成功读取文件: C:/Users/30495/Desktop/12h间隔未加窗/南航10.25-1/1-3day-5_20200824130447_Time_processed.txt
+2026-07-19 17:14:28 [INFO] [logger:106] 样品 1-3day-5_20200824130447_Time_processed 读取完成
+2026-07-19 17:14:28 [INFO] [logger:106] 成功读取文件: C:/Users/30495/Desktop/12h间隔未加窗/南航10.25-1/1-3day-4_20200824130141_Time_processed.txt
+2026-07-19 17:14:28 [INFO] [logger:106] 样品 1-3day-4_20200824130141_Time_processed 读取完成
+2026-07-19 17:14:28 [INFO] [logger:106] 成功读取文件: C:/Users/30495/Desktop/12h间隔未加窗/南航10.25-1/1-3day-3_20200824125820_Time_processed.txt
+2026-07-19 17:14:28 [INFO] [logger:106] 样品 1-3day-3_20200824125820_Time_processed 读取完成
+2026-07-19 17:14:28 [INFO] [logger:106] 成功读取文件: C:/Users/30495/Desktop/12h间隔未加窗/南航10.25-1/1-3day-2_20200824125525_Time_processed.txt
+2026-07-19 17:14:28 [INFO] [logger:106] 样品 1-3day-2_20200824125525_Time_processed 读取完成
+2026-07-19 17:14:28 [INFO] [logger:106] 成功读取文件: C:/Users/30495/Desktop/12h间隔未加窗/南航10.25-1/1-3day-1_20200824125214_Time_processed.txt
+2026-07-19 17:14:28 [INFO] [logger:106] 样品 1-3day-1_20200824125214_Time_processed 读取完成
+2026-07-19 17:14:28 [INFO] [logger:106] 成功读取文件: C:/Users/30495/Desktop/12h间隔未加窗/南航10.25-1/1-2day-12h-5_20200824124856_Time_processed.txt
+2026-07-19 17:14:28 [INFO] [logger:106] 样品 1-2day-12h-5_20200824124856_Time_processed 读取完成
+2026-07-19 17:14:28 [INFO] [logger:106] 成功读取文件: C:/Users/30495/Desktop/12h间隔未加窗/南航10.25-1/1-2day-12h-4_20200824124459_Time_processed.txt
+2026-07-19 17:14:28 [INFO] [logger:106] 样品 1-2day-12h-4_20200824124459_Time_processed 读取完成
+2026-07-19 17:14:28 [INFO] [logger:106] 成功读取文件: C:/Users/30495/Desktop/12h间隔未加窗/南航10.25-1/1-2day-12h-3_20200824124155_Time_processed.txt
+2026-07-19 17:14:28 [INFO] [logger:106] 样品 1-2day-12h-3_20200824124155_Time_processed 读取完成
+2026-07-19 17:14:28 [INFO] [logger:106] 成功读取文件: C:/Users/30495/Desktop/12h间隔未加窗/南航10.25-1/1-2day-12h-2_20200824123849_Time_processed.txt
+2026-07-19 17:14:28 [INFO] [logger:106] 样品 1-2day-12h-2_20200824123849_Time_processed 读取完成
+2026-07-19 17:14:28 [INFO] [logger:106] 成功读取文件: C:/Users/30495/Desktop/12h间隔未加窗/南航10.25-1/1-2day-12h-1_20200824123533_Time_processed.txt
+2026-07-19 17:14:28 [INFO] [logger:106] 样品 1-2day-12h-1_20200824123533_Time_processed 读取完成
+2026-07-19 17:14:28 [INFO] [logger:106] 成功读取文件: C:/Users/30495/Desktop/12h间隔未加窗/南航10.25-1/1-2day-5_20200824123204_Time_processed.txt
+2026-07-19 17:14:28 [INFO] [logger:106] 样品 1-2day-5_20200824123204_Time_processed 读取完成
+2026-07-19 17:14:28 [INFO] [logger:106] 成功读取文件: C:/Users/30495/Desktop/12h间隔未加窗/南航10.25-1/1-2day-4_20200824122841_Time_processed.txt
+2026-07-19 17:14:28 [INFO] [logger:106] 样品 1-2day-4_20200824122841_Time_processed 读取完成
+2026-07-19 17:14:28 [INFO] [logger:106] 成功读取文件: C:/Users/30495/Desktop/12h间隔未加窗/南航10.25-1/1-2day-3_20200824122526_Time_processed.txt
+2026-07-19 17:14:28 [INFO] [logger:106] 样品 1-2day-3_20200824122526_Time_processed 读取完成
+2026-07-19 17:14:28 [INFO] [logger:106] 成功读取文件: C:/Users/30495/Desktop/12h间隔未加窗/南航10.25-1/1-2day-2_20200824122200_Time_processed.txt
+2026-07-19 17:14:28 [INFO] [logger:106] 样品 1-2day-2_20200824122200_Time_processed 读取完成
+2026-07-19 17:14:28 [INFO] [logger:106] 成功读取文件: C:/Users/30495/Desktop/12h间隔未加窗/南航10.25-1/1-2day-1_20200824121840_Time_processed.txt
+2026-07-19 17:14:28 [INFO] [logger:106] 样品 1-2day-1_20200824121840_Time_processed 读取完成
+2026-07-19 17:14:28 [INFO] [logger:106] 成功读取文件: C:/Users/30495/Desktop/12h间隔未加窗/南航10.25-1/1-1day-12h-5_20200824121529_Time_processed.txt
+2026-07-19 17:14:28 [INFO] [logger:106] 样品 1-1day-12h-5_20200824121529_Time_processed 读取完成
+2026-07-19 17:14:28 [INFO] [logger:106] 成功读取文件: C:/Users/30495/Desktop/12h间隔未加窗/南航10.25-1/1-1day-12h-4_20200824121149_Time_processed.txt
+2026-07-19 17:14:28 [INFO] [logger:106] 样品 1-1day-12h-4_20200824121149_Time_processed 读取完成
+2026-07-19 17:14:28 [INFO] [logger:106] 成功读取文件: C:/Users/30495/Desktop/12h间隔未加窗/南航10.25-1/1-1day-12h-3_20200824120349_Time_processed.txt
+2026-07-19 17:14:28 [INFO] [logger:106] 样品 1-1day-12h-3_20200824120349_Time_processed 读取完成
+2026-07-19 17:14:28 [INFO] [logger:106] 成功读取文件: C:/Users/30495/Desktop/12h间隔未加窗/南航10.25-1/1-1day-12h-2_20200824115128_Time_processed.txt
+2026-07-19 17:14:28 [INFO] [logger:106] 样品 1-1day-12h-2_20200824115128_Time_processed 读取完成
+2026-07-19 17:14:28 [INFO] [logger:106] 成功读取文件: C:/Users/30495/Desktop/12h间隔未加窗/南航10.25-1/1-1day-12h-1_20200824114810_Time_processed.txt
+2026-07-19 17:14:28 [INFO] [logger:106] 样品 1-1day-12h-1_20200824114810_Time_processed 读取完成
+2026-07-19 17:14:28 [INFO] [logger:106] 成功读取文件: C:/Users/30495/Desktop/12h间隔未加窗/南航10.25-1/1-1day-5_20200824114354_Time_processed.txt
+2026-07-19 17:14:28 [INFO] [logger:106] 样品 1-1day-5_20200824114354_Time_processed 读取完成
+2026-07-19 17:14:28 [INFO] [logger:106] 成功读取文件: C:/Users/30495/Desktop/12h间隔未加窗/南航10.25-1/1-1day-4_20200824114014_Time_processed.txt
+2026-07-19 17:14:28 [INFO] [logger:106] 样品 1-1day-4_20200824114014_Time_processed 读取完成
+2026-07-19 17:14:28 [INFO] [logger:106] 成功读取文件: C:/Users/30495/Desktop/12h间隔未加窗/南航10.25-1/1-1day-3_20200824113656_Time_processed.txt
+2026-07-19 17:14:28 [INFO] [logger:106] 样品 1-1day-3_20200824113656_Time_processed 读取完成
+2026-07-19 17:14:28 [INFO] [logger:106] 成功读取文件: C:/Users/30495/Desktop/12h间隔未加窗/南航10.25-1/1-1day-2_20200824113354_Time_processed.txt
+2026-07-19 17:14:28 [INFO] [logger:106] 样品 1-1day-2_20200824113354_Time_processed 读取完成
+2026-07-19 17:14:28 [INFO] [logger:106] 成功读取文件: C:/Users/30495/Desktop/12h间隔未加窗/南航10.25-1/1-1day-1_20200824113055_Time_processed.txt
+2026-07-19 17:14:28 [INFO] [logger:106] 样品 1-1day-1_20200824113055_Time_processed 读取完成
+2026-07-19 17:14:28 [INFO] [logger:106] 成功读取文件: C:/Users/30495/Desktop/12h间隔未加窗/南航10.25-1/1-0day-12h-5_20200824112143_Time_processed.txt
+2026-07-19 17:14:28 [INFO] [logger:106] 样品 1-0day-12h-5_20200824112143_Time_processed 读取完成
+2026-07-19 17:14:28 [INFO] [logger:106] 成功读取文件: C:/Users/30495/Desktop/12h间隔未加窗/南航10.25-1/1-0day-12h-4_20200824111839_Time_processed.txt
+2026-07-19 17:14:28 [INFO] [logger:106] 样品 1-0day-12h-4_20200824111839_Time_processed 读取完成
+2026-07-19 17:14:28 [INFO] [logger:106] 成功读取文件: C:/Users/30495/Desktop/12h间隔未加窗/南航10.25-1/1-0day-12h-3_20200824111536_Time_processed.txt
+2026-07-19 17:14:28 [INFO] [logger:106] 样品 1-0day-12h-3_20200824111536_Time_processed 读取完成
+2026-07-19 17:14:28 [INFO] [logger:106] 成功读取文件: C:/Users/30495/Desktop/12h间隔未加窗/南航10.25-1/1-0day-12h-2_20200824111243_Time_processed.txt
+2026-07-19 17:14:28 [INFO] [logger:106] 样品 1-0day-12h-2_20200824111243_Time_processed 读取完成
+2026-07-19 17:14:28 [INFO] [logger:106] 成功读取文件: C:/Users/30495/Desktop/12h间隔未加窗/南航10.25-1/1-0day-12h-1_20200824110658_Time_processed.txt
+2026-07-19 17:14:28 [INFO] [logger:106] 样品 1-0day-12h-1_20200824110658_Time_processed 读取完成
+2026-07-19 17:14:28 [INFO] [logger:106] 成功读取文件: C:/Users/30495/Desktop/12h间隔未加窗/南航10.25-1/1-0day-5_20200824110312_Time_processed.txt
+2026-07-19 17:14:28 [INFO] [logger:106] 样品 1-0day-5_20200824110312_Time_processed 读取完成
+2026-07-19 17:14:28 [INFO] [logger:106] 成功读取文件: C:/Users/30495/Desktop/12h间隔未加窗/南航10.25-1/1-0day-4_20200824110010_Time_processed.txt
+2026-07-19 17:14:28 [INFO] [logger:106] 样品 1-0day-4_20200824110010_Time_processed 读取完成
+2026-07-19 17:14:28 [INFO] [logger:106] 成功读取文件: C:/Users/30495/Desktop/12h间隔未加窗/南航10.25-1/1-0day-3_20200824105640_Time_processed.txt
+2026-07-19 17:14:28 [INFO] [logger:106] 样品 1-0day-3_20200824105640_Time_processed 读取完成
+2026-07-19 17:14:28 [INFO] [logger:106] 成功读取文件: C:/Users/30495/Desktop/12h间隔未加窗/南航10.25-1/1-0day-2_20200824105255_Time_processed.txt
+2026-07-19 17:14:28 [INFO] [logger:106] 样品 1-0day-2_20200824105255_Time_processed 读取完成
+2026-07-19 17:14:28 [INFO] [logger:106] 成功读取文件: C:/Users/30495/Desktop/12h间隔未加窗/南航10.25-1/1-0day-1_20200824104921_Time_processed.txt
+2026-07-19 17:14:28 [INFO] [logger:106] 样品 1-0day-1_20200824104921_Time_processed 读取完成
+2026-07-19 17:14:29 [INFO] [logger:106] 光学参数计算完成
+2026-07-19 17:14:30 [INFO] [logger:106] 计算完成
+2026-07-19 17:14:52 [INFO] [logger:106] 添加 1 个样品文件
+2026-07-19 17:14:53 [INFO] [logger:106] 开始异步计算
+2026-07-19 17:14:53 [INFO] [logger:106] 开始计算光学参数，样品数量: 1
+2026-07-19 17:14:53 [INFO] [logger:106] 成功读取文件: C:/Users/30495/Desktop/12h间隔未加窗/南航10.25-1/reference.txt
+2026-07-19 17:14:53 [INFO] [logger:106] 参考信号读取完成，数据点数: 9000
+2026-07-19 17:14:53 [INFO] [logger:106] 成功读取文件: C:/Users/30495/Desktop/12h间隔未加窗/南航10.25-1/1-6day-4_20200824143512_Time_processed.txt
+2026-07-19 17:14:53 [INFO] [logger:106] 样品 1-6day-4_20200824143512_Time_processed 读取完成
+2026-07-19 17:14:54 [INFO] [logger:106] 光学参数计算完成
+2026-07-19 17:14:54 [INFO] [logger:106] 计算完成
+2026-07-19 17:14:56 [INFO] [logger:106] 配置已保存
+2026-07-19 17:14:56 [INFO] [logger:106] 程序关闭
+2026-07-19 17:24:18 [INFO] [logger:63] 日志系统初始化完成
+2026-07-19 17:24:18 [INFO] [logger:106] 程序启动
+2026-07-19 17:24:18 [INFO] [logger:106] 正在初始化THz分析系统...
+2026-07-19 17:24:18 [INFO] [logger:106] 配置已加载
+2026-07-19 17:24:18 [INFO] [logger:106] THz分析系统初始化完成
+2026-07-19 17:24:21 [INFO] [logger:106] 选择参考文件: C:/Users/30495/Desktop/12h间隔未加窗/南航10.25-1/reference.txt
+2026-07-19 17:24:25 [INFO] [logger:106] 添加 64 个样品文件
+2026-07-19 17:24:30 [INFO] [logger:106] 开始异步计算
+2026-07-19 17:24:30 [INFO] [logger:106] 开始计算光学参数，样品数量: 64
+2026-07-19 17:24:30 [INFO] [logger:106] 成功读取文件: C:/Users/30495/Desktop/12h间隔未加窗/南航10.25-1/reference.txt
+2026-07-19 17:24:30 [INFO] [logger:106] 参考信号读取完成，数据点数: 9000
+2026-07-19 17:24:30 [INFO] [logger:106] 成功读取文件: C:/Users/30495/Desktop/12h间隔未加窗/南航10.25-1/1-6day-5_20200824143841_Time_processed.txt
+2026-07-19 17:24:30 [INFO] [logger:106] 样品 1-6day-5_20200824143841_Time_processed 读取完成
+2026-07-19 17:24:30 [INFO] [logger:106] 成功读取文件: C:/Users/30495/Desktop/12h间隔未加窗/南航10.25-1/1-6day-4_20200824143512_Time_processed.txt
+2026-07-19 17:24:30 [INFO] [logger:106] 样品 1-6day-4_20200824143512_Time_processed 读取完成
+2026-07-19 17:24:30 [INFO] [logger:106] 成功读取文件: C:/Users/30495/Desktop/12h间隔未加窗/南航10.25-1/1-6day-3_20200824143158_Time_processed.txt
+2026-07-19 17:24:30 [INFO] [logger:106] 样品 1-6day-3_20200824143158_Time_processed 读取完成
+2026-07-19 17:24:30 [INFO] [logger:106] 成功读取文件: C:/Users/30495/Desktop/12h间隔未加窗/南航10.25-1/1-6day-2_20200824142844_Time_processed.txt
+2026-07-19 17:24:30 [INFO] [logger:106] 样品 1-6day-2_20200824142844_Time_processed 读取完成
+2026-07-19 17:24:30 [INFO] [logger:106] 成功读取文件: C:/Users/30495/Desktop/12h间隔未加窗/南航10.25-1/1-6day-1_20200824142545_Time_processed.txt
+2026-07-19 17:24:30 [INFO] [logger:106] 样品 1-6day-1_20200824142545_Time_processed 读取完成
+2026-07-19 17:24:30 [INFO] [logger:106] 成功读取文件: C:/Users/30495/Desktop/12h间隔未加窗/南航10.25-1/1-5day-12h-5_20200824142233_Time_processed.txt
+2026-07-19 17:24:30 [INFO] [logger:106] 样品 1-5day-12h-5_20200824142233_Time_processed 读取完成
+2026-07-19 17:24:30 [INFO] [logger:106] 成功读取文件: C:/Users/30495/Desktop/12h间隔未加窗/南航10.25-1/1-5day-12h-4_20200824141922_Time_processed.txt
+2026-07-19 17:24:30 [INFO] [logger:106] 样品 1-5day-12h-4_20200824141922_Time_processed 读取完成
+2026-07-19 17:24:30 [INFO] [logger:106] 成功读取文件: C:/Users/30495/Desktop/12h间隔未加窗/南航10.25-1/1-5day-12h-3_20200824141602_Time_processed.txt
+2026-07-19 17:24:30 [INFO] [logger:106] 样品 1-5day-12h-3_20200824141602_Time_processed 读取完成
+2026-07-19 17:24:30 [INFO] [logger:106] 成功读取文件: C:/Users/30495/Desktop/12h间隔未加窗/南航10.25-1/1-5day-12h-2_20200824141303_Time_processed.txt
+2026-07-19 17:24:30 [INFO] [logger:106] 样品 1-5day-12h-2_20200824141303_Time_processed 读取完成
+2026-07-19 17:24:30 [INFO] [logger:106] 成功读取文件: C:/Users/30495/Desktop/12h间隔未加窗/南航10.25-1/1-5day-12h-1_20200824140944_Time_processed.txt
+2026-07-19 17:24:30 [INFO] [logger:106] 样品 1-5day-12h-1_20200824140944_Time_processed 读取完成
+2026-07-19 17:24:30 [INFO] [logger:106] 成功读取文件: C:/Users/30495/Desktop/12h间隔未加窗/南航10.25-1/1-5day-4_20200824140550_Time_processed.txt
+2026-07-19 17:24:30 [INFO] [logger:106] 样品 1-5day-4_20200824140550_Time_processed 读取完成
+2026-07-19 17:24:30 [INFO] [logger:106] 成功读取文件: C:/Users/30495/Desktop/12h间隔未加窗/南航10.25-1/1-5day-3_20200824140239_Time_processed.txt
+2026-07-19 17:24:30 [INFO] [logger:106] 样品 1-5day-3_20200824140239_Time_processed 读取完成
+2026-07-19 17:24:30 [INFO] [logger:106] 成功读取文件: C:/Users/30495/Desktop/12h间隔未加窗/南航10.25-1/1-5day-2_20200824135936_Time_processed.txt
+2026-07-19 17:24:30 [INFO] [logger:106] 样品 1-5day-2_20200824135936_Time_processed 读取完成
+2026-07-19 17:24:30 [INFO] [logger:106] 成功读取文件: C:/Users/30495/Desktop/12h间隔未加窗/南航10.25-1/1-5day-1_20200824135628_Time_processed.txt
+2026-07-19 17:24:30 [INFO] [logger:106] 样品 1-5day-1_20200824135628_Time_processed 读取完成
+2026-07-19 17:24:30 [INFO] [logger:106] 成功读取文件: C:/Users/30495/Desktop/12h间隔未加窗/南航10.25-1/1-4day-12h-5_20200824135319_Time_processed.txt
+2026-07-19 17:24:30 [INFO] [logger:106] 样品 1-4day-12h-5_20200824135319_Time_processed 读取完成
+2026-07-19 17:24:30 [INFO] [logger:106] 成功读取文件: C:/Users/30495/Desktop/12h间隔未加窗/南航10.25-1/1-4day-12h-4_20200824135011_Time_processed.txt
+2026-07-19 17:24:30 [INFO] [logger:106] 样品 1-4day-12h-4_20200824135011_Time_processed 读取完成
+2026-07-19 17:24:30 [INFO] [logger:106] 成功读取文件: C:/Users/30495/Desktop/12h间隔未加窗/南航10.25-1/1-4day-12h-3_20200824134702_Time_processed.txt
+2026-07-19 17:24:30 [INFO] [logger:106] 样品 1-4day-12h-3_20200824134702_Time_processed 读取完成
+2026-07-19 17:24:30 [INFO] [logger:106] 成功读取文件: C:/Users/30495/Desktop/12h间隔未加窗/南航10.25-1/1-4day-12h-2_20200824134342_Time_processed.txt
+2026-07-19 17:24:30 [INFO] [logger:106] 样品 1-4day-12h-2_20200824134342_Time_processed 读取完成
+2026-07-19 17:24:30 [INFO] [logger:106] 成功读取文件: C:/Users/30495/Desktop/12h间隔未加窗/南航10.25-1/1-4day-12h-1_20200824134022_Time_processed.txt
+2026-07-19 17:24:30 [INFO] [logger:106] 样品 1-4day-12h-1_20200824134022_Time_processed 读取完成
+2026-07-19 17:24:30 [INFO] [logger:106] 成功读取文件: C:/Users/30495/Desktop/12h间隔未加窗/南航10.25-1/1-4day-5_20200824133721_Time_processed.txt
+2026-07-19 17:24:30 [INFO] [logger:106] 样品 1-4day-5_20200824133721_Time_processed 读取完成
+2026-07-19 17:24:30 [INFO] [logger:106] 成功读取文件: C:/Users/30495/Desktop/12h间隔未加窗/南航10.25-1/1-4day-4_20200824133411_Time_processed.txt
+2026-07-19 17:24:30 [INFO] [logger:106] 样品 1-4day-4_20200824133411_Time_processed 读取完成
+2026-07-19 17:24:30 [INFO] [logger:106] 成功读取文件: C:/Users/30495/Desktop/12h间隔未加窗/南航10.25-1/1-4day-3_20200824133113_Time_processed.txt
+2026-07-19 17:24:30 [INFO] [logger:106] 样品 1-4day-3_20200824133113_Time_processed 读取完成
+2026-07-19 17:24:30 [INFO] [logger:106] 成功读取文件: C:/Users/30495/Desktop/12h间隔未加窗/南航10.25-1/1-4day-2_20200824132752_Time_processed.txt
+2026-07-19 17:24:30 [INFO] [logger:106] 样品 1-4day-2_20200824132752_Time_processed 读取完成
+2026-07-19 17:24:30 [INFO] [logger:106] 成功读取文件: C:/Users/30495/Desktop/12h间隔未加窗/南航10.25-1/1-4day-1_20200824132457_Time_processed.txt
+2026-07-19 17:24:30 [INFO] [logger:106] 样品 1-4day-1_20200824132457_Time_processed 读取完成
+2026-07-19 17:24:30 [INFO] [logger:106] 成功读取文件: C:/Users/30495/Desktop/12h间隔未加窗/南航10.25-1/1-3day-12h-5_20200824132132_Time_processed.txt
+2026-07-19 17:24:30 [INFO] [logger:106] 样品 1-3day-12h-5_20200824132132_Time_processed 读取完成
+2026-07-19 17:24:30 [INFO] [logger:106] 成功读取文件: C:/Users/30495/Desktop/12h间隔未加窗/南航10.25-1/1-3day-12h-4_20200824131814_Time_processed.txt
+2026-07-19 17:24:30 [INFO] [logger:106] 样品 1-3day-12h-4_20200824131814_Time_processed 读取完成
+2026-07-19 17:24:30 [INFO] [logger:106] 成功读取文件: C:/Users/30495/Desktop/12h间隔未加窗/南航10.25-1/1-3day-12h-3_20200824131413_Time_processed.txt
+2026-07-19 17:24:30 [INFO] [logger:106] 样品 1-3day-12h-3_20200824131413_Time_processed 读取完成
+2026-07-19 17:24:30 [INFO] [logger:106] 成功读取文件: C:/Users/30495/Desktop/12h间隔未加窗/南航10.25-1/1-3day-12h-2_20200824131111_Time_processed.txt
+2026-07-19 17:24:30 [INFO] [logger:106] 样品 1-3day-12h-2_20200824131111_Time_processed 读取完成
+2026-07-19 17:24:30 [INFO] [logger:106] 成功读取文件: C:/Users/30495/Desktop/12h间隔未加窗/南航10.25-1/1-3day-12h-1_20200824130813_Time_processed.txt
+2026-07-19 17:24:30 [INFO] [logger:106] 样品 1-3day-12h-1_20200824130813_Time_processed 读取完成
+2026-07-19 17:24:30 [INFO] [logger:106] 成功读取文件: C:/Users/30495/Desktop/12h间隔未加窗/南航10.25-1/1-3day-5_20200824130447_Time_processed.txt
+2026-07-19 17:24:30 [INFO] [logger:106] 样品 1-3day-5_20200824130447_Time_processed 读取完成
+2026-07-19 17:24:30 [INFO] [logger:106] 成功读取文件: C:/Users/30495/Desktop/12h间隔未加窗/南航10.25-1/1-3day-4_20200824130141_Time_processed.txt
+2026-07-19 17:24:30 [INFO] [logger:106] 样品 1-3day-4_20200824130141_Time_processed 读取完成
+2026-07-19 17:24:30 [INFO] [logger:106] 成功读取文件: C:/Users/30495/Desktop/12h间隔未加窗/南航10.25-1/1-3day-3_20200824125820_Time_processed.txt
+2026-07-19 17:24:30 [INFO] [logger:106] 样品 1-3day-3_20200824125820_Time_processed 读取完成
+2026-07-19 17:24:30 [INFO] [logger:106] 成功读取文件: C:/Users/30495/Desktop/12h间隔未加窗/南航10.25-1/1-3day-2_20200824125525_Time_processed.txt
+2026-07-19 17:24:30 [INFO] [logger:106] 样品 1-3day-2_20200824125525_Time_processed 读取完成
+2026-07-19 17:24:30 [INFO] [logger:106] 成功读取文件: C:/Users/30495/Desktop/12h间隔未加窗/南航10.25-1/1-3day-1_20200824125214_Time_processed.txt
+2026-07-19 17:24:30 [INFO] [logger:106] 样品 1-3day-1_20200824125214_Time_processed 读取完成
+2026-07-19 17:24:30 [INFO] [logger:106] 成功读取文件: C:/Users/30495/Desktop/12h间隔未加窗/南航10.25-1/1-2day-12h-5_20200824124856_Time_processed.txt
+2026-07-19 17:24:30 [INFO] [logger:106] 样品 1-2day-12h-5_20200824124856_Time_processed 读取完成
+2026-07-19 17:24:30 [INFO] [logger:106] 成功读取文件: C:/Users/30495/Desktop/12h间隔未加窗/南航10.25-1/1-2day-12h-4_20200824124459_Time_processed.txt
+2026-07-19 17:24:30 [INFO] [logger:106] 样品 1-2day-12h-4_20200824124459_Time_processed 读取完成
+2026-07-19 17:24:30 [INFO] [logger:106] 成功读取文件: C:/Users/30495/Desktop/12h间隔未加窗/南航10.25-1/1-2day-12h-3_20200824124155_Time_processed.txt
+2026-07-19 17:24:30 [INFO] [logger:106] 样品 1-2day-12h-3_20200824124155_Time_processed 读取完成
+2026-07-19 17:24:30 [INFO] [logger:106] 成功读取文件: C:/Users/30495/Desktop/12h间隔未加窗/南航10.25-1/1-2day-12h-2_20200824123849_Time_processed.txt
+2026-07-19 17:24:30 [INFO] [logger:106] 样品 1-2day-12h-2_20200824123849_Time_processed 读取完成
+2026-07-19 17:24:30 [INFO] [logger:106] 成功读取文件: C:/Users/30495/Desktop/12h间隔未加窗/南航10.25-1/1-2day-12h-1_20200824123533_Time_processed.txt
+2026-07-19 17:24:30 [INFO] [logger:106] 样品 1-2day-12h-1_20200824123533_Time_processed 读取完成
+2026-07-19 17:24:30 [INFO] [logger:106] 成功读取文件: C:/Users/30495/Desktop/12h间隔未加窗/南航10.25-1/1-2day-5_20200824123204_Time_processed.txt
+2026-07-19 17:24:30 [INFO] [logger:106] 样品 1-2day-5_20200824123204_Time_processed 读取完成
+2026-07-19 17:24:30 [INFO] [logger:106] 成功读取文件: C:/Users/30495/Desktop/12h间隔未加窗/南航10.25-1/1-2day-4_20200824122841_Time_processed.txt
+2026-07-19 17:24:30 [INFO] [logger:106] 样品 1-2day-4_20200824122841_Time_processed 读取完成
+2026-07-19 17:24:30 [INFO] [logger:106] 成功读取文件: C:/Users/30495/Desktop/12h间隔未加窗/南航10.25-1/1-2day-3_20200824122526_Time_processed.txt
+2026-07-19 17:24:30 [INFO] [logger:106] 样品 1-2day-3_20200824122526_Time_processed 读取完成
+2026-07-19 17:24:30 [INFO] [logger:106] 成功读取文件: C:/Users/30495/Desktop/12h间隔未加窗/南航10.25-1/1-2day-2_20200824122200_Time_processed.txt
+2026-07-19 17:24:30 [INFO] [logger:106] 样品 1-2day-2_20200824122200_Time_processed 读取完成
+2026-07-19 17:24:30 [INFO] [logger:106] 成功读取文件: C:/Users/30495/Desktop/12h间隔未加窗/南航10.25-1/1-2day-1_20200824121840_Time_processed.txt
+2026-07-19 17:24:30 [INFO] [logger:106] 样品 1-2day-1_20200824121840_Time_processed 读取完成
+2026-07-19 17:24:30 [INFO] [logger:106] 成功读取文件: C:/Users/30495/Desktop/12h间隔未加窗/南航10.25-1/1-1day-12h-5_20200824121529_Time_processed.txt
+2026-07-19 17:24:30 [INFO] [logger:106] 样品 1-1day-12h-5_20200824121529_Time_processed 读取完成
+2026-07-19 17:24:30 [INFO] [logger:106] 成功读取文件: C:/Users/30495/Desktop/12h间隔未加窗/南航10.25-1/1-1day-12h-4_20200824121149_Time_processed.txt
+2026-07-19 17:24:30 [INFO] [logger:106] 样品 1-1day-12h-4_20200824121149_Time_processed 读取完成
+2026-07-19 17:24:30 [INFO] [logger:106] 成功读取文件: C:/Users/30495/Desktop/12h间隔未加窗/南航10.25-1/1-1day-12h-3_20200824120349_Time_processed.txt
+2026-07-19 17:24:30 [INFO] [logger:106] 样品 1-1day-12h-3_20200824120349_Time_processed 读取完成
+2026-07-19 17:24:30 [INFO] [logger:106] 成功读取文件: C:/Users/30495/Desktop/12h间隔未加窗/南航10.25-1/1-1day-12h-2_20200824115128_Time_processed.txt
+2026-07-19 17:24:30 [INFO] [logger:106] 样品 1-1day-12h-2_20200824115128_Time_processed 读取完成
+2026-07-19 17:24:30 [INFO] [logger:106] 成功读取文件: C:/Users/30495/Desktop/12h间隔未加窗/南航10.25-1/1-1day-12h-1_20200824114810_Time_processed.txt
+2026-07-19 17:24:30 [INFO] [logger:106] 样品 1-1day-12h-1_20200824114810_Time_processed 读取完成
+2026-07-19 17:24:30 [INFO] [logger:106] 成功读取文件: C:/Users/30495/Desktop/12h间隔未加窗/南航10.25-1/1-1day-5_20200824114354_Time_processed.txt
+2026-07-19 17:24:30 [INFO] [logger:106] 样品 1-1day-5_20200824114354_Time_processed 读取完成
+2026-07-19 17:24:30 [INFO] [logger:106] 成功读取文件: C:/Users/30495/Desktop/12h间隔未加窗/南航10.25-1/1-1day-4_20200824114014_Time_processed.txt
+2026-07-19 17:24:30 [INFO] [logger:106] 样品 1-1day-4_20200824114014_Time_processed 读取完成
+2026-07-19 17:24:30 [INFO] [logger:106] 成功读取文件: C:/Users/30495/Desktop/12h间隔未加窗/南航10.25-1/1-1day-3_20200824113656_Time_processed.txt
+2026-07-19 17:24:30 [INFO] [logger:106] 样品 1-1day-3_20200824113656_Time_processed 读取完成
+2026-07-19 17:24:30 [INFO] [logger:106] 成功读取文件: C:/Users/30495/Desktop/12h间隔未加窗/南航10.25-1/1-1day-2_20200824113354_Time_processed.txt
+2026-07-19 17:24:30 [INFO] [logger:106] 样品 1-1day-2_20200824113354_Time_processed 读取完成
+2026-07-19 17:24:30 [INFO] [logger:106] 成功读取文件: C:/Users/30495/Desktop/12h间隔未加窗/南航10.25-1/1-1day-1_20200824113055_Time_processed.txt
+2026-07-19 17:24:30 [INFO] [logger:106] 样品 1-1day-1_20200824113055_Time_processed 读取完成
+2026-07-19 17:24:30 [INFO] [logger:106] 成功读取文件: C:/Users/30495/Desktop/12h间隔未加窗/南航10.25-1/1-0day-12h-5_20200824112143_Time_processed.txt
+2026-07-19 17:24:30 [INFO] [logger:106] 样品 1-0day-12h-5_20200824112143_Time_processed 读取完成
+2026-07-19 17:24:30 [INFO] [logger:106] 成功读取文件: C:/Users/30495/Desktop/12h间隔未加窗/南航10.25-1/1-0day-12h-4_20200824111839_Time_processed.txt
+2026-07-19 17:24:30 [INFO] [logger:106] 样品 1-0day-12h-4_20200824111839_Time_processed 读取完成
+2026-07-19 17:24:31 [INFO] [logger:106] 成功读取文件: C:/Users/30495/Desktop/12h间隔未加窗/南航10.25-1/1-0day-12h-3_20200824111536_Time_processed.txt
+2026-07-19 17:24:31 [INFO] [logger:106] 样品 1-0day-12h-3_20200824111536_Time_processed 读取完成
+2026-07-19 17:24:31 [INFO] [logger:106] 成功读取文件: C:/Users/30495/Desktop/12h间隔未加窗/南航10.25-1/1-0day-12h-2_20200824111243_Time_processed.txt
+2026-07-19 17:24:31 [INFO] [logger:106] 样品 1-0day-12h-2_20200824111243_Time_processed 读取完成
+2026-07-19 17:24:31 [INFO] [logger:106] 成功读取文件: C:/Users/30495/Desktop/12h间隔未加窗/南航10.25-1/1-0day-12h-1_20200824110658_Time_processed.txt
+2026-07-19 17:24:31 [INFO] [logger:106] 样品 1-0day-12h-1_20200824110658_Time_processed 读取完成
+2026-07-19 17:24:31 [INFO] [logger:106] 成功读取文件: C:/Users/30495/Desktop/12h间隔未加窗/南航10.25-1/1-0day-5_20200824110312_Time_processed.txt
+2026-07-19 17:24:31 [INFO] [logger:106] 样品 1-0day-5_20200824110312_Time_processed 读取完成
+2026-07-19 17:24:31 [INFO] [logger:106] 成功读取文件: C:/Users/30495/Desktop/12h间隔未加窗/南航10.25-1/1-0day-4_20200824110010_Time_processed.txt
+2026-07-19 17:24:31 [INFO] [logger:106] 样品 1-0day-4_20200824110010_Time_processed 读取完成
+2026-07-19 17:24:31 [INFO] [logger:106] 成功读取文件: C:/Users/30495/Desktop/12h间隔未加窗/南航10.25-1/1-0day-3_20200824105640_Time_processed.txt
+2026-07-19 17:24:31 [INFO] [logger:106] 样品 1-0day-3_20200824105640_Time_processed 读取完成
+2026-07-19 17:24:31 [INFO] [logger:106] 成功读取文件: C:/Users/30495/Desktop/12h间隔未加窗/南航10.25-1/1-0day-2_20200824105255_Time_processed.txt
+2026-07-19 17:24:31 [INFO] [logger:106] 样品 1-0day-2_20200824105255_Time_processed 读取完成
+2026-07-19 17:24:31 [INFO] [logger:106] 成功读取文件: C:/Users/30495/Desktop/12h间隔未加窗/南航10.25-1/1-0day-1_20200824104921_Time_processed.txt
+2026-07-19 17:24:31 [INFO] [logger:106] 样品 1-0day-1_20200824104921_Time_processed 读取完成
+2026-07-19 17:24:31 [INFO] [logger:106] 光学参数计算完成
+2026-07-19 17:24:31 [INFO] [logger:106] 计算完成
+2026-07-19 17:25:26 [INFO] [logger:106] 配置已保存
+2026-07-19 17:25:26 [INFO] [logger:106] 程序关闭
+2026-07-19 17:25:30 [INFO] [logger:63] 日志系统初始化完成
+2026-07-19 17:25:30 [INFO] [logger:106] 程序启动
+2026-07-19 17:25:30 [INFO] [logger:106] 正在初始化THz分析系统...
+2026-07-19 17:25:30 [INFO] [logger:106] 配置已加载
+2026-07-19 17:25:30 [INFO] [logger:106] THz分析系统初始化完成
+2026-07-19 17:25:33 [INFO] [logger:106] 选择参考文件: C:/Users/30495/Desktop/12h间隔未加窗/南航10.25-1/reference.txt
+2026-07-19 17:25:35 [INFO] [logger:106] 添加 4 个样品文件
+2026-07-19 17:25:39 [INFO] [logger:106] 开始异步计算
+2026-07-19 17:25:39 [INFO] [logger:106] 开始计算光学参数，样品数量: 4
+2026-07-19 17:25:39 [INFO] [logger:106] 成功读取文件: C:/Users/30495/Desktop/12h间隔未加窗/南航10.25-1/reference.txt
+2026-07-19 17:25:39 [INFO] [logger:106] 参考信号读取完成，数据点数: 9000
+2026-07-19 17:25:39 [INFO] [logger:106] 成功读取文件: C:/Users/30495/Desktop/12h间隔未加窗/南航10.25-1/1-6day-4_20200824143512_Time_processed.txt
+2026-07-19 17:25:39 [INFO] [logger:106] 样品 1-6day-4_20200824143512_Time_processed 读取完成
+2026-07-19 17:25:39 [INFO] [logger:106] 成功读取文件: C:/Users/30495/Desktop/12h间隔未加窗/南航10.25-1/1-6day-3_20200824143158_Time_processed.txt
+2026-07-19 17:25:39 [INFO] [logger:106] 样品 1-6day-3_20200824143158_Time_processed 读取完成
+2026-07-19 17:25:39 [INFO] [logger:106] 成功读取文件: C:/Users/30495/Desktop/12h间隔未加窗/南航10.25-1/1-6day-2_20200824142844_Time_processed.txt
+2026-07-19 17:25:39 [INFO] [logger:106] 样品 1-6day-2_20200824142844_Time_processed 读取完成
+2026-07-19 17:25:39 [INFO] [logger:106] 成功读取文件: C:/Users/30495/Desktop/12h间隔未加窗/南航10.25-1/1-6day-1_20200824142545_Time_processed.txt
+2026-07-19 17:25:39 [INFO] [logger:106] 样品 1-6day-1_20200824142545_Time_processed 读取完成
+2026-07-19 17:25:39 [INFO] [logger:106] 光学参数计算完成
+2026-07-19 17:25:39 [INFO] [logger:106] 计算完成
+2026-07-19 17:26:27 [INFO] [logger:106] 配置已保存
+2026-07-19 17:26:27 [INFO] [logger:106] 程序关闭

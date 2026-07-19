@@ -3,190 +3,170 @@
 """
 样式表模块
 
-包含应用程序使用的所有样式表定义
+简约扁平风格：无渐变、细边框、中性色
 """
 
 
 def get_main_window_style() -> str:
     """获取主窗口样式表"""
     return """
-        /* 主窗口样式 */
         QMainWindow {
-            background: qlineargradient(x1:0, y1:0, x2:0, y2:1,
-                stop:0 #FFFFFF, stop:0.5 #F8F8F8, stop:1 #FFFFFF);
+            background-color: #FFFFFF;
         }
-        
-        /* 组合框样式 */
+
         QComboBox {
-            background: qlineargradient(x1:0, y1:0, x2:0, y2:1,
-                stop:0 #FFFFFF, stop:1 #F0F0F0);
-            border: 2px solid #CCCCCC;
-            border-radius: 6px;
-            padding: 6px;
+            background-color: #FFFFFF;
+            border: 1px solid #D0D0D0;
+            border-radius: 3px;
+            padding: 4px 6px;
             color: #333333;
             min-width: 6em;
-            font-weight: 500;
         }
         QComboBox:focus {
-            border: 2px solid #4A90E2;
-            background: qlineargradient(x1:0, y1:0, x2:0, y2:1,
-                stop:0 #FFFFFF, stop:1 #F8F8F8);
+            border: 1px solid #5B7C99;
         }
         QComboBox:hover {
-            background: qlineargradient(x1:0, y1:0, x2:0, y2:1,
-                stop:0 #FFFFFF, stop:1 #F8F8F8);
-            border: 2px solid #999999;
+            border: 1px solid #A0A0A0;
         }
         QComboBox::drop-down {
             subcontrol-origin: padding;
             subcontrol-position: top right;
-            width: 20px;
-            border-left-width: 2px;
-            border-left-color: #CCCCCC;
-            border-left-style: solid;
-            border-top-right-radius: 6px;
-            border-bottom-right-radius: 6px;
-            background: qlineargradient(x1:0, y1:0, x2:0, y2:1,
-                stop:0 #F0F0F0, stop:1 #E0E0E0);
+            width: 18px;
+            border-left: 1px solid #D0D0D0;
         }
         QComboBox::down-arrow {
             image: none;
-            border-left: 5px solid transparent;
-            border-right: 5px solid transparent;
-            border-top: 5px solid #333333;
+            border-left: 4px solid transparent;
+            border-right: 4px solid transparent;
+            border-top: 5px solid #666666;
             width: 0px;
             height: 0px;
         }
         QComboBox QAbstractItemView {
-            background: qlineargradient(x1:0, y1:0, x2:0, y2:1,
-                stop:0 #FFFFFF, stop:1 #F0F0F0);
-            border: 2px solid #CCCCCC;
+            background-color: #FFFFFF;
+            border: 1px solid #D0D0D0;
             color: #333333;
-            selection-background-color: qlineargradient(x1:0, y1:0, x2:0, y2:1,
-                stop:0 #4A90E2, stop:1 #3A80D2);
-            selection-color: #FFFFFF;
-            border-radius: 4px;
+            selection-background-color: #E8EEF4;
+            selection-color: #222222;
         }
-        
-        /* 分组框样式 */
+
         QGroupBox {
-            background: qlineargradient(x1:0, y1:0, x2:0, y2:1,
-                stop:0 rgba(255, 255, 255, 0.9), stop:1 rgba(240, 240, 240, 0.9));
-            border: 2px solid #CCCCCC;
-            border-radius: 8px;
+            background-color: #FAFAFA;
+            border: 1px solid #D0D0D0;
+            border-radius: 4px;
             margin-top: 1ex;
             font-weight: bold;
             color: #333333;
         }
         QGroupBox::title {
             subcontrol-origin: margin;
-            left: 10px;
-            padding: 0 8px 0 8px;
-            color: #4A90E2;
+            left: 8px;
+            padding: 0 4px;
+            color: #555555;
             font-size: 11px;
         }
-        
-        /* 列表控件样式 */
+
         QListWidget {
-            background: qlineargradient(x1:0, y1:0, x2:0, y2:1,
-                stop:0 #FFFFFF, stop:1 #F8F8F8);
-            border: 2px solid #CCCCCC;
-            border-radius: 6px;
+            background-color: #FFFFFF;
+            border: 1px solid #D0D0D0;
+            border-radius: 3px;
             color: #333333;
-            selection-background-color: qlineargradient(x1:0, y1:0, x2:0, y2:1,
-                stop:0 #4A90E2, stop:1 #3A80D2);
-            alternate-background-color: #F0F0F0;
+            selection-background-color: #E8EEF4;
+            selection-color: #222222;
+            alternate-background-color: #F7F7F7;
         }
         QListWidget::item {
-            padding: 8px;
+            padding: 5px;
             border-bottom: 1px solid #EEEEEE;
         }
         QListWidget::item:hover {
-            background: qlineargradient(x1:0, y1:0, x2:0, y2:1,
-                stop:0 #F8F8F8, stop:1 #EEEEEE);
+            background-color: #F0F0F0;
         }
-        
-        /* 输入框样式 */
+
         QLineEdit {
-            background: qlineargradient(x1:0, y1:0, x2:0, y2:1,
-                stop:0 #FFFFFF, stop:1 #F8F8F8);
-            border: 2px solid #CCCCCC;
-            border-radius: 6px;
-            padding: 6px;
+            background-color: #FFFFFF;
+            border: 1px solid #D0D0D0;
+            border-radius: 3px;
+            padding: 4px 6px;
             color: #333333;
             font-size: 10px;
         }
         QLineEdit:focus {
-            border: 2px solid #4A90E2;
-            background: qlineargradient(x1:0, y1:0, x2:0, y2:1,
-                stop:0 #FFFFFF, stop:1 #F0F0F0);
+            border: 1px solid #5B7C99;
         }
-        
-        /* 标签页样式 */
+
         QTabWidget {
             background: transparent;
         }
         QTabWidget::pane {
-            border: 2px solid #CCCCCC;
-            border-radius: 6px;
-            background: qlineargradient(x1:0, y1:0, x2:0, y2:1,
-                stop:0 rgba(255, 255, 255, 0.9), stop:1 rgba(248, 248, 248, 0.9));
+            border: 1px solid #D0D0D0;
+            border-radius: 3px;
+            background-color: #FFFFFF;
         }
         QTabBar::tab {
-            background: qlineargradient(x1:0, y1:0, x2:0, y2:1,
-                stop:0 #F0F0F0, stop:1 #E0E0E0);
-            border: 2px solid #CCCCCC;
+            background-color: #F0F0F0;
+            border: 1px solid #D0D0D0;
             border-bottom: none;
-            border-radius: 6px 6px 0 0;
-            padding: 8px 16px;
-            margin-right: 2px;
-            color: #666666;
+            border-radius: 3px 3px 0 0;
+            padding: 6px 12px;
+            margin-right: 1px;
+            color: #555555;
         }
         QTabBar::tab:selected {
-            background: qlineargradient(x1:0, y1:0, x2:0, y2:1,
-                stop:0 #4A90E2, stop:1 #3A80D2);
-            color: #FFFFFF;
-            border-color: #4A90E2;
+            background-color: #FFFFFF;
+            color: #222222;
+            border-bottom: 1px solid #FFFFFF;
         }
         QTabBar::tab:hover:!selected {
-            background: qlineargradient(x1:0, y1:0, x2:0, y2:1,
-                stop:0 #F8F8F8, stop:1 #F0F0F0);
+            background-color: #E8E8E8;
             color: #333333;
         }
-        
-        /* 分割器样式 */
+
         QSplitter::handle {
-            background: qlineargradient(x1:0, y1:0, x2:1, y2:0,
-                stop:0 #CCCCCC, stop:0.5 #DDDDDD, stop:1 #CCCCCC);
-            border-radius: 2px;
+            background-color: #D8D8D8;
         }
         QSplitter::handle:hover {
-            background: qlineargradient(x1:0, y1:0, x2:1, y2:0,
-                stop:0 #4A90E2, stop:0.5 #5A9AE2, stop:1 #4A90E2);
+            background-color: #B0B0B0;
         }
-        
-        /* 状态标签样式 */
+
         QLabel[accessibleName="status"] {
-            background: qlineargradient(x1:0, y1:0, x2:0, y2:1,
-                stop:0 rgba(255, 255, 255, 0.9), stop:1 rgba(240, 240, 240, 0.9));
-            border: 2px solid #CCCCCC;
-            border-radius: 6px;
-            padding: 8px;
+            background-color: #F7F7F7;
+            border: 1px solid #D0D0D0;
+            border-radius: 3px;
+            padding: 6px;
             color: #333333;
         }
-        
-        /* 进度条样式 */
+
         QProgressBar {
-            border: 2px solid #CCCCCC;
-            border-radius: 5px;
+            border: 1px solid #D0D0D0;
+            border-radius: 3px;
             background-color: #F0F0F0;
             text-align: center;
             color: #333333;
         }
         QProgressBar::chunk {
-            background: qlineargradient(x1:0, y1:0, x2:1, y2:0,
-                stop:0 #4A90E2, stop:1 #3A80D2);
+            background-color: #5B7C99;
+            border-radius: 2px;
+        }
+
+        QPushButton {
+            background-color: #F5F5F5;
+            border: 1px solid #D0D0D0;
             border-radius: 3px;
+            padding: 5px 10px;
+            color: #333333;
+        }
+        QPushButton:hover {
+            background-color: #EBEBEB;
+            border-color: #B8B8B8;
+        }
+        QPushButton:pressed {
+            background-color: #E0E0E0;
+        }
+        QPushButton:disabled {
+            background-color: #F5F5F5;
+            color: #A0A0A0;
+            border-color: #E0E0E0;
         }
     """
 
@@ -195,27 +175,27 @@ def get_menubar_style() -> str:
     """获取菜单栏样式"""
     return """
         QMenuBar {
-            background-color: #F8F8F8;
+            background-color: #FAFAFA;
             color: #333333;
-            border-bottom: 1px solid #CCCCCC;
+            border-bottom: 1px solid #D0D0D0;
         }
         QMenuBar::item {
-            padding: 5px 10px;
+            padding: 4px 10px;
             background-color: transparent;
         }
         QMenuBar::item:selected {
-            background-color: #E0E0E0;
+            background-color: #E8E8E8;
         }
         QMenu {
             background-color: #FFFFFF;
             color: #333333;
-            border: 1px solid #CCCCCC;
+            border: 1px solid #D0D0D0;
         }
         QMenu::item {
-            padding: 5px 30px 5px 20px;
+            padding: 5px 28px 5px 16px;
         }
         QMenu::item:selected {
-            background-color: #E0E0E0;
+            background-color: #E8EEF4;
         }
     """
 
@@ -231,16 +211,15 @@ def get_progress_dialog_style() -> str:
             font-size: 11pt;
         }
         QProgressBar {
-            border: 2px solid #CCCCCC;
-            border-radius: 8px;
+            border: 1px solid #D0D0D0;
+            border-radius: 3px;
             background-color: #F0F0F0;
             text-align: center;
             color: #333333;
-            min-height: 25px;
+            min-height: 22px;
         }
         QProgressBar::chunk {
-            background: qlineargradient(x1:0, y1:0, x2:1, y2:0,
-                stop:0 #4CAF50, stop:1 #45a049);
-            border-radius: 6px;
+            background-color: #5B7C99;
+            border-radius: 2px;
         }
     """
