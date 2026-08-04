@@ -1,0 +1,1748 @@
+2026-08-04 22:04:41 [INFO] [logger:63] 日志系统初始化完成
+2026-08-04 22:04:41 [INFO] [logger:106] 程序启动
+2026-08-04 22:04:41 [INFO] [logger:106] 正在初始化THz分析系统...
+2026-08-04 22:04:41 [INFO] [logger:106] 配置已加载
+2026-08-04 22:04:41 [INFO] [logger:106] THz分析系统初始化完成
+2026-08-04 22:04:53 [INFO] [logger:106] 开始异步计算
+2026-08-04 22:04:53 [INFO] [logger:106] 开始计算光学参数，样品数量: 1
+2026-08-04 22:04:53 [ERROR] [logger:122] 读取文件 C:/Users/30495/Desktop/测试数据/GFRP_20260804200528_ReferenceTd.txt 时出错
+Traceback (most recent call last):
+  File "d:\pyProjects\optical_parameter_extraction\core\data_io.py", line 42, in read_data_file
+    data = pd.read_csv(file_path, sep=None, skiprows=skip, header=None, names=['time', 'intensity'], engine='python')
+  File "D:\pyProjects\optical_parameter_extraction\.venv\Lib\site-packages\pandas\io\parsers\readers.py", line 1026, in read_csv
+    return _read(filepath_or_buffer, kwds)
+  File "D:\pyProjects\optical_parameter_extraction\.venv\Lib\site-packages\pandas\io\parsers\readers.py", line 626, in _read
+    return parser.read(nrows)
+           ~~~~~~~~~~~^^^^^^^
+  File "D:\pyProjects\optical_parameter_extraction\.venv\Lib\site-packages\pandas\io\parsers\readers.py", line 1923, in read
+    ) = self._engine.read(  # type: ignore[attr-defined]
+        ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        nrows
+        ^^^^^
+    )
+    ^
+  File "D:\pyProjects\optical_parameter_extraction\.venv\Lib\site-packages\pandas\io\parsers\python_parser.py", line 288, in read
+    alldata = self._rows_to_cols(content)
+  File "D:\pyProjects\optical_parameter_extraction\.venv\Lib\site-packages\pandas\io\parsers\python_parser.py", line 1063, in _rows_to_cols
+    self._alert_malformed(msg, row_num + 1)
+    ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^
+  File "D:\pyProjects\optical_parameter_extraction\.venv\Lib\site-packages\pandas\io\parsers\python_parser.py", line 781, in _alert_malformed
+    raise ParserError(msg)
+pandas.errors.ParserError: Expected 2 fields in line 15, saw 17
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "d:\pyProjects\optical_parameter_extraction\core\data_io.py", line 46, in read_data_file
+    data = pd.read_csv(file_path, sep=' ', skiprows=skip, header=None, names=['time', 'intensity'])
+  File "D:\pyProjects\optical_parameter_extraction\.venv\Lib\site-packages\pandas\io\parsers\readers.py", line 1026, in read_csv
+    return _read(filepath_or_buffer, kwds)
+  File "D:\pyProjects\optical_parameter_extraction\.venv\Lib\site-packages\pandas\io\parsers\readers.py", line 626, in _read
+    return parser.read(nrows)
+           ~~~~~~~~~~~^^^^^^^
+  File "D:\pyProjects\optical_parameter_extraction\.venv\Lib\site-packages\pandas\io\parsers\readers.py", line 1923, in read
+    ) = self._engine.read(  # type: ignore[attr-defined]
+        ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        nrows
+        ^^^^^
+    )
+    ^
+  File "D:\pyProjects\optical_parameter_extraction\.venv\Lib\site-packages\pandas\io\parsers\c_parser_wrapper.py", line 234, in read
+    chunks = self._reader.read_low_memory(nrows)
+  File "pandas/_libs/parsers.pyx", line 838, in pandas._libs.parsers.TextReader.read_low_memory
+  File "pandas/_libs/parsers.pyx", line 905, in pandas._libs.parsers.TextReader._read_rows
+  File "pandas/_libs/parsers.pyx", line 874, in pandas._libs.parsers.TextReader._tokenize_rows
+  File "pandas/_libs/parsers.pyx", line 891, in pandas._libs.parsers.TextReader._check_tokenize_status
+  File "pandas/_libs/parsers.pyx", line 2061, in pandas._libs.parsers.raise_parser_error
+pandas.errors.ParserError: Error tokenizing data. C error: Expected 2 fields in line 15, saw 3
+
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "d:\pyProjects\optical_parameter_extraction\core\data_io.py", line 49, in read_data_file
+    data = pd.read_csv(file_path, sep='\t', skiprows=skip, header=None, names=['time', 'intensity'])
+  File "D:\pyProjects\optical_parameter_extraction\.venv\Lib\site-packages\pandas\io\parsers\readers.py", line 1026, in read_csv
+    return _read(filepath_or_buffer, kwds)
+  File "D:\pyProjects\optical_parameter_extraction\.venv\Lib\site-packages\pandas\io\parsers\readers.py", line 626, in _read
+    return parser.read(nrows)
+           ~~~~~~~~~~~^^^^^^^
+  File "D:\pyProjects\optical_parameter_extraction\.venv\Lib\site-packages\pandas\io\parsers\readers.py", line 1923, in read
+    ) = self._engine.read(  # type: ignore[attr-defined]
+        ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        nrows
+        ^^^^^
+    )
+    ^
+  File "D:\pyProjects\optical_parameter_extraction\.venv\Lib\site-packages\pandas\io\parsers\c_parser_wrapper.py", line 234, in read
+    chunks = self._reader.read_low_memory(nrows)
+  File "pandas/_libs/parsers.pyx", line 838, in pandas._libs.parsers.TextReader.read_low_memory
+  File "pandas/_libs/parsers.pyx", line 905, in pandas._libs.parsers.TextReader._read_rows
+  File "pandas/_libs/parsers.pyx", line 874, in pandas._libs.parsers.TextReader._tokenize_rows
+  File "pandas/_libs/parsers.pyx", line 891, in pandas._libs.parsers.TextReader._check_tokenize_status
+  File "pandas/_libs/parsers.pyx", line 2061, in pandas._libs.parsers.raise_parser_error
+pandas.errors.ParserError: Error tokenizing data. C error: Expected 2 fields in line 15, saw 17
+
+2026-08-04 22:04:53 [ERROR] [logger:122] 计算过程中出错: 读取文件 'C:/Users/30495/Desktop/测试数据/GFRP_20260804200528_ReferenceTd.txt' 时出错: Error tokenizing data. C error: Expected 2 fields in line 15, saw 17
+Traceback (most recent call last):
+  File "d:\pyProjects\optical_parameter_extraction\core\data_io.py", line 42, in read_data_file
+    data = pd.read_csv(file_path, sep=None, skiprows=skip, header=None, names=['time', 'intensity'], engine='python')
+  File "D:\pyProjects\optical_parameter_extraction\.venv\Lib\site-packages\pandas\io\parsers\readers.py", line 1026, in read_csv
+    return _read(filepath_or_buffer, kwds)
+  File "D:\pyProjects\optical_parameter_extraction\.venv\Lib\site-packages\pandas\io\parsers\readers.py", line 626, in _read
+    return parser.read(nrows)
+           ~~~~~~~~~~~^^^^^^^
+  File "D:\pyProjects\optical_parameter_extraction\.venv\Lib\site-packages\pandas\io\parsers\readers.py", line 1923, in read
+    ) = self._engine.read(  # type: ignore[attr-defined]
+        ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        nrows
+        ^^^^^
+    )
+    ^
+  File "D:\pyProjects\optical_parameter_extraction\.venv\Lib\site-packages\pandas\io\parsers\python_parser.py", line 288, in read
+    alldata = self._rows_to_cols(content)
+  File "D:\pyProjects\optical_parameter_extraction\.venv\Lib\site-packages\pandas\io\parsers\python_parser.py", line 1063, in _rows_to_cols
+    self._alert_malformed(msg, row_num + 1)
+    ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^
+  File "D:\pyProjects\optical_parameter_extraction\.venv\Lib\site-packages\pandas\io\parsers\python_parser.py", line 781, in _alert_malformed
+    raise ParserError(msg)
+pandas.errors.ParserError: Expected 2 fields in line 15, saw 17
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "d:\pyProjects\optical_parameter_extraction\core\data_io.py", line 46, in read_data_file
+    data = pd.read_csv(file_path, sep=' ', skiprows=skip, header=None, names=['time', 'intensity'])
+  File "D:\pyProjects\optical_parameter_extraction\.venv\Lib\site-packages\pandas\io\parsers\readers.py", line 1026, in read_csv
+    return _read(filepath_or_buffer, kwds)
+  File "D:\pyProjects\optical_parameter_extraction\.venv\Lib\site-packages\pandas\io\parsers\readers.py", line 626, in _read
+    return parser.read(nrows)
+           ~~~~~~~~~~~^^^^^^^
+  File "D:\pyProjects\optical_parameter_extraction\.venv\Lib\site-packages\pandas\io\parsers\readers.py", line 1923, in read
+    ) = self._engine.read(  # type: ignore[attr-defined]
+        ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        nrows
+        ^^^^^
+    )
+    ^
+  File "D:\pyProjects\optical_parameter_extraction\.venv\Lib\site-packages\pandas\io\parsers\c_parser_wrapper.py", line 234, in read
+    chunks = self._reader.read_low_memory(nrows)
+  File "pandas/_libs/parsers.pyx", line 838, in pandas._libs.parsers.TextReader.read_low_memory
+  File "pandas/_libs/parsers.pyx", line 905, in pandas._libs.parsers.TextReader._read_rows
+  File "pandas/_libs/parsers.pyx", line 874, in pandas._libs.parsers.TextReader._tokenize_rows
+  File "pandas/_libs/parsers.pyx", line 891, in pandas._libs.parsers.TextReader._check_tokenize_status
+  File "pandas/_libs/parsers.pyx", line 2061, in pandas._libs.parsers.raise_parser_error
+pandas.errors.ParserError: Error tokenizing data. C error: Expected 2 fields in line 15, saw 3
+
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "d:\pyProjects\optical_parameter_extraction\core\data_io.py", line 49, in read_data_file
+    data = pd.read_csv(file_path, sep='\t', skiprows=skip, header=None, names=['time', 'intensity'])
+  File "D:\pyProjects\optical_parameter_extraction\.venv\Lib\site-packages\pandas\io\parsers\readers.py", line 1026, in read_csv
+    return _read(filepath_or_buffer, kwds)
+  File "D:\pyProjects\optical_parameter_extraction\.venv\Lib\site-packages\pandas\io\parsers\readers.py", line 626, in _read
+    return parser.read(nrows)
+           ~~~~~~~~~~~^^^^^^^
+  File "D:\pyProjects\optical_parameter_extraction\.venv\Lib\site-packages\pandas\io\parsers\readers.py", line 1923, in read
+    ) = self._engine.read(  # type: ignore[attr-defined]
+        ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        nrows
+        ^^^^^
+    )
+    ^
+  File "D:\pyProjects\optical_parameter_extraction\.venv\Lib\site-packages\pandas\io\parsers\c_parser_wrapper.py", line 234, in read
+    chunks = self._reader.read_low_memory(nrows)
+  File "pandas/_libs/parsers.pyx", line 838, in pandas._libs.parsers.TextReader.read_low_memory
+  File "pandas/_libs/parsers.pyx", line 905, in pandas._libs.parsers.TextReader._read_rows
+  File "pandas/_libs/parsers.pyx", line 874, in pandas._libs.parsers.TextReader._tokenize_rows
+  File "pandas/_libs/parsers.pyx", line 891, in pandas._libs.parsers.TextReader._check_tokenize_status
+  File "pandas/_libs/parsers.pyx", line 2061, in pandas._libs.parsers.raise_parser_error
+pandas.errors.ParserError: Error tokenizing data. C error: Expected 2 fields in line 15, saw 17
+
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "d:\pyProjects\optical_parameter_extraction\core\calculator.py", line 83, in calculate_optical_params
+    measurements = load_measurements(
+        ref_file=ref_file,
+    ...<3 lines>...
+        progress_reporter=progress.update,
+    )
+  File "d:\pyProjects\optical_parameter_extraction\core\signal_loading.py", line 48, in load_measurements
+    reference = _load_signal(ref_file, "参考信号", start_row)
+                ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "d:\pyProjects\optical_parameter_extraction\core\signal_loading.py", line 62, in _load_signal
+    data = read_data_file(file_path, start_row)
+  File "d:\pyProjects\optical_parameter_extraction\core\data_io.py", line 68, in read_data_file
+    raise DataReadError(file_path, str(e))
+core.exceptions.DataReadError: 读取文件 'C:/Users/30495/Desktop/测试数据/GFRP_20260804200528_ReferenceTd.txt' 时出错: Error tokenizing data. C error: Expected 2 fields in line 15, saw 17
+
+2026-08-04 22:04:54 [ERROR] [logger:114] 计算错误: 计算过程中出错: 读取文件 'C:/Users/30495/Desktop/测试数据/GFRP_20260804200528_ReferenceTd.txt' 时出错: Error tokenizing data. C error: Expected 2 fields in line 15, saw 17
+
+2026-08-04 22:05:02 [INFO] [logger:106] 开始异步计算
+2026-08-04 22:05:02 [INFO] [logger:106] 开始计算光学参数，样品数量: 1
+2026-08-04 22:05:02 [ERROR] [logger:122] 读取文件 C:/Users/30495/Desktop/测试数据/GFRP_20260804200528_ReferenceTd.txt 时出错
+Traceback (most recent call last):
+  File "d:\pyProjects\optical_parameter_extraction\core\data_io.py", line 42, in read_data_file
+    data = pd.read_csv(file_path, sep=None, skiprows=skip, header=None, names=['time', 'intensity'], engine='python')
+  File "D:\pyProjects\optical_parameter_extraction\.venv\Lib\site-packages\pandas\io\parsers\readers.py", line 1026, in read_csv
+    return _read(filepath_or_buffer, kwds)
+  File "D:\pyProjects\optical_parameter_extraction\.venv\Lib\site-packages\pandas\io\parsers\readers.py", line 626, in _read
+    return parser.read(nrows)
+           ~~~~~~~~~~~^^^^^^^
+  File "D:\pyProjects\optical_parameter_extraction\.venv\Lib\site-packages\pandas\io\parsers\readers.py", line 1923, in read
+    ) = self._engine.read(  # type: ignore[attr-defined]
+        ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        nrows
+        ^^^^^
+    )
+    ^
+  File "D:\pyProjects\optical_parameter_extraction\.venv\Lib\site-packages\pandas\io\parsers\python_parser.py", line 288, in read
+    alldata = self._rows_to_cols(content)
+  File "D:\pyProjects\optical_parameter_extraction\.venv\Lib\site-packages\pandas\io\parsers\python_parser.py", line 1063, in _rows_to_cols
+    self._alert_malformed(msg, row_num + 1)
+    ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^
+  File "D:\pyProjects\optical_parameter_extraction\.venv\Lib\site-packages\pandas\io\parsers\python_parser.py", line 781, in _alert_malformed
+    raise ParserError(msg)
+pandas.errors.ParserError: Expected 2 fields in line 15, saw 17
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "d:\pyProjects\optical_parameter_extraction\core\data_io.py", line 46, in read_data_file
+    data = pd.read_csv(file_path, sep=' ', skiprows=skip, header=None, names=['time', 'intensity'])
+  File "D:\pyProjects\optical_parameter_extraction\.venv\Lib\site-packages\pandas\io\parsers\readers.py", line 1026, in read_csv
+    return _read(filepath_or_buffer, kwds)
+  File "D:\pyProjects\optical_parameter_extraction\.venv\Lib\site-packages\pandas\io\parsers\readers.py", line 626, in _read
+    return parser.read(nrows)
+           ~~~~~~~~~~~^^^^^^^
+  File "D:\pyProjects\optical_parameter_extraction\.venv\Lib\site-packages\pandas\io\parsers\readers.py", line 1923, in read
+    ) = self._engine.read(  # type: ignore[attr-defined]
+        ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        nrows
+        ^^^^^
+    )
+    ^
+  File "D:\pyProjects\optical_parameter_extraction\.venv\Lib\site-packages\pandas\io\parsers\c_parser_wrapper.py", line 234, in read
+    chunks = self._reader.read_low_memory(nrows)
+  File "pandas/_libs/parsers.pyx", line 838, in pandas._libs.parsers.TextReader.read_low_memory
+  File "pandas/_libs/parsers.pyx", line 905, in pandas._libs.parsers.TextReader._read_rows
+  File "pandas/_libs/parsers.pyx", line 874, in pandas._libs.parsers.TextReader._tokenize_rows
+  File "pandas/_libs/parsers.pyx", line 891, in pandas._libs.parsers.TextReader._check_tokenize_status
+  File "pandas/_libs/parsers.pyx", line 2061, in pandas._libs.parsers.raise_parser_error
+pandas.errors.ParserError: Error tokenizing data. C error: Expected 2 fields in line 15, saw 3
+
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "d:\pyProjects\optical_parameter_extraction\core\data_io.py", line 49, in read_data_file
+    data = pd.read_csv(file_path, sep='\t', skiprows=skip, header=None, names=['time', 'intensity'])
+  File "D:\pyProjects\optical_parameter_extraction\.venv\Lib\site-packages\pandas\io\parsers\readers.py", line 1026, in read_csv
+    return _read(filepath_or_buffer, kwds)
+  File "D:\pyProjects\optical_parameter_extraction\.venv\Lib\site-packages\pandas\io\parsers\readers.py", line 626, in _read
+    return parser.read(nrows)
+           ~~~~~~~~~~~^^^^^^^
+  File "D:\pyProjects\optical_parameter_extraction\.venv\Lib\site-packages\pandas\io\parsers\readers.py", line 1923, in read
+    ) = self._engine.read(  # type: ignore[attr-defined]
+        ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        nrows
+        ^^^^^
+    )
+    ^
+  File "D:\pyProjects\optical_parameter_extraction\.venv\Lib\site-packages\pandas\io\parsers\c_parser_wrapper.py", line 234, in read
+    chunks = self._reader.read_low_memory(nrows)
+  File "pandas/_libs/parsers.pyx", line 838, in pandas._libs.parsers.TextReader.read_low_memory
+  File "pandas/_libs/parsers.pyx", line 905, in pandas._libs.parsers.TextReader._read_rows
+  File "pandas/_libs/parsers.pyx", line 874, in pandas._libs.parsers.TextReader._tokenize_rows
+  File "pandas/_libs/parsers.pyx", line 891, in pandas._libs.parsers.TextReader._check_tokenize_status
+  File "pandas/_libs/parsers.pyx", line 2061, in pandas._libs.parsers.raise_parser_error
+pandas.errors.ParserError: Error tokenizing data. C error: Expected 2 fields in line 15, saw 17
+
+2026-08-04 22:05:02 [ERROR] [logger:122] 计算过程中出错: 读取文件 'C:/Users/30495/Desktop/测试数据/GFRP_20260804200528_ReferenceTd.txt' 时出错: Error tokenizing data. C error: Expected 2 fields in line 15, saw 17
+Traceback (most recent call last):
+  File "d:\pyProjects\optical_parameter_extraction\core\data_io.py", line 42, in read_data_file
+    data = pd.read_csv(file_path, sep=None, skiprows=skip, header=None, names=['time', 'intensity'], engine='python')
+  File "D:\pyProjects\optical_parameter_extraction\.venv\Lib\site-packages\pandas\io\parsers\readers.py", line 1026, in read_csv
+    return _read(filepath_or_buffer, kwds)
+  File "D:\pyProjects\optical_parameter_extraction\.venv\Lib\site-packages\pandas\io\parsers\readers.py", line 626, in _read
+    return parser.read(nrows)
+           ~~~~~~~~~~~^^^^^^^
+  File "D:\pyProjects\optical_parameter_extraction\.venv\Lib\site-packages\pandas\io\parsers\readers.py", line 1923, in read
+    ) = self._engine.read(  # type: ignore[attr-defined]
+        ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        nrows
+        ^^^^^
+    )
+    ^
+  File "D:\pyProjects\optical_parameter_extraction\.venv\Lib\site-packages\pandas\io\parsers\python_parser.py", line 288, in read
+    alldata = self._rows_to_cols(content)
+  File "D:\pyProjects\optical_parameter_extraction\.venv\Lib\site-packages\pandas\io\parsers\python_parser.py", line 1063, in _rows_to_cols
+    self._alert_malformed(msg, row_num + 1)
+    ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^
+  File "D:\pyProjects\optical_parameter_extraction\.venv\Lib\site-packages\pandas\io\parsers\python_parser.py", line 781, in _alert_malformed
+    raise ParserError(msg)
+pandas.errors.ParserError: Expected 2 fields in line 15, saw 17
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "d:\pyProjects\optical_parameter_extraction\core\data_io.py", line 46, in read_data_file
+    data = pd.read_csv(file_path, sep=' ', skiprows=skip, header=None, names=['time', 'intensity'])
+  File "D:\pyProjects\optical_parameter_extraction\.venv\Lib\site-packages\pandas\io\parsers\readers.py", line 1026, in read_csv
+    return _read(filepath_or_buffer, kwds)
+  File "D:\pyProjects\optical_parameter_extraction\.venv\Lib\site-packages\pandas\io\parsers\readers.py", line 626, in _read
+    return parser.read(nrows)
+           ~~~~~~~~~~~^^^^^^^
+  File "D:\pyProjects\optical_parameter_extraction\.venv\Lib\site-packages\pandas\io\parsers\readers.py", line 1923, in read
+    ) = self._engine.read(  # type: ignore[attr-defined]
+        ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        nrows
+        ^^^^^
+    )
+    ^
+  File "D:\pyProjects\optical_parameter_extraction\.venv\Lib\site-packages\pandas\io\parsers\c_parser_wrapper.py", line 234, in read
+    chunks = self._reader.read_low_memory(nrows)
+  File "pandas/_libs/parsers.pyx", line 838, in pandas._libs.parsers.TextReader.read_low_memory
+  File "pandas/_libs/parsers.pyx", line 905, in pandas._libs.parsers.TextReader._read_rows
+  File "pandas/_libs/parsers.pyx", line 874, in pandas._libs.parsers.TextReader._tokenize_rows
+  File "pandas/_libs/parsers.pyx", line 891, in pandas._libs.parsers.TextReader._check_tokenize_status
+  File "pandas/_libs/parsers.pyx", line 2061, in pandas._libs.parsers.raise_parser_error
+pandas.errors.ParserError: Error tokenizing data. C error: Expected 2 fields in line 15, saw 3
+
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "d:\pyProjects\optical_parameter_extraction\core\data_io.py", line 49, in read_data_file
+    data = pd.read_csv(file_path, sep='\t', skiprows=skip, header=None, names=['time', 'intensity'])
+  File "D:\pyProjects\optical_parameter_extraction\.venv\Lib\site-packages\pandas\io\parsers\readers.py", line 1026, in read_csv
+    return _read(filepath_or_buffer, kwds)
+  File "D:\pyProjects\optical_parameter_extraction\.venv\Lib\site-packages\pandas\io\parsers\readers.py", line 626, in _read
+    return parser.read(nrows)
+           ~~~~~~~~~~~^^^^^^^
+  File "D:\pyProjects\optical_parameter_extraction\.venv\Lib\site-packages\pandas\io\parsers\readers.py", line 1923, in read
+    ) = self._engine.read(  # type: ignore[attr-defined]
+        ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        nrows
+        ^^^^^
+    )
+    ^
+  File "D:\pyProjects\optical_parameter_extraction\.venv\Lib\site-packages\pandas\io\parsers\c_parser_wrapper.py", line 234, in read
+    chunks = self._reader.read_low_memory(nrows)
+  File "pandas/_libs/parsers.pyx", line 838, in pandas._libs.parsers.TextReader.read_low_memory
+  File "pandas/_libs/parsers.pyx", line 905, in pandas._libs.parsers.TextReader._read_rows
+  File "pandas/_libs/parsers.pyx", line 874, in pandas._libs.parsers.TextReader._tokenize_rows
+  File "pandas/_libs/parsers.pyx", line 891, in pandas._libs.parsers.TextReader._check_tokenize_status
+  File "pandas/_libs/parsers.pyx", line 2061, in pandas._libs.parsers.raise_parser_error
+pandas.errors.ParserError: Error tokenizing data. C error: Expected 2 fields in line 15, saw 17
+
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "d:\pyProjects\optical_parameter_extraction\core\calculator.py", line 83, in calculate_optical_params
+    measurements = load_measurements(
+        ref_file=ref_file,
+    ...<3 lines>...
+        progress_reporter=progress.update,
+    )
+  File "d:\pyProjects\optical_parameter_extraction\core\signal_loading.py", line 48, in load_measurements
+    reference = _load_signal(ref_file, "参考信号", start_row)
+                ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "d:\pyProjects\optical_parameter_extraction\core\signal_loading.py", line 62, in _load_signal
+    data = read_data_file(file_path, start_row)
+  File "d:\pyProjects\optical_parameter_extraction\core\data_io.py", line 68, in read_data_file
+    raise DataReadError(file_path, str(e))
+core.exceptions.DataReadError: 读取文件 'C:/Users/30495/Desktop/测试数据/GFRP_20260804200528_ReferenceTd.txt' 时出错: Error tokenizing data. C error: Expected 2 fields in line 15, saw 17
+
+2026-08-04 22:05:07 [ERROR] [logger:114] 计算错误: 计算过程中出错: 读取文件 'C:/Users/30495/Desktop/测试数据/GFRP_20260804200528_ReferenceTd.txt' 时出错: Error tokenizing data. C error: Expected 2 fields in line 15, saw 17
+
+2026-08-04 22:05:18 [INFO] [logger:106] 配置已保存
+2026-08-04 22:05:18 [INFO] [logger:106] 程序关闭
+2026-08-04 22:20:01 [INFO] [logger:63] 日志系统初始化完成
+2026-08-04 22:20:01 [INFO] [logger:106] 时域扫描文件解析完成：1 行平均，波形点数 10000
+2026-08-04 22:20:01 [INFO] [logger:106] 成功读取时域扫描文件: C:\Users\30495\AppData\Local\Temp\codebuddy-dropped-files\a1423e90-795c-4fda-a94c-32cb3ce5ab3f\GFRP_20260804200528_ReferenceTd.txt
+2026-08-04 22:20:01 [INFO] [logger:106] 时域扫描文件解析完成：2 行平均，波形点数 10000
+2026-08-04 22:20:01 [INFO] [logger:106] 成功读取时域扫描文件: C:\Users\30495\AppData\Local\Temp\codebuddy-dropped-files\9f758b2c-acc9-4897-b0f1-2163f39f5024\GFRP_20260804200528_Time.txt
+2026-08-04 22:20:26 [INFO] [logger:63] 日志系统初始化完成
+2026-08-04 22:20:26 [INFO] [logger:106] 程序启动
+2026-08-04 22:20:26 [INFO] [logger:106] 正在初始化THz分析系统...
+2026-08-04 22:20:26 [INFO] [logger:106] 配置已加载
+2026-08-04 22:20:26 [INFO] [logger:106] THz分析系统初始化完成
+2026-08-04 22:20:40 [INFO] [logger:106] 开始异步计算
+2026-08-04 22:20:40 [INFO] [logger:106] 开始计算光学参数，样品数量: 1
+2026-08-04 22:20:40 [INFO] [logger:106] 时域扫描文件解析完成：1 行平均，波形点数 10000
+2026-08-04 22:20:40 [INFO] [logger:106] 成功读取时域扫描文件: C:/Users/30495/Desktop/测试数据/GFRP_20260804200528_ReferenceTd.txt
+2026-08-04 22:20:40 [INFO] [logger:106] 参考信号读取完成，数据点数: 10000
+2026-08-04 22:20:40 [INFO] [logger:106] 时域扫描文件解析完成：2 行平均，波形点数 10000
+2026-08-04 22:20:40 [INFO] [logger:106] 成功读取时域扫描文件: C:/Users/30495/Desktop/测试数据/GFRP_20260804200528_Time.txt
+2026-08-04 22:20:40 [INFO] [logger:106] 样品 GFRP_20260804200528_Time 读取完成
+2026-08-04 22:20:40 [INFO] [logger:106] 光学参数计算完成
+2026-08-04 22:20:40 [INFO] [logger:106] 计算完成
+2026-08-04 22:46:28 [INFO] [logger:63] 日志系统初始化完成
+2026-08-04 22:46:28 [INFO] [logger:106] 标准化完成: REF_scan.txt [thz-scan] -> 2 条信号
+2026-08-04 22:46:28 [INFO] [logger:106] 标准化完成: SAM_a.csv [delimited-text] -> 1 条信号
+2026-08-04 22:46:28 [INFO] [logger:106] 标准化完成: SAM_b.xlsx [excel] -> 1 条信号
+2026-08-04 22:46:28 [INFO] [logger:106] 标准化完成: SAM_c.dat [delimited-text] -> 1 条信号
+2026-08-04 22:46:28 [INFO] [logger:106] 标准数据已导出: C:\Users\30495\AppData\Local\Temp\thz_smoke_jr5y6vsg\standardized\REF_scan_scan1.txt (512 点)
+2026-08-04 22:46:28 [INFO] [logger:106] 标准数据已导出: C:\Users\30495\AppData\Local\Temp\thz_smoke_jr5y6vsg\standardized\REF_scan_scan2.txt (512 点)
+2026-08-04 22:46:28 [INFO] [logger:106] 标准数据已导出: C:\Users\30495\AppData\Local\Temp\thz_smoke_jr5y6vsg\standardized\SAM_a.txt (512 点)
+2026-08-04 22:46:28 [INFO] [logger:106] 标准数据已导出: C:\Users\30495\AppData\Local\Temp\thz_smoke_jr5y6vsg\standardized\SAM_b.txt (512 点)
+2026-08-04 22:46:28 [INFO] [logger:106] 标准数据已导出: C:\Users\30495\AppData\Local\Temp\thz_smoke_jr5y6vsg\standardized\SAM_c.txt (511 点)
+2026-08-04 22:46:28 [INFO] [logger:106] 标准化完成: REF_scan_scan1.txt [standard-txt] -> 1 条信号
+2026-08-04 22:46:28 [INFO] [logger:106] 成功读取文件: C:\Users\30495\AppData\Local\Temp\thz_smoke_jr5y6vsg\standardized\REF_scan_scan1.txt
+2026-08-04 22:46:28 [INFO] [logger:106] 开始计算光学参数，样品数量: 3
+2026-08-04 22:46:28 [INFO] [logger:106] 标准化完成: REF_scan_scan1.txt [standard-txt] -> 1 条信号
+2026-08-04 22:46:28 [INFO] [logger:106] 成功读取文件: C:\Users\30495\AppData\Local\Temp\thz_smoke_jr5y6vsg\standardized\REF_scan_scan1.txt
+2026-08-04 22:46:28 [INFO] [logger:106] 参考信号读取完成，数据点数: 512
+2026-08-04 22:46:28 [INFO] [logger:106] 标准化完成: SAM_a.txt [standard-txt] -> 1 条信号
+2026-08-04 22:46:28 [INFO] [logger:106] 成功读取文件: C:\Users\30495\AppData\Local\Temp\thz_smoke_jr5y6vsg\standardized\SAM_a.txt
+2026-08-04 22:46:28 [INFO] [logger:106] 样品 SAM_a 读取完成
+2026-08-04 22:46:28 [INFO] [logger:106] 标准化完成: SAM_b.txt [standard-txt] -> 1 条信号
+2026-08-04 22:46:28 [INFO] [logger:106] 成功读取文件: C:\Users\30495\AppData\Local\Temp\thz_smoke_jr5y6vsg\standardized\SAM_b.txt
+2026-08-04 22:46:28 [INFO] [logger:106] 样品 SAM_b 读取完成
+2026-08-04 22:46:28 [INFO] [logger:106] 标准化完成: SAM_c.txt [standard-txt] -> 1 条信号
+2026-08-04 22:46:28 [INFO] [logger:106] 成功读取文件: C:\Users\30495\AppData\Local\Temp\thz_smoke_jr5y6vsg\standardized\SAM_c.txt
+2026-08-04 22:46:28 [INFO] [logger:106] 样品 SAM_c 读取完成
+2026-08-04 22:46:28 [WARNING] [logger:110] 文件 SAM_c 的数据点数与参考文件不匹配，已自动截断至 511 个点
+2026-08-04 22:46:28 [INFO] [logger:106] 光学参数计算完成
+2026-08-04 22:46:28 [INFO] [logger:106] 开始保存光学参数到: C:\Users\30495\AppData\Local\Temp\thz_smoke_jr5y6vsg\结果.txt
+2026-08-04 22:46:28 [INFO] [logger:106] 数据已保存到: C:\Users\30495\AppData\Local\Temp\thz_smoke_jr5y6vsg\结果.txt (256 行 x 19 列)
+2026-08-04 22:46:28 [INFO] [logger:106] 开始保存时频域数据到: C:\Users\30495\AppData\Local\Temp\thz_smoke_jr5y6vsg\结果_时域.txt / C:\Users\30495\AppData\Local\Temp\thz_smoke_jr5y6vsg\结果_频域.txt
+2026-08-04 22:46:28 [INFO] [logger:106] 数据已保存到: C:\Users\30495\AppData\Local\Temp\thz_smoke_jr5y6vsg\结果_时域.txt (511 行 x 5 列)
+2026-08-04 22:46:28 [INFO] [logger:106] 数据已保存到: C:\Users\30495\AppData\Local\Temp\thz_smoke_jr5y6vsg\结果_频域.txt (256 行 x 5 列)
+2026-08-04 22:46:36 [INFO] [logger:63] 日志系统初始化完成
+2026-08-04 22:46:36 [INFO] [logger:106] 标准化完成: REF_scan.txt [thz-scan] -> 2 条信号
+2026-08-04 22:46:36 [INFO] [logger:106] 标准化完成: SAM_a.csv [delimited-text] -> 1 条信号
+2026-08-04 22:46:36 [INFO] [logger:106] 标准化完成: SAM_b.xlsx [excel] -> 1 条信号
+2026-08-04 22:46:36 [INFO] [logger:106] 标准化完成: SAM_c.dat [delimited-text] -> 1 条信号
+2026-08-04 22:46:36 [INFO] [logger:106] 标准数据已导出: C:\Users\30495\AppData\Local\Temp\thz_smoke_dzybf4_e\standardized\REF_scan_scan1.txt (512 点)
+2026-08-04 22:46:36 [INFO] [logger:106] 标准数据已导出: C:\Users\30495\AppData\Local\Temp\thz_smoke_dzybf4_e\standardized\REF_scan_scan2.txt (512 点)
+2026-08-04 22:46:36 [INFO] [logger:106] 标准数据已导出: C:\Users\30495\AppData\Local\Temp\thz_smoke_dzybf4_e\standardized\SAM_a.txt (512 点)
+2026-08-04 22:46:36 [INFO] [logger:106] 标准数据已导出: C:\Users\30495\AppData\Local\Temp\thz_smoke_dzybf4_e\standardized\SAM_b.txt (512 点)
+2026-08-04 22:46:36 [INFO] [logger:106] 标准数据已导出: C:\Users\30495\AppData\Local\Temp\thz_smoke_dzybf4_e\standardized\SAM_c.txt (511 点)
+2026-08-04 22:46:36 [INFO] [logger:106] 标准化完成: REF_scan_scan1.txt [standard-txt] -> 1 条信号
+2026-08-04 22:46:36 [INFO] [logger:106] 成功读取文件: C:\Users\30495\AppData\Local\Temp\thz_smoke_dzybf4_e\standardized\REF_scan_scan1.txt
+2026-08-04 22:46:36 [INFO] [logger:106] 开始计算光学参数，样品数量: 3
+2026-08-04 22:46:36 [INFO] [logger:106] 标准化完成: REF_scan_scan1.txt [standard-txt] -> 1 条信号
+2026-08-04 22:46:36 [INFO] [logger:106] 成功读取文件: C:\Users\30495\AppData\Local\Temp\thz_smoke_dzybf4_e\standardized\REF_scan_scan1.txt
+2026-08-04 22:46:36 [INFO] [logger:106] 参考信号读取完成，数据点数: 512
+2026-08-04 22:46:36 [INFO] [logger:106] 标准化完成: SAM_a.txt [standard-txt] -> 1 条信号
+2026-08-04 22:46:36 [INFO] [logger:106] 成功读取文件: C:\Users\30495\AppData\Local\Temp\thz_smoke_dzybf4_e\standardized\SAM_a.txt
+2026-08-04 22:46:36 [INFO] [logger:106] 样品 SAM_a 读取完成
+2026-08-04 22:46:36 [INFO] [logger:106] 标准化完成: SAM_b.txt [standard-txt] -> 1 条信号
+2026-08-04 22:46:36 [INFO] [logger:106] 成功读取文件: C:\Users\30495\AppData\Local\Temp\thz_smoke_dzybf4_e\standardized\SAM_b.txt
+2026-08-04 22:46:36 [INFO] [logger:106] 样品 SAM_b 读取完成
+2026-08-04 22:46:36 [INFO] [logger:106] 标准化完成: SAM_c.txt [standard-txt] -> 1 条信号
+2026-08-04 22:46:36 [INFO] [logger:106] 成功读取文件: C:\Users\30495\AppData\Local\Temp\thz_smoke_dzybf4_e\standardized\SAM_c.txt
+2026-08-04 22:46:36 [INFO] [logger:106] 样品 SAM_c 读取完成
+2026-08-04 22:46:36 [WARNING] [logger:110] 文件 SAM_c 的数据点数与参考文件不匹配，已自动截断至 511 个点
+2026-08-04 22:46:36 [INFO] [logger:106] 光学参数计算完成
+2026-08-04 22:46:36 [INFO] [logger:106] 开始保存光学参数到: C:\Users\30495\AppData\Local\Temp\thz_smoke_dzybf4_e\结果.txt
+2026-08-04 22:46:36 [INFO] [logger:106] 数据已保存到: C:\Users\30495\AppData\Local\Temp\thz_smoke_dzybf4_e\结果.txt (256 行 x 19 列)
+2026-08-04 22:46:36 [INFO] [logger:106] 开始保存时频域数据到: C:\Users\30495\AppData\Local\Temp\thz_smoke_dzybf4_e\结果_时域.txt / C:\Users\30495\AppData\Local\Temp\thz_smoke_dzybf4_e\结果_频域.txt
+2026-08-04 22:46:36 [INFO] [logger:106] 数据已保存到: C:\Users\30495\AppData\Local\Temp\thz_smoke_dzybf4_e\结果_时域.txt (511 行 x 5 列)
+2026-08-04 22:46:36 [INFO] [logger:106] 数据已保存到: C:\Users\30495\AppData\Local\Temp\thz_smoke_dzybf4_e\结果_频域.txt (256 行 x 5 列)
+2026-08-04 22:47:12 [INFO] [logger:63] 日志系统初始化完成
+2026-08-04 22:47:12 [INFO] [logger:106] 程序启动
+2026-08-04 22:47:12 [INFO] [logger:106] 正在初始化THz分析系统...
+2026-08-04 22:47:12 [INFO] [logger:106] 配置已加载
+2026-08-04 22:47:12 [INFO] [logger:106] THz分析系统初始化完成
+2026-08-04 22:47:30 [INFO] [logger:106] 标准化完成: reference.txt [delimited-text] -> 1 条信号
+2026-08-04 22:47:30 [INFO] [logger:106] 标准化新增 1 条信号
+2026-08-04 22:47:37 [INFO] [logger:106] 标准化完成: reference.txt [delimited-text] -> 1 条信号
+2026-08-04 22:47:37 [INFO] [logger:106] 标准化完成: 1-6day-5_20200824143841_Time_processed.txt [delimited-text] -> 1 条信号
+2026-08-04 22:47:37 [INFO] [logger:106] 标准化完成: 1-6day-4_20200824143512_Time_processed.txt [delimited-text] -> 1 条信号
+2026-08-04 22:47:37 [INFO] [logger:106] 标准化完成: 1-6day-3_20200824143158_Time_processed.txt [delimited-text] -> 1 条信号
+2026-08-04 22:47:37 [INFO] [logger:106] 标准化完成: 1-6day-2_20200824142844_Time_processed.txt [delimited-text] -> 1 条信号
+2026-08-04 22:47:37 [INFO] [logger:106] 标准化完成: 1-6day-1_20200824142545_Time_processed.txt [delimited-text] -> 1 条信号
+2026-08-04 22:47:37 [INFO] [logger:106] 标准化完成: 1-5day-12h-5_20200824142233_Time_processed.txt [delimited-text] -> 1 条信号
+2026-08-04 22:47:37 [INFO] [logger:106] 标准化完成: 1-5day-12h-4_20200824141922_Time_processed.txt [delimited-text] -> 1 条信号
+2026-08-04 22:47:37 [INFO] [logger:106] 标准化完成: 1-5day-12h-3_20200824141602_Time_processed.txt [delimited-text] -> 1 条信号
+2026-08-04 22:47:37 [INFO] [logger:106] 标准化完成: 1-5day-12h-2_20200824141303_Time_processed.txt [delimited-text] -> 1 条信号
+2026-08-04 22:47:37 [INFO] [logger:106] 标准化完成: 1-5day-12h-1_20200824140944_Time_processed.txt [delimited-text] -> 1 条信号
+2026-08-04 22:47:37 [INFO] [logger:106] 标准化完成: 1-5day-4_20200824140550_Time_processed.txt [delimited-text] -> 1 条信号
+2026-08-04 22:47:37 [INFO] [logger:106] 标准化完成: 1-5day-3_20200824140239_Time_processed.txt [delimited-text] -> 1 条信号
+2026-08-04 22:47:37 [INFO] [logger:106] 标准化完成: 1-5day-2_20200824135936_Time_processed.txt [delimited-text] -> 1 条信号
+2026-08-04 22:47:37 [INFO] [logger:106] 标准化完成: 1-5day-1_20200824135628_Time_processed.txt [delimited-text] -> 1 条信号
+2026-08-04 22:47:37 [INFO] [logger:106] 标准化完成: 1-4day-12h-5_20200824135319_Time_processed.txt [delimited-text] -> 1 条信号
+2026-08-04 22:47:37 [INFO] [logger:106] 标准化完成: 1-4day-12h-4_20200824135011_Time_processed.txt [delimited-text] -> 1 条信号
+2026-08-04 22:47:37 [INFO] [logger:106] 标准化完成: 1-4day-12h-3_20200824134702_Time_processed.txt [delimited-text] -> 1 条信号
+2026-08-04 22:47:37 [INFO] [logger:106] 标准化完成: 1-4day-12h-2_20200824134342_Time_processed.txt [delimited-text] -> 1 条信号
+2026-08-04 22:47:37 [INFO] [logger:106] 标准化完成: 1-4day-12h-1_20200824134022_Time_processed.txt [delimited-text] -> 1 条信号
+2026-08-04 22:47:38 [INFO] [logger:106] 标准化完成: 1-4day-5_20200824133721_Time_processed.txt [delimited-text] -> 1 条信号
+2026-08-04 22:47:38 [INFO] [logger:106] 标准化完成: 1-4day-4_20200824133411_Time_processed.txt [delimited-text] -> 1 条信号
+2026-08-04 22:47:38 [INFO] [logger:106] 标准化完成: 1-4day-3_20200824133113_Time_processed.txt [delimited-text] -> 1 条信号
+2026-08-04 22:47:38 [INFO] [logger:106] 标准化完成: 1-4day-2_20200824132752_Time_processed.txt [delimited-text] -> 1 条信号
+2026-08-04 22:47:38 [INFO] [logger:106] 标准化完成: 1-4day-1_20200824132457_Time_processed.txt [delimited-text] -> 1 条信号
+2026-08-04 22:47:38 [INFO] [logger:106] 标准化完成: 1-3day-12h-5_20200824132132_Time_processed.txt [delimited-text] -> 1 条信号
+2026-08-04 22:47:38 [INFO] [logger:106] 标准化完成: 1-3day-12h-4_20200824131814_Time_processed.txt [delimited-text] -> 1 条信号
+2026-08-04 22:47:38 [INFO] [logger:106] 标准化完成: 1-3day-12h-3_20200824131413_Time_processed.txt [delimited-text] -> 1 条信号
+2026-08-04 22:47:38 [INFO] [logger:106] 标准化完成: 1-3day-12h-2_20200824131111_Time_processed.txt [delimited-text] -> 1 条信号
+2026-08-04 22:47:38 [INFO] [logger:106] 标准化完成: 1-3day-12h-1_20200824130813_Time_processed.txt [delimited-text] -> 1 条信号
+2026-08-04 22:47:38 [INFO] [logger:106] 标准化完成: 1-3day-5_20200824130447_Time_processed.txt [delimited-text] -> 1 条信号
+2026-08-04 22:47:38 [INFO] [logger:106] 标准化完成: 1-3day-4_20200824130141_Time_processed.txt [delimited-text] -> 1 条信号
+2026-08-04 22:47:38 [INFO] [logger:106] 标准化完成: 1-3day-3_20200824125820_Time_processed.txt [delimited-text] -> 1 条信号
+2026-08-04 22:47:38 [INFO] [logger:106] 标准化完成: 1-3day-2_20200824125525_Time_processed.txt [delimited-text] -> 1 条信号
+2026-08-04 22:47:38 [INFO] [logger:106] 标准化完成: 1-3day-1_20200824125214_Time_processed.txt [delimited-text] -> 1 条信号
+2026-08-04 22:47:38 [INFO] [logger:106] 标准化完成: 1-2day-12h-5_20200824124856_Time_processed.txt [delimited-text] -> 1 条信号
+2026-08-04 22:47:38 [INFO] [logger:106] 标准化完成: 1-2day-12h-4_20200824124459_Time_processed.txt [delimited-text] -> 1 条信号
+2026-08-04 22:47:38 [INFO] [logger:106] 标准化完成: 1-2day-12h-3_20200824124155_Time_processed.txt [delimited-text] -> 1 条信号
+2026-08-04 22:47:38 [INFO] [logger:106] 标准化完成: 1-2day-12h-2_20200824123849_Time_processed.txt [delimited-text] -> 1 条信号
+2026-08-04 22:47:38 [INFO] [logger:106] 标准化完成: 1-2day-12h-1_20200824123533_Time_processed.txt [delimited-text] -> 1 条信号
+2026-08-04 22:47:38 [INFO] [logger:106] 标准化完成: 1-2day-5_20200824123204_Time_processed.txt [delimited-text] -> 1 条信号
+2026-08-04 22:47:38 [INFO] [logger:106] 标准化完成: 1-2day-4_20200824122841_Time_processed.txt [delimited-text] -> 1 条信号
+2026-08-04 22:47:38 [INFO] [logger:106] 标准化完成: 1-2day-3_20200824122526_Time_processed.txt [delimited-text] -> 1 条信号
+2026-08-04 22:47:38 [INFO] [logger:106] 标准化完成: 1-2day-2_20200824122200_Time_processed.txt [delimited-text] -> 1 条信号
+2026-08-04 22:47:38 [INFO] [logger:106] 标准化完成: 1-2day-1_20200824121840_Time_processed.txt [delimited-text] -> 1 条信号
+2026-08-04 22:47:38 [INFO] [logger:106] 标准化完成: 1-1day-12h-5_20200824121529_Time_processed.txt [delimited-text] -> 1 条信号
+2026-08-04 22:47:38 [INFO] [logger:106] 标准化完成: 1-1day-12h-4_20200824121149_Time_processed.txt [delimited-text] -> 1 条信号
+2026-08-04 22:47:38 [INFO] [logger:106] 标准化完成: 1-1day-12h-3_20200824120349_Time_processed.txt [delimited-text] -> 1 条信号
+2026-08-04 22:47:38 [INFO] [logger:106] 标准化完成: 1-1day-12h-2_20200824115128_Time_processed.txt [delimited-text] -> 1 条信号
+2026-08-04 22:47:38 [INFO] [logger:106] 标准化完成: 1-1day-12h-1_20200824114810_Time_processed.txt [delimited-text] -> 1 条信号
+2026-08-04 22:47:38 [INFO] [logger:106] 标准化完成: 1-1day-5_20200824114354_Time_processed.txt [delimited-text] -> 1 条信号
+2026-08-04 22:47:38 [INFO] [logger:106] 标准化完成: 1-1day-4_20200824114014_Time_processed.txt [delimited-text] -> 1 条信号
+2026-08-04 22:47:38 [INFO] [logger:106] 标准化完成: 1-1day-3_20200824113656_Time_processed.txt [delimited-text] -> 1 条信号
+2026-08-04 22:47:38 [INFO] [logger:106] 标准化完成: 1-1day-2_20200824113354_Time_processed.txt [delimited-text] -> 1 条信号
+2026-08-04 22:47:38 [INFO] [logger:106] 标准化完成: 1-1day-1_20200824113055_Time_processed.txt [delimited-text] -> 1 条信号
+2026-08-04 22:47:38 [INFO] [logger:106] 标准化完成: 1-0day-12h-5_20200824112143_Time_processed.txt [delimited-text] -> 1 条信号
+2026-08-04 22:47:38 [INFO] [logger:106] 标准化完成: 1-0day-12h-4_20200824111839_Time_processed.txt [delimited-text] -> 1 条信号
+2026-08-04 22:47:38 [INFO] [logger:106] 标准化完成: 1-0day-12h-3_20200824111536_Time_processed.txt [delimited-text] -> 1 条信号
+2026-08-04 22:47:38 [INFO] [logger:106] 标准化完成: 1-0day-12h-2_20200824111243_Time_processed.txt [delimited-text] -> 1 条信号
+2026-08-04 22:47:38 [INFO] [logger:106] 标准化完成: 1-0day-12h-1_20200824110658_Time_processed.txt [delimited-text] -> 1 条信号
+2026-08-04 22:47:38 [INFO] [logger:106] 标准化完成: 1-0day-5_20200824110312_Time_processed.txt [delimited-text] -> 1 条信号
+2026-08-04 22:47:38 [INFO] [logger:106] 标准化完成: 1-0day-4_20200824110010_Time_processed.txt [delimited-text] -> 1 条信号
+2026-08-04 22:47:38 [INFO] [logger:106] 标准化完成: 1-0day-3_20200824105640_Time_processed.txt [delimited-text] -> 1 条信号
+2026-08-04 22:47:38 [INFO] [logger:106] 标准化完成: 1-0day-2_20200824105255_Time_processed.txt [delimited-text] -> 1 条信号
+2026-08-04 22:47:38 [INFO] [logger:106] 标准化完成: 1-0day-1_20200824104921_Time_processed.txt [delimited-text] -> 1 条信号
+2026-08-04 22:47:38 [INFO] [logger:106] 标准化新增 65 条信号
+2026-08-04 22:47:58 [INFO] [logger:106] 标准数据已导出: C:/Users/30495/Desktop\standardized\reference.txt (9000 点)
+2026-08-04 22:48:17 [INFO] [logger:106] 标准数据已导出: C:/Users/30495/Desktop/standardized\reference.txt (9000 点)
+2026-08-04 22:48:17 [INFO] [logger:106] 标准数据已导出: C:/Users/30495/Desktop/standardized\reference_2.txt (9000 点)
+2026-08-04 22:48:17 [INFO] [logger:106] 标准数据已导出: C:/Users/30495/Desktop/standardized\1-6day-5_20200824143841_Time_processed.txt (9000 点)
+2026-08-04 22:48:17 [INFO] [logger:106] 标准数据已导出: C:/Users/30495/Desktop/standardized\1-6day-4_20200824143512_Time_processed.txt (9000 点)
+2026-08-04 22:48:17 [INFO] [logger:106] 标准数据已导出: C:/Users/30495/Desktop/standardized\1-6day-3_20200824143158_Time_processed.txt (9000 点)
+2026-08-04 22:48:17 [INFO] [logger:106] 标准数据已导出: C:/Users/30495/Desktop/standardized\1-6day-2_20200824142844_Time_processed.txt (9000 点)
+2026-08-04 22:48:17 [INFO] [logger:106] 标准数据已导出: C:/Users/30495/Desktop/standardized\1-6day-1_20200824142545_Time_processed.txt (9000 点)
+2026-08-04 22:48:17 [INFO] [logger:106] 标准数据已导出: C:/Users/30495/Desktop/standardized\1-5day-12h-5_20200824142233_Time_processed.txt (9000 点)
+2026-08-04 22:48:17 [INFO] [logger:106] 标准数据已导出: C:/Users/30495/Desktop/standardized\1-5day-12h-4_20200824141922_Time_processed.txt (9000 点)
+2026-08-04 22:48:17 [INFO] [logger:106] 标准数据已导出: C:/Users/30495/Desktop/standardized\1-5day-12h-3_20200824141602_Time_processed.txt (9000 点)
+2026-08-04 22:48:17 [INFO] [logger:106] 标准数据已导出: C:/Users/30495/Desktop/standardized\1-5day-12h-2_20200824141303_Time_processed.txt (9000 点)
+2026-08-04 22:48:17 [INFO] [logger:106] 标准数据已导出: C:/Users/30495/Desktop/standardized\1-5day-12h-1_20200824140944_Time_processed.txt (9000 点)
+2026-08-04 22:48:17 [INFO] [logger:106] 标准数据已导出: C:/Users/30495/Desktop/standardized\1-5day-4_20200824140550_Time_processed.txt (9000 点)
+2026-08-04 22:48:17 [INFO] [logger:106] 标准数据已导出: C:/Users/30495/Desktop/standardized\1-5day-3_20200824140239_Time_processed.txt (9000 点)
+2026-08-04 22:48:17 [INFO] [logger:106] 标准数据已导出: C:/Users/30495/Desktop/standardized\1-5day-2_20200824135936_Time_processed.txt (9000 点)
+2026-08-04 22:48:17 [INFO] [logger:106] 标准数据已导出: C:/Users/30495/Desktop/standardized\1-5day-1_20200824135628_Time_processed.txt (9000 点)
+2026-08-04 22:48:17 [INFO] [logger:106] 标准数据已导出: C:/Users/30495/Desktop/standardized\1-4day-12h-5_20200824135319_Time_processed.txt (9000 点)
+2026-08-04 22:48:17 [INFO] [logger:106] 标准数据已导出: C:/Users/30495/Desktop/standardized\1-4day-12h-4_20200824135011_Time_processed.txt (9000 点)
+2026-08-04 22:48:17 [INFO] [logger:106] 标准数据已导出: C:/Users/30495/Desktop/standardized\1-4day-12h-3_20200824134702_Time_processed.txt (9000 点)
+2026-08-04 22:48:17 [INFO] [logger:106] 标准数据已导出: C:/Users/30495/Desktop/standardized\1-4day-12h-2_20200824134342_Time_processed.txt (9000 点)
+2026-08-04 22:48:17 [INFO] [logger:106] 标准数据已导出: C:/Users/30495/Desktop/standardized\1-4day-12h-1_20200824134022_Time_processed.txt (9000 点)
+2026-08-04 22:48:17 [INFO] [logger:106] 标准数据已导出: C:/Users/30495/Desktop/standardized\1-4day-5_20200824133721_Time_processed.txt (9000 点)
+2026-08-04 22:48:17 [INFO] [logger:106] 标准数据已导出: C:/Users/30495/Desktop/standardized\1-4day-4_20200824133411_Time_processed.txt (9000 点)
+2026-08-04 22:48:17 [INFO] [logger:106] 标准数据已导出: C:/Users/30495/Desktop/standardized\1-4day-3_20200824133113_Time_processed.txt (9000 点)
+2026-08-04 22:48:17 [INFO] [logger:106] 标准数据已导出: C:/Users/30495/Desktop/standardized\1-4day-2_20200824132752_Time_processed.txt (9000 点)
+2026-08-04 22:48:17 [INFO] [logger:106] 标准数据已导出: C:/Users/30495/Desktop/standardized\1-4day-1_20200824132457_Time_processed.txt (9000 点)
+2026-08-04 22:48:17 [INFO] [logger:106] 标准数据已导出: C:/Users/30495/Desktop/standardized\1-3day-12h-5_20200824132132_Time_processed.txt (9000 点)
+2026-08-04 22:48:17 [INFO] [logger:106] 标准数据已导出: C:/Users/30495/Desktop/standardized\1-3day-12h-4_20200824131814_Time_processed.txt (9000 点)
+2026-08-04 22:48:17 [INFO] [logger:106] 标准数据已导出: C:/Users/30495/Desktop/standardized\1-3day-12h-3_20200824131413_Time_processed.txt (9000 点)
+2026-08-04 22:48:17 [INFO] [logger:106] 标准数据已导出: C:/Users/30495/Desktop/standardized\1-3day-12h-2_20200824131111_Time_processed.txt (9000 点)
+2026-08-04 22:48:17 [INFO] [logger:106] 标准数据已导出: C:/Users/30495/Desktop/standardized\1-3day-12h-1_20200824130813_Time_processed.txt (9000 点)
+2026-08-04 22:48:17 [INFO] [logger:106] 标准数据已导出: C:/Users/30495/Desktop/standardized\1-3day-5_20200824130447_Time_processed.txt (9000 点)
+2026-08-04 22:48:17 [INFO] [logger:106] 标准数据已导出: C:/Users/30495/Desktop/standardized\1-3day-4_20200824130141_Time_processed.txt (9000 点)
+2026-08-04 22:48:17 [INFO] [logger:106] 标准数据已导出: C:/Users/30495/Desktop/standardized\1-3day-3_20200824125820_Time_processed.txt (9000 点)
+2026-08-04 22:48:17 [INFO] [logger:106] 标准数据已导出: C:/Users/30495/Desktop/standardized\1-3day-2_20200824125525_Time_processed.txt (9000 点)
+2026-08-04 22:48:17 [INFO] [logger:106] 标准数据已导出: C:/Users/30495/Desktop/standardized\1-3day-1_20200824125214_Time_processed.txt (9000 点)
+2026-08-04 22:48:17 [INFO] [logger:106] 标准数据已导出: C:/Users/30495/Desktop/standardized\1-2day-12h-5_20200824124856_Time_processed.txt (9000 点)
+2026-08-04 22:48:17 [INFO] [logger:106] 标准数据已导出: C:/Users/30495/Desktop/standardized\1-2day-12h-4_20200824124459_Time_processed.txt (9000 点)
+2026-08-04 22:48:17 [INFO] [logger:106] 标准数据已导出: C:/Users/30495/Desktop/standardized\1-2day-12h-3_20200824124155_Time_processed.txt (9000 点)
+2026-08-04 22:48:17 [INFO] [logger:106] 标准数据已导出: C:/Users/30495/Desktop/standardized\1-2day-12h-2_20200824123849_Time_processed.txt (9000 点)
+2026-08-04 22:48:17 [INFO] [logger:106] 标准数据已导出: C:/Users/30495/Desktop/standardized\1-2day-12h-1_20200824123533_Time_processed.txt (9000 点)
+2026-08-04 22:48:17 [INFO] [logger:106] 标准数据已导出: C:/Users/30495/Desktop/standardized\1-2day-5_20200824123204_Time_processed.txt (9000 点)
+2026-08-04 22:48:17 [INFO] [logger:106] 标准数据已导出: C:/Users/30495/Desktop/standardized\1-2day-4_20200824122841_Time_processed.txt (9000 点)
+2026-08-04 22:48:17 [INFO] [logger:106] 标准数据已导出: C:/Users/30495/Desktop/standardized\1-2day-3_20200824122526_Time_processed.txt (9000 点)
+2026-08-04 22:48:17 [INFO] [logger:106] 标准数据已导出: C:/Users/30495/Desktop/standardized\1-2day-2_20200824122200_Time_processed.txt (9000 点)
+2026-08-04 22:48:17 [INFO] [logger:106] 标准数据已导出: C:/Users/30495/Desktop/standardized\1-2day-1_20200824121840_Time_processed.txt (9000 点)
+2026-08-04 22:48:17 [INFO] [logger:106] 标准数据已导出: C:/Users/30495/Desktop/standardized\1-1day-12h-5_20200824121529_Time_processed.txt (9000 点)
+2026-08-04 22:48:17 [INFO] [logger:106] 标准数据已导出: C:/Users/30495/Desktop/standardized\1-1day-12h-4_20200824121149_Time_processed.txt (9000 点)
+2026-08-04 22:48:17 [INFO] [logger:106] 标准数据已导出: C:/Users/30495/Desktop/standardized\1-1day-12h-3_20200824120349_Time_processed.txt (9000 点)
+2026-08-04 22:48:17 [INFO] [logger:106] 标准数据已导出: C:/Users/30495/Desktop/standardized\1-1day-12h-2_20200824115128_Time_processed.txt (9000 点)
+2026-08-04 22:48:17 [INFO] [logger:106] 标准数据已导出: C:/Users/30495/Desktop/standardized\1-1day-12h-1_20200824114810_Time_processed.txt (9000 点)
+2026-08-04 22:48:17 [INFO] [logger:106] 标准数据已导出: C:/Users/30495/Desktop/standardized\1-1day-5_20200824114354_Time_processed.txt (9000 点)
+2026-08-04 22:48:17 [INFO] [logger:106] 标准数据已导出: C:/Users/30495/Desktop/standardized\1-1day-4_20200824114014_Time_processed.txt (9000 点)
+2026-08-04 22:48:17 [INFO] [logger:106] 标准数据已导出: C:/Users/30495/Desktop/standardized\1-1day-3_20200824113656_Time_processed.txt (9000 点)
+2026-08-04 22:48:17 [INFO] [logger:106] 标准数据已导出: C:/Users/30495/Desktop/standardized\1-1day-2_20200824113354_Time_processed.txt (9000 点)
+2026-08-04 22:48:17 [INFO] [logger:106] 标准数据已导出: C:/Users/30495/Desktop/standardized\1-1day-1_20200824113055_Time_processed.txt (9000 点)
+2026-08-04 22:48:17 [INFO] [logger:106] 标准数据已导出: C:/Users/30495/Desktop/standardized\1-0day-12h-5_20200824112143_Time_processed.txt (9000 点)
+2026-08-04 22:48:17 [INFO] [logger:106] 标准数据已导出: C:/Users/30495/Desktop/standardized\1-0day-12h-4_20200824111839_Time_processed.txt (9000 点)
+2026-08-04 22:48:17 [INFO] [logger:106] 标准数据已导出: C:/Users/30495/Desktop/standardized\1-0day-12h-3_20200824111536_Time_processed.txt (9000 点)
+2026-08-04 22:48:17 [INFO] [logger:106] 标准数据已导出: C:/Users/30495/Desktop/standardized\1-0day-12h-2_20200824111243_Time_processed.txt (9000 点)
+2026-08-04 22:48:17 [INFO] [logger:106] 标准数据已导出: C:/Users/30495/Desktop/standardized\1-0day-12h-1_20200824110658_Time_processed.txt (9000 点)
+2026-08-04 22:48:17 [INFO] [logger:106] 标准数据已导出: C:/Users/30495/Desktop/standardized\1-0day-5_20200824110312_Time_processed.txt (9000 点)
+2026-08-04 22:48:17 [INFO] [logger:106] 标准数据已导出: C:/Users/30495/Desktop/standardized\1-0day-4_20200824110010_Time_processed.txt (9000 点)
+2026-08-04 22:48:17 [INFO] [logger:106] 标准数据已导出: C:/Users/30495/Desktop/standardized\1-0day-3_20200824105640_Time_processed.txt (9000 点)
+2026-08-04 22:48:17 [INFO] [logger:106] 标准数据已导出: C:/Users/30495/Desktop/standardized\1-0day-2_20200824105255_Time_processed.txt (9000 点)
+2026-08-04 22:48:17 [INFO] [logger:106] 标准数据已导出: C:/Users/30495/Desktop/standardized\1-0day-1_20200824104921_Time_processed.txt (9000 点)
+2026-08-04 22:48:17 [INFO] [logger:106] 阶段一完成：参考 reference，样品 65 条，输出 C:/Users/30495/Desktop/standardized
+2026-08-04 22:48:17 [INFO] [logger:106] 阶段一结果已应用: ref=C:/Users/30495/Desktop/standardized\reference.txt, samples=65
+2026-08-04 22:49:04 [INFO] [logger:106] 开始异步计算
+2026-08-04 22:49:04 [INFO] [logger:106] 开始计算光学参数，样品数量: 64
+2026-08-04 22:49:04 [INFO] [logger:106] 标准化完成: reference.txt [standard-txt] -> 1 条信号
+2026-08-04 22:49:04 [INFO] [logger:106] 成功读取文件: C:/Users/30495/Desktop/standardized\reference.txt
+2026-08-04 22:49:04 [INFO] [logger:106] 参考信号读取完成，数据点数: 9000
+2026-08-04 22:49:04 [INFO] [logger:106] 标准化完成: 1-6day-5_20200824143841_Time_processed.txt [standard-txt] -> 1 条信号
+2026-08-04 22:49:04 [INFO] [logger:106] 成功读取文件: C:/Users/30495/Desktop/standardized\1-6day-5_20200824143841_Time_processed.txt
+2026-08-04 22:49:04 [INFO] [logger:106] 样品 1-6day-5_20200824143841_Time_processed 读取完成
+2026-08-04 22:49:04 [INFO] [logger:106] 标准化完成: 1-6day-4_20200824143512_Time_processed.txt [standard-txt] -> 1 条信号
+2026-08-04 22:49:04 [INFO] [logger:106] 成功读取文件: C:/Users/30495/Desktop/standardized\1-6day-4_20200824143512_Time_processed.txt
+2026-08-04 22:49:04 [INFO] [logger:106] 样品 1-6day-4_20200824143512_Time_processed 读取完成
+2026-08-04 22:49:04 [INFO] [logger:106] 标准化完成: 1-6day-3_20200824143158_Time_processed.txt [standard-txt] -> 1 条信号
+2026-08-04 22:49:04 [INFO] [logger:106] 成功读取文件: C:/Users/30495/Desktop/standardized\1-6day-3_20200824143158_Time_processed.txt
+2026-08-04 22:49:04 [INFO] [logger:106] 样品 1-6day-3_20200824143158_Time_processed 读取完成
+2026-08-04 22:49:04 [INFO] [logger:106] 标准化完成: 1-6day-2_20200824142844_Time_processed.txt [standard-txt] -> 1 条信号
+2026-08-04 22:49:04 [INFO] [logger:106] 成功读取文件: C:/Users/30495/Desktop/standardized\1-6day-2_20200824142844_Time_processed.txt
+2026-08-04 22:49:04 [INFO] [logger:106] 样品 1-6day-2_20200824142844_Time_processed 读取完成
+2026-08-04 22:49:04 [INFO] [logger:106] 标准化完成: 1-6day-1_20200824142545_Time_processed.txt [standard-txt] -> 1 条信号
+2026-08-04 22:49:04 [INFO] [logger:106] 成功读取文件: C:/Users/30495/Desktop/standardized\1-6day-1_20200824142545_Time_processed.txt
+2026-08-04 22:49:04 [INFO] [logger:106] 样品 1-6day-1_20200824142545_Time_processed 读取完成
+2026-08-04 22:49:04 [INFO] [logger:106] 标准化完成: 1-5day-12h-5_20200824142233_Time_processed.txt [standard-txt] -> 1 条信号
+2026-08-04 22:49:04 [INFO] [logger:106] 成功读取文件: C:/Users/30495/Desktop/standardized\1-5day-12h-5_20200824142233_Time_processed.txt
+2026-08-04 22:49:04 [INFO] [logger:106] 样品 1-5day-12h-5_20200824142233_Time_processed 读取完成
+2026-08-04 22:49:04 [INFO] [logger:106] 标准化完成: 1-5day-12h-4_20200824141922_Time_processed.txt [standard-txt] -> 1 条信号
+2026-08-04 22:49:04 [INFO] [logger:106] 成功读取文件: C:/Users/30495/Desktop/standardized\1-5day-12h-4_20200824141922_Time_processed.txt
+2026-08-04 22:49:04 [INFO] [logger:106] 样品 1-5day-12h-4_20200824141922_Time_processed 读取完成
+2026-08-04 22:49:04 [INFO] [logger:106] 标准化完成: 1-5day-12h-3_20200824141602_Time_processed.txt [standard-txt] -> 1 条信号
+2026-08-04 22:49:04 [INFO] [logger:106] 成功读取文件: C:/Users/30495/Desktop/standardized\1-5day-12h-3_20200824141602_Time_processed.txt
+2026-08-04 22:49:04 [INFO] [logger:106] 样品 1-5day-12h-3_20200824141602_Time_processed 读取完成
+2026-08-04 22:49:04 [INFO] [logger:106] 标准化完成: 1-5day-12h-2_20200824141303_Time_processed.txt [standard-txt] -> 1 条信号
+2026-08-04 22:49:04 [INFO] [logger:106] 成功读取文件: C:/Users/30495/Desktop/standardized\1-5day-12h-2_20200824141303_Time_processed.txt
+2026-08-04 22:49:04 [INFO] [logger:106] 样品 1-5day-12h-2_20200824141303_Time_processed 读取完成
+2026-08-04 22:49:04 [INFO] [logger:106] 标准化完成: 1-5day-12h-1_20200824140944_Time_processed.txt [standard-txt] -> 1 条信号
+2026-08-04 22:49:04 [INFO] [logger:106] 成功读取文件: C:/Users/30495/Desktop/standardized\1-5day-12h-1_20200824140944_Time_processed.txt
+2026-08-04 22:49:04 [INFO] [logger:106] 样品 1-5day-12h-1_20200824140944_Time_processed 读取完成
+2026-08-04 22:49:04 [INFO] [logger:106] 标准化完成: 1-5day-4_20200824140550_Time_processed.txt [standard-txt] -> 1 条信号
+2026-08-04 22:49:04 [INFO] [logger:106] 成功读取文件: C:/Users/30495/Desktop/standardized\1-5day-4_20200824140550_Time_processed.txt
+2026-08-04 22:49:04 [INFO] [logger:106] 样品 1-5day-4_20200824140550_Time_processed 读取完成
+2026-08-04 22:49:04 [INFO] [logger:106] 标准化完成: 1-5day-3_20200824140239_Time_processed.txt [standard-txt] -> 1 条信号
+2026-08-04 22:49:04 [INFO] [logger:106] 成功读取文件: C:/Users/30495/Desktop/standardized\1-5day-3_20200824140239_Time_processed.txt
+2026-08-04 22:49:04 [INFO] [logger:106] 样品 1-5day-3_20200824140239_Time_processed 读取完成
+2026-08-04 22:49:04 [INFO] [logger:106] 标准化完成: 1-5day-2_20200824135936_Time_processed.txt [standard-txt] -> 1 条信号
+2026-08-04 22:49:04 [INFO] [logger:106] 成功读取文件: C:/Users/30495/Desktop/standardized\1-5day-2_20200824135936_Time_processed.txt
+2026-08-04 22:49:04 [INFO] [logger:106] 样品 1-5day-2_20200824135936_Time_processed 读取完成
+2026-08-04 22:49:04 [INFO] [logger:106] 标准化完成: 1-5day-1_20200824135628_Time_processed.txt [standard-txt] -> 1 条信号
+2026-08-04 22:49:04 [INFO] [logger:106] 成功读取文件: C:/Users/30495/Desktop/standardized\1-5day-1_20200824135628_Time_processed.txt
+2026-08-04 22:49:04 [INFO] [logger:106] 样品 1-5day-1_20200824135628_Time_processed 读取完成
+2026-08-04 22:49:04 [INFO] [logger:106] 标准化完成: 1-4day-12h-5_20200824135319_Time_processed.txt [standard-txt] -> 1 条信号
+2026-08-04 22:49:04 [INFO] [logger:106] 成功读取文件: C:/Users/30495/Desktop/standardized\1-4day-12h-5_20200824135319_Time_processed.txt
+2026-08-04 22:49:04 [INFO] [logger:106] 样品 1-4day-12h-5_20200824135319_Time_processed 读取完成
+2026-08-04 22:49:04 [INFO] [logger:106] 标准化完成: 1-4day-12h-4_20200824135011_Time_processed.txt [standard-txt] -> 1 条信号
+2026-08-04 22:49:04 [INFO] [logger:106] 成功读取文件: C:/Users/30495/Desktop/standardized\1-4day-12h-4_20200824135011_Time_processed.txt
+2026-08-04 22:49:04 [INFO] [logger:106] 样品 1-4day-12h-4_20200824135011_Time_processed 读取完成
+2026-08-04 22:49:04 [INFO] [logger:106] 标准化完成: 1-4day-12h-3_20200824134702_Time_processed.txt [standard-txt] -> 1 条信号
+2026-08-04 22:49:04 [INFO] [logger:106] 成功读取文件: C:/Users/30495/Desktop/standardized\1-4day-12h-3_20200824134702_Time_processed.txt
+2026-08-04 22:49:04 [INFO] [logger:106] 样品 1-4day-12h-3_20200824134702_Time_processed 读取完成
+2026-08-04 22:49:04 [INFO] [logger:106] 标准化完成: 1-4day-12h-2_20200824134342_Time_processed.txt [standard-txt] -> 1 条信号
+2026-08-04 22:49:04 [INFO] [logger:106] 成功读取文件: C:/Users/30495/Desktop/standardized\1-4day-12h-2_20200824134342_Time_processed.txt
+2026-08-04 22:49:04 [INFO] [logger:106] 样品 1-4day-12h-2_20200824134342_Time_processed 读取完成
+2026-08-04 22:49:04 [INFO] [logger:106] 标准化完成: 1-4day-12h-1_20200824134022_Time_processed.txt [standard-txt] -> 1 条信号
+2026-08-04 22:49:04 [INFO] [logger:106] 成功读取文件: C:/Users/30495/Desktop/standardized\1-4day-12h-1_20200824134022_Time_processed.txt
+2026-08-04 22:49:04 [INFO] [logger:106] 样品 1-4day-12h-1_20200824134022_Time_processed 读取完成
+2026-08-04 22:49:04 [INFO] [logger:106] 标准化完成: 1-4day-5_20200824133721_Time_processed.txt [standard-txt] -> 1 条信号
+2026-08-04 22:49:04 [INFO] [logger:106] 成功读取文件: C:/Users/30495/Desktop/standardized\1-4day-5_20200824133721_Time_processed.txt
+2026-08-04 22:49:04 [INFO] [logger:106] 样品 1-4day-5_20200824133721_Time_processed 读取完成
+2026-08-04 22:49:04 [INFO] [logger:106] 标准化完成: 1-4day-4_20200824133411_Time_processed.txt [standard-txt] -> 1 条信号
+2026-08-04 22:49:04 [INFO] [logger:106] 成功读取文件: C:/Users/30495/Desktop/standardized\1-4day-4_20200824133411_Time_processed.txt
+2026-08-04 22:49:04 [INFO] [logger:106] 样品 1-4day-4_20200824133411_Time_processed 读取完成
+2026-08-04 22:49:04 [INFO] [logger:106] 标准化完成: 1-4day-3_20200824133113_Time_processed.txt [standard-txt] -> 1 条信号
+2026-08-04 22:49:04 [INFO] [logger:106] 成功读取文件: C:/Users/30495/Desktop/standardized\1-4day-3_20200824133113_Time_processed.txt
+2026-08-04 22:49:04 [INFO] [logger:106] 样品 1-4day-3_20200824133113_Time_processed 读取完成
+2026-08-04 22:49:04 [INFO] [logger:106] 标准化完成: 1-4day-2_20200824132752_Time_processed.txt [standard-txt] -> 1 条信号
+2026-08-04 22:49:04 [INFO] [logger:106] 成功读取文件: C:/Users/30495/Desktop/standardized\1-4day-2_20200824132752_Time_processed.txt
+2026-08-04 22:49:04 [INFO] [logger:106] 样品 1-4day-2_20200824132752_Time_processed 读取完成
+2026-08-04 22:49:04 [INFO] [logger:106] 标准化完成: 1-4day-1_20200824132457_Time_processed.txt [standard-txt] -> 1 条信号
+2026-08-04 22:49:04 [INFO] [logger:106] 成功读取文件: C:/Users/30495/Desktop/standardized\1-4day-1_20200824132457_Time_processed.txt
+2026-08-04 22:49:04 [INFO] [logger:106] 样品 1-4day-1_20200824132457_Time_processed 读取完成
+2026-08-04 22:49:04 [INFO] [logger:106] 标准化完成: 1-3day-12h-5_20200824132132_Time_processed.txt [standard-txt] -> 1 条信号
+2026-08-04 22:49:04 [INFO] [logger:106] 成功读取文件: C:/Users/30495/Desktop/standardized\1-3day-12h-5_20200824132132_Time_processed.txt
+2026-08-04 22:49:04 [INFO] [logger:106] 样品 1-3day-12h-5_20200824132132_Time_processed 读取完成
+2026-08-04 22:49:04 [INFO] [logger:106] 标准化完成: 1-3day-12h-4_20200824131814_Time_processed.txt [standard-txt] -> 1 条信号
+2026-08-04 22:49:04 [INFO] [logger:106] 成功读取文件: C:/Users/30495/Desktop/standardized\1-3day-12h-4_20200824131814_Time_processed.txt
+2026-08-04 22:49:04 [INFO] [logger:106] 样品 1-3day-12h-4_20200824131814_Time_processed 读取完成
+2026-08-04 22:49:04 [INFO] [logger:106] 标准化完成: 1-3day-12h-3_20200824131413_Time_processed.txt [standard-txt] -> 1 条信号
+2026-08-04 22:49:04 [INFO] [logger:106] 成功读取文件: C:/Users/30495/Desktop/standardized\1-3day-12h-3_20200824131413_Time_processed.txt
+2026-08-04 22:49:04 [INFO] [logger:106] 样品 1-3day-12h-3_20200824131413_Time_processed 读取完成
+2026-08-04 22:49:04 [INFO] [logger:106] 标准化完成: 1-3day-12h-2_20200824131111_Time_processed.txt [standard-txt] -> 1 条信号
+2026-08-04 22:49:04 [INFO] [logger:106] 成功读取文件: C:/Users/30495/Desktop/standardized\1-3day-12h-2_20200824131111_Time_processed.txt
+2026-08-04 22:49:04 [INFO] [logger:106] 样品 1-3day-12h-2_20200824131111_Time_processed 读取完成
+2026-08-04 22:49:04 [INFO] [logger:106] 标准化完成: 1-3day-12h-1_20200824130813_Time_processed.txt [standard-txt] -> 1 条信号
+2026-08-04 22:49:04 [INFO] [logger:106] 成功读取文件: C:/Users/30495/Desktop/standardized\1-3day-12h-1_20200824130813_Time_processed.txt
+2026-08-04 22:49:04 [INFO] [logger:106] 样品 1-3day-12h-1_20200824130813_Time_processed 读取完成
+2026-08-04 22:49:04 [INFO] [logger:106] 标准化完成: 1-3day-5_20200824130447_Time_processed.txt [standard-txt] -> 1 条信号
+2026-08-04 22:49:04 [INFO] [logger:106] 成功读取文件: C:/Users/30495/Desktop/standardized\1-3day-5_20200824130447_Time_processed.txt
+2026-08-04 22:49:04 [INFO] [logger:106] 样品 1-3day-5_20200824130447_Time_processed 读取完成
+2026-08-04 22:49:04 [INFO] [logger:106] 标准化完成: 1-3day-4_20200824130141_Time_processed.txt [standard-txt] -> 1 条信号
+2026-08-04 22:49:04 [INFO] [logger:106] 成功读取文件: C:/Users/30495/Desktop/standardized\1-3day-4_20200824130141_Time_processed.txt
+2026-08-04 22:49:04 [INFO] [logger:106] 样品 1-3day-4_20200824130141_Time_processed 读取完成
+2026-08-04 22:49:04 [INFO] [logger:106] 标准化完成: 1-3day-3_20200824125820_Time_processed.txt [standard-txt] -> 1 条信号
+2026-08-04 22:49:04 [INFO] [logger:106] 成功读取文件: C:/Users/30495/Desktop/standardized\1-3day-3_20200824125820_Time_processed.txt
+2026-08-04 22:49:04 [INFO] [logger:106] 样品 1-3day-3_20200824125820_Time_processed 读取完成
+2026-08-04 22:49:04 [INFO] [logger:106] 标准化完成: 1-3day-2_20200824125525_Time_processed.txt [standard-txt] -> 1 条信号
+2026-08-04 22:49:04 [INFO] [logger:106] 成功读取文件: C:/Users/30495/Desktop/standardized\1-3day-2_20200824125525_Time_processed.txt
+2026-08-04 22:49:04 [INFO] [logger:106] 样品 1-3day-2_20200824125525_Time_processed 读取完成
+2026-08-04 22:49:04 [INFO] [logger:106] 标准化完成: 1-3day-1_20200824125214_Time_processed.txt [standard-txt] -> 1 条信号
+2026-08-04 22:49:04 [INFO] [logger:106] 成功读取文件: C:/Users/30495/Desktop/standardized\1-3day-1_20200824125214_Time_processed.txt
+2026-08-04 22:49:04 [INFO] [logger:106] 样品 1-3day-1_20200824125214_Time_processed 读取完成
+2026-08-04 22:49:04 [INFO] [logger:106] 标准化完成: 1-2day-12h-5_20200824124856_Time_processed.txt [standard-txt] -> 1 条信号
+2026-08-04 22:49:04 [INFO] [logger:106] 成功读取文件: C:/Users/30495/Desktop/standardized\1-2day-12h-5_20200824124856_Time_processed.txt
+2026-08-04 22:49:04 [INFO] [logger:106] 样品 1-2day-12h-5_20200824124856_Time_processed 读取完成
+2026-08-04 22:49:04 [INFO] [logger:106] 标准化完成: 1-2day-12h-4_20200824124459_Time_processed.txt [standard-txt] -> 1 条信号
+2026-08-04 22:49:04 [INFO] [logger:106] 成功读取文件: C:/Users/30495/Desktop/standardized\1-2day-12h-4_20200824124459_Time_processed.txt
+2026-08-04 22:49:04 [INFO] [logger:106] 样品 1-2day-12h-4_20200824124459_Time_processed 读取完成
+2026-08-04 22:49:04 [INFO] [logger:106] 标准化完成: 1-2day-12h-3_20200824124155_Time_processed.txt [standard-txt] -> 1 条信号
+2026-08-04 22:49:04 [INFO] [logger:106] 成功读取文件: C:/Users/30495/Desktop/standardized\1-2day-12h-3_20200824124155_Time_processed.txt
+2026-08-04 22:49:04 [INFO] [logger:106] 样品 1-2day-12h-3_20200824124155_Time_processed 读取完成
+2026-08-04 22:49:04 [INFO] [logger:106] 标准化完成: 1-2day-12h-2_20200824123849_Time_processed.txt [standard-txt] -> 1 条信号
+2026-08-04 22:49:04 [INFO] [logger:106] 成功读取文件: C:/Users/30495/Desktop/standardized\1-2day-12h-2_20200824123849_Time_processed.txt
+2026-08-04 22:49:04 [INFO] [logger:106] 样品 1-2day-12h-2_20200824123849_Time_processed 读取完成
+2026-08-04 22:49:04 [INFO] [logger:106] 标准化完成: 1-2day-12h-1_20200824123533_Time_processed.txt [standard-txt] -> 1 条信号
+2026-08-04 22:49:04 [INFO] [logger:106] 成功读取文件: C:/Users/30495/Desktop/standardized\1-2day-12h-1_20200824123533_Time_processed.txt
+2026-08-04 22:49:04 [INFO] [logger:106] 样品 1-2day-12h-1_20200824123533_Time_processed 读取完成
+2026-08-04 22:49:04 [INFO] [logger:106] 标准化完成: 1-2day-5_20200824123204_Time_processed.txt [standard-txt] -> 1 条信号
+2026-08-04 22:49:04 [INFO] [logger:106] 成功读取文件: C:/Users/30495/Desktop/standardized\1-2day-5_20200824123204_Time_processed.txt
+2026-08-04 22:49:04 [INFO] [logger:106] 样品 1-2day-5_20200824123204_Time_processed 读取完成
+2026-08-04 22:49:04 [INFO] [logger:106] 标准化完成: 1-2day-4_20200824122841_Time_processed.txt [standard-txt] -> 1 条信号
+2026-08-04 22:49:04 [INFO] [logger:106] 成功读取文件: C:/Users/30495/Desktop/standardized\1-2day-4_20200824122841_Time_processed.txt
+2026-08-04 22:49:04 [INFO] [logger:106] 样品 1-2day-4_20200824122841_Time_processed 读取完成
+2026-08-04 22:49:04 [INFO] [logger:106] 标准化完成: 1-2day-3_20200824122526_Time_processed.txt [standard-txt] -> 1 条信号
+2026-08-04 22:49:04 [INFO] [logger:106] 成功读取文件: C:/Users/30495/Desktop/standardized\1-2day-3_20200824122526_Time_processed.txt
+2026-08-04 22:49:04 [INFO] [logger:106] 样品 1-2day-3_20200824122526_Time_processed 读取完成
+2026-08-04 22:49:04 [INFO] [logger:106] 标准化完成: 1-2day-2_20200824122200_Time_processed.txt [standard-txt] -> 1 条信号
+2026-08-04 22:49:04 [INFO] [logger:106] 成功读取文件: C:/Users/30495/Desktop/standardized\1-2day-2_20200824122200_Time_processed.txt
+2026-08-04 22:49:04 [INFO] [logger:106] 样品 1-2day-2_20200824122200_Time_processed 读取完成
+2026-08-04 22:49:04 [INFO] [logger:106] 标准化完成: 1-2day-1_20200824121840_Time_processed.txt [standard-txt] -> 1 条信号
+2026-08-04 22:49:04 [INFO] [logger:106] 成功读取文件: C:/Users/30495/Desktop/standardized\1-2day-1_20200824121840_Time_processed.txt
+2026-08-04 22:49:04 [INFO] [logger:106] 样品 1-2day-1_20200824121840_Time_processed 读取完成
+2026-08-04 22:49:04 [INFO] [logger:106] 标准化完成: 1-1day-12h-5_20200824121529_Time_processed.txt [standard-txt] -> 1 条信号
+2026-08-04 22:49:04 [INFO] [logger:106] 成功读取文件: C:/Users/30495/Desktop/standardized\1-1day-12h-5_20200824121529_Time_processed.txt
+2026-08-04 22:49:04 [INFO] [logger:106] 样品 1-1day-12h-5_20200824121529_Time_processed 读取完成
+2026-08-04 22:49:04 [INFO] [logger:106] 标准化完成: 1-1day-12h-4_20200824121149_Time_processed.txt [standard-txt] -> 1 条信号
+2026-08-04 22:49:04 [INFO] [logger:106] 成功读取文件: C:/Users/30495/Desktop/standardized\1-1day-12h-4_20200824121149_Time_processed.txt
+2026-08-04 22:49:04 [INFO] [logger:106] 样品 1-1day-12h-4_20200824121149_Time_processed 读取完成
+2026-08-04 22:49:04 [INFO] [logger:106] 标准化完成: 1-1day-12h-3_20200824120349_Time_processed.txt [standard-txt] -> 1 条信号
+2026-08-04 22:49:04 [INFO] [logger:106] 成功读取文件: C:/Users/30495/Desktop/standardized\1-1day-12h-3_20200824120349_Time_processed.txt
+2026-08-04 22:49:04 [INFO] [logger:106] 样品 1-1day-12h-3_20200824120349_Time_processed 读取完成
+2026-08-04 22:49:04 [INFO] [logger:106] 标准化完成: 1-1day-12h-2_20200824115128_Time_processed.txt [standard-txt] -> 1 条信号
+2026-08-04 22:49:04 [INFO] [logger:106] 成功读取文件: C:/Users/30495/Desktop/standardized\1-1day-12h-2_20200824115128_Time_processed.txt
+2026-08-04 22:49:04 [INFO] [logger:106] 样品 1-1day-12h-2_20200824115128_Time_processed 读取完成
+2026-08-04 22:49:04 [INFO] [logger:106] 标准化完成: 1-1day-12h-1_20200824114810_Time_processed.txt [standard-txt] -> 1 条信号
+2026-08-04 22:49:04 [INFO] [logger:106] 成功读取文件: C:/Users/30495/Desktop/standardized\1-1day-12h-1_20200824114810_Time_processed.txt
+2026-08-04 22:49:04 [INFO] [logger:106] 样品 1-1day-12h-1_20200824114810_Time_processed 读取完成
+2026-08-04 22:49:04 [INFO] [logger:106] 标准化完成: 1-1day-5_20200824114354_Time_processed.txt [standard-txt] -> 1 条信号
+2026-08-04 22:49:04 [INFO] [logger:106] 成功读取文件: C:/Users/30495/Desktop/standardized\1-1day-5_20200824114354_Time_processed.txt
+2026-08-04 22:49:04 [INFO] [logger:106] 样品 1-1day-5_20200824114354_Time_processed 读取完成
+2026-08-04 22:49:04 [INFO] [logger:106] 标准化完成: 1-1day-4_20200824114014_Time_processed.txt [standard-txt] -> 1 条信号
+2026-08-04 22:49:04 [INFO] [logger:106] 成功读取文件: C:/Users/30495/Desktop/standardized\1-1day-4_20200824114014_Time_processed.txt
+2026-08-04 22:49:04 [INFO] [logger:106] 样品 1-1day-4_20200824114014_Time_processed 读取完成
+2026-08-04 22:49:04 [INFO] [logger:106] 标准化完成: 1-1day-3_20200824113656_Time_processed.txt [standard-txt] -> 1 条信号
+2026-08-04 22:49:04 [INFO] [logger:106] 成功读取文件: C:/Users/30495/Desktop/standardized\1-1day-3_20200824113656_Time_processed.txt
+2026-08-04 22:49:04 [INFO] [logger:106] 样品 1-1day-3_20200824113656_Time_processed 读取完成
+2026-08-04 22:49:04 [INFO] [logger:106] 标准化完成: 1-1day-2_20200824113354_Time_processed.txt [standard-txt] -> 1 条信号
+2026-08-04 22:49:04 [INFO] [logger:106] 成功读取文件: C:/Users/30495/Desktop/standardized\1-1day-2_20200824113354_Time_processed.txt
+2026-08-04 22:49:04 [INFO] [logger:106] 样品 1-1day-2_20200824113354_Time_processed 读取完成
+2026-08-04 22:49:04 [INFO] [logger:106] 标准化完成: 1-1day-1_20200824113055_Time_processed.txt [standard-txt] -> 1 条信号
+2026-08-04 22:49:04 [INFO] [logger:106] 成功读取文件: C:/Users/30495/Desktop/standardized\1-1day-1_20200824113055_Time_processed.txt
+2026-08-04 22:49:04 [INFO] [logger:106] 样品 1-1day-1_20200824113055_Time_processed 读取完成
+2026-08-04 22:49:04 [INFO] [logger:106] 标准化完成: 1-0day-12h-5_20200824112143_Time_processed.txt [standard-txt] -> 1 条信号
+2026-08-04 22:49:04 [INFO] [logger:106] 成功读取文件: C:/Users/30495/Desktop/standardized\1-0day-12h-5_20200824112143_Time_processed.txt
+2026-08-04 22:49:04 [INFO] [logger:106] 样品 1-0day-12h-5_20200824112143_Time_processed 读取完成
+2026-08-04 22:49:04 [INFO] [logger:106] 标准化完成: 1-0day-12h-4_20200824111839_Time_processed.txt [standard-txt] -> 1 条信号
+2026-08-04 22:49:04 [INFO] [logger:106] 成功读取文件: C:/Users/30495/Desktop/standardized\1-0day-12h-4_20200824111839_Time_processed.txt
+2026-08-04 22:49:04 [INFO] [logger:106] 样品 1-0day-12h-4_20200824111839_Time_processed 读取完成
+2026-08-04 22:49:04 [INFO] [logger:106] 标准化完成: 1-0day-12h-3_20200824111536_Time_processed.txt [standard-txt] -> 1 条信号
+2026-08-04 22:49:04 [INFO] [logger:106] 成功读取文件: C:/Users/30495/Desktop/standardized\1-0day-12h-3_20200824111536_Time_processed.txt
+2026-08-04 22:49:04 [INFO] [logger:106] 样品 1-0day-12h-3_20200824111536_Time_processed 读取完成
+2026-08-04 22:49:04 [INFO] [logger:106] 标准化完成: 1-0day-12h-2_20200824111243_Time_processed.txt [standard-txt] -> 1 条信号
+2026-08-04 22:49:04 [INFO] [logger:106] 成功读取文件: C:/Users/30495/Desktop/standardized\1-0day-12h-2_20200824111243_Time_processed.txt
+2026-08-04 22:49:04 [INFO] [logger:106] 样品 1-0day-12h-2_20200824111243_Time_processed 读取完成
+2026-08-04 22:49:04 [INFO] [logger:106] 标准化完成: 1-0day-12h-1_20200824110658_Time_processed.txt [standard-txt] -> 1 条信号
+2026-08-04 22:49:04 [INFO] [logger:106] 成功读取文件: C:/Users/30495/Desktop/standardized\1-0day-12h-1_20200824110658_Time_processed.txt
+2026-08-04 22:49:04 [INFO] [logger:106] 样品 1-0day-12h-1_20200824110658_Time_processed 读取完成
+2026-08-04 22:49:04 [INFO] [logger:106] 标准化完成: 1-0day-5_20200824110312_Time_processed.txt [standard-txt] -> 1 条信号
+2026-08-04 22:49:04 [INFO] [logger:106] 成功读取文件: C:/Users/30495/Desktop/standardized\1-0day-5_20200824110312_Time_processed.txt
+2026-08-04 22:49:04 [INFO] [logger:106] 样品 1-0day-5_20200824110312_Time_processed 读取完成
+2026-08-04 22:49:04 [INFO] [logger:106] 标准化完成: 1-0day-4_20200824110010_Time_processed.txt [standard-txt] -> 1 条信号
+2026-08-04 22:49:04 [INFO] [logger:106] 成功读取文件: C:/Users/30495/Desktop/standardized\1-0day-4_20200824110010_Time_processed.txt
+2026-08-04 22:49:04 [INFO] [logger:106] 样品 1-0day-4_20200824110010_Time_processed 读取完成
+2026-08-04 22:49:04 [INFO] [logger:106] 标准化完成: 1-0day-3_20200824105640_Time_processed.txt [standard-txt] -> 1 条信号
+2026-08-04 22:49:04 [INFO] [logger:106] 成功读取文件: C:/Users/30495/Desktop/standardized\1-0day-3_20200824105640_Time_processed.txt
+2026-08-04 22:49:04 [INFO] [logger:106] 样品 1-0day-3_20200824105640_Time_processed 读取完成
+2026-08-04 22:49:04 [INFO] [logger:106] 标准化完成: 1-0day-2_20200824105255_Time_processed.txt [standard-txt] -> 1 条信号
+2026-08-04 22:49:04 [INFO] [logger:106] 成功读取文件: C:/Users/30495/Desktop/standardized\1-0day-2_20200824105255_Time_processed.txt
+2026-08-04 22:49:04 [INFO] [logger:106] 样品 1-0day-2_20200824105255_Time_processed 读取完成
+2026-08-04 22:49:04 [INFO] [logger:106] 标准化完成: 1-0day-1_20200824104921_Time_processed.txt [standard-txt] -> 1 条信号
+2026-08-04 22:49:04 [INFO] [logger:106] 成功读取文件: C:/Users/30495/Desktop/standardized\1-0day-1_20200824104921_Time_processed.txt
+2026-08-04 22:49:04 [INFO] [logger:106] 样品 1-0day-1_20200824104921_Time_processed 读取完成
+2026-08-04 22:49:04 [INFO] [logger:106] 光学参数计算完成
+2026-08-04 22:49:05 [INFO] [logger:106] 计算完成
+2026-08-04 22:50:03 [INFO] [logger:106] 标准化完成: reference.txt [delimited-text] -> 1 条信号
+2026-08-04 22:50:03 [INFO] [logger:106] 标准化完成: 1-6day-5_20200824143841_Time_processed.txt [delimited-text] -> 1 条信号
+2026-08-04 22:50:03 [INFO] [logger:106] 标准化完成: 1-6day-4_20200824143512_Time_processed.txt [delimited-text] -> 1 条信号
+2026-08-04 22:50:03 [INFO] [logger:106] 标准化完成: 1-6day-3_20200824143158_Time_processed.txt [delimited-text] -> 1 条信号
+2026-08-04 22:50:03 [INFO] [logger:106] 标准化完成: 1-6day-1_20200824142545_Time_processed.txt [delimited-text] -> 1 条信号
+2026-08-04 22:50:03 [INFO] [logger:106] 标准化新增 5 条信号
+2026-08-04 22:50:33 [INFO] [logger:63] 日志系统初始化完成
+2026-08-04 22:50:33 [INFO] [logger:106] 配置已加载
+2026-08-04 22:51:29 [INFO] [logger:106] 标准化完成: GFRP_20260804200528_ReferenceTd.txt [thz-scan] -> 1 条信号
+2026-08-04 22:51:29 [INFO] [logger:106] 标准化完成: GFRP_20260804200528_Time.txt [thz-scan] -> 2 条信号
+2026-08-04 22:51:29 [INFO] [logger:106] 标准化完成: PTFE_20260804202059_Time.txt [thz-scan] -> 1 条信号
+2026-08-04 22:51:29 [INFO] [logger:106] 标准化完成: PVC_20260804202520_Time.txt [thz-scan] -> 1 条信号
+2026-08-04 22:51:29 [INFO] [logger:106] 标准化新增 5 条信号
+2026-08-04 22:51:45 [INFO] [logger:106] 标准数据已导出: C:/Users/30495/Desktop/standardized\GFRP_20260804200528_ReferenceTd.txt (10000 点)
+2026-08-04 22:51:45 [INFO] [logger:106] 标准数据已导出: C:/Users/30495/Desktop/standardized\GFRP_20260804200528_Time_scan1.txt (10000 点)
+2026-08-04 22:51:45 [INFO] [logger:106] 标准数据已导出: C:/Users/30495/Desktop/standardized\GFRP_20260804200528_Time_scan2.txt (10000 点)
+2026-08-04 22:51:45 [INFO] [logger:106] 标准数据已导出: C:/Users/30495/Desktop/standardized\PTFE_20260804202059_Time.txt (10000 点)
+2026-08-04 22:51:45 [INFO] [logger:106] 标准数据已导出: C:/Users/30495/Desktop/standardized\PVC_20260804202520_Time.txt (10000 点)
+2026-08-04 22:51:45 [INFO] [logger:106] 阶段一完成：参考 GFRP_20260804200528_ReferenceTd，样品 4 条，输出 C:/Users/30495/Desktop/standardized
+2026-08-04 22:51:45 [INFO] [logger:106] 阶段一结果已应用: ref=C:/Users/30495/Desktop/standardized\GFRP_20260804200528_ReferenceTd.txt, samples=4
+2026-08-04 22:51:50 [INFO] [logger:106] 开始异步计算
+2026-08-04 22:51:50 [INFO] [logger:106] 开始计算光学参数，样品数量: 4
+2026-08-04 22:51:50 [INFO] [logger:106] 标准化完成: GFRP_20260804200528_ReferenceTd.txt [standard-txt] -> 1 条信号
+2026-08-04 22:51:50 [INFO] [logger:106] 成功读取文件: C:/Users/30495/Desktop/standardized\GFRP_20260804200528_ReferenceTd.txt
+2026-08-04 22:51:50 [INFO] [logger:106] 参考信号读取完成，数据点数: 10000
+2026-08-04 22:51:50 [INFO] [logger:106] 标准化完成: GFRP_20260804200528_Time_scan1.txt [standard-txt] -> 1 条信号
+2026-08-04 22:51:50 [INFO] [logger:106] 成功读取文件: C:/Users/30495/Desktop/standardized\GFRP_20260804200528_Time_scan1.txt
+2026-08-04 22:51:50 [INFO] [logger:106] 样品 GFRP_20260804200528_Time_scan1 读取完成
+2026-08-04 22:51:50 [INFO] [logger:106] 标准化完成: GFRP_20260804200528_Time_scan2.txt [standard-txt] -> 1 条信号
+2026-08-04 22:51:50 [INFO] [logger:106] 成功读取文件: C:/Users/30495/Desktop/standardized\GFRP_20260804200528_Time_scan2.txt
+2026-08-04 22:51:50 [INFO] [logger:106] 样品 GFRP_20260804200528_Time_scan2 读取完成
+2026-08-04 22:51:50 [INFO] [logger:106] 标准化完成: PTFE_20260804202059_Time.txt [standard-txt] -> 1 条信号
+2026-08-04 22:51:50 [INFO] [logger:106] 成功读取文件: C:/Users/30495/Desktop/standardized\PTFE_20260804202059_Time.txt
+2026-08-04 22:51:50 [INFO] [logger:106] 样品 PTFE_20260804202059_Time 读取完成
+2026-08-04 22:51:50 [INFO] [logger:106] 标准化完成: PVC_20260804202520_Time.txt [standard-txt] -> 1 条信号
+2026-08-04 22:51:50 [INFO] [logger:106] 成功读取文件: C:/Users/30495/Desktop/standardized\PVC_20260804202520_Time.txt
+2026-08-04 22:51:50 [INFO] [logger:106] 样品 PVC_20260804202520_Time 读取完成
+2026-08-04 22:51:50 [INFO] [logger:106] 光学参数计算完成
+2026-08-04 22:51:50 [INFO] [logger:106] 计算完成
+2026-08-04 22:52:42 [INFO] [logger:106] 标准化完成: GFRP_20260804200528_ReferenceTd.txt [thz-scan] -> 1 条信号
+2026-08-04 22:52:42 [INFO] [logger:106] 标准化完成: GFRP_20260804200528_Time.txt [thz-scan] -> 2 条信号
+2026-08-04 22:52:42 [INFO] [logger:106] 标准化完成: PTFE_20260804202059_Time.txt [thz-scan] -> 1 条信号
+2026-08-04 22:52:42 [INFO] [logger:106] 标准化完成: PVC_20260804202520_Time.txt [thz-scan] -> 1 条信号
+2026-08-04 22:52:42 [INFO] [logger:106] 标准化新增 5 条信号
+2026-08-04 22:52:45 [INFO] [logger:106] 标准数据已导出: C:/Users/30495/Desktop/standardized\GFRP_20260804200528_ReferenceTd.txt (10000 点)
+2026-08-04 22:52:45 [INFO] [logger:106] 标准数据已导出: C:/Users/30495/Desktop/standardized\GFRP_20260804200528_Time_scan1.txt (10000 点)
+2026-08-04 22:52:45 [INFO] [logger:106] 标准数据已导出: C:/Users/30495/Desktop/standardized\GFRP_20260804200528_Time_scan2.txt (10000 点)
+2026-08-04 22:52:45 [INFO] [logger:106] 标准数据已导出: C:/Users/30495/Desktop/standardized\PTFE_20260804202059_Time.txt (10000 点)
+2026-08-04 22:52:45 [INFO] [logger:106] 标准数据已导出: C:/Users/30495/Desktop/standardized\PVC_20260804202520_Time.txt (10000 点)
+2026-08-04 22:52:45 [INFO] [logger:106] 阶段一完成：参考 GFRP_20260804200528_ReferenceTd，样品 4 条，输出 C:/Users/30495/Desktop/standardized
+2026-08-04 22:52:45 [INFO] [logger:106] 阶段一结果已应用: ref=C:/Users/30495/Desktop/standardized\GFRP_20260804200528_ReferenceTd.txt, samples=4
+2026-08-04 22:52:56 [INFO] [logger:106] 配置已保存
+2026-08-04 22:52:56 [INFO] [logger:106] 程序关闭
+2026-08-04 22:53:02 [INFO] [logger:63] 日志系统初始化完成
+2026-08-04 22:53:02 [INFO] [logger:106] 配置已加载
+2026-08-04 22:53:30 [INFO] [logger:63] 日志系统初始化完成
+2026-08-04 22:53:30 [INFO] [logger:106] 正在初始化THz分析系统...
+2026-08-04 22:53:30 [INFO] [logger:106] 配置已加载
+2026-08-04 22:53:30 [INFO] [logger:106] THz分析系统初始化完成
+2026-08-04 22:53:52 [INFO] [logger:63] 日志系统初始化完成
+2026-08-04 22:53:52 [INFO] [logger:106] 程序启动
+2026-08-04 22:53:52 [INFO] [logger:106] 正在初始化THz分析系统...
+2026-08-04 22:53:52 [INFO] [logger:106] 配置已加载
+2026-08-04 22:53:52 [INFO] [logger:106] THz分析系统初始化完成
+2026-08-04 22:54:35 [INFO] [logger:106] 选择参考文件: C:/Users/30495/Desktop/测试数据/GFRP_20260804200528_ReferenceTd.txt
+2026-08-04 22:54:37 [INFO] [logger:106] 添加 1 个样品文件
+2026-08-04 22:54:38 [INFO] [logger:106] 开始异步计算
+2026-08-04 22:54:38 [INFO] [logger:106] 开始计算光学参数，样品数量: 1
+2026-08-04 22:54:38 [INFO] [logger:106] 标准化完成: GFRP_20260804200528_ReferenceTd.txt [thz-scan] -> 1 条信号
+2026-08-04 22:54:38 [INFO] [logger:106] 成功读取文件: C:/Users/30495/Desktop/测试数据/GFRP_20260804200528_ReferenceTd.txt
+2026-08-04 22:54:38 [INFO] [logger:106] 参考信号读取完成，数据点数: 10000
+2026-08-04 22:54:38 [INFO] [logger:106] 标准化完成: PTFE_20260804202059_Time.txt [thz-scan] -> 1 条信号
+2026-08-04 22:54:38 [INFO] [logger:106] 成功读取文件: C:/Users/30495/Desktop/测试数据/PTFE_20260804202059_Time.txt
+2026-08-04 22:54:38 [INFO] [logger:106] 样品 PTFE_20260804202059_Time 读取完成
+2026-08-04 22:54:38 [INFO] [logger:106] 光学参数计算完成
+2026-08-04 22:54:38 [INFO] [logger:106] 计算完成
+2026-08-04 22:56:18 [INFO] [logger:63] 日志系统初始化完成
+2026-08-04 22:56:18 [INFO] [logger:106] 正在初始化THz分析系统...
+2026-08-04 22:56:18 [INFO] [logger:106] 配置已加载
+2026-08-04 22:56:18 [INFO] [logger:106] THz分析系统初始化完成
+2026-08-04 22:56:50 [INFO] [logger:106] 配置已保存
+2026-08-04 22:56:50 [INFO] [logger:106] 程序关闭
+2026-08-04 22:56:52 [INFO] [logger:63] 日志系统初始化完成
+2026-08-04 22:56:52 [INFO] [logger:106] 程序启动
+2026-08-04 22:56:52 [INFO] [logger:106] 正在初始化THz分析系统...
+2026-08-04 22:56:52 [INFO] [logger:106] 配置已加载
+2026-08-04 22:56:52 [INFO] [logger:106] THz分析系统初始化完成
+2026-08-04 22:57:06 [INFO] [logger:106] 标准化完成: GFRP_20260804200528_ReferenceTd.txt [thz-scan] -> 1 条信号
+2026-08-04 22:57:06 [INFO] [logger:106] 标准化完成: GFRP_20260804200528_Time.txt [thz-scan] -> 2 条信号
+2026-08-04 22:57:06 [INFO] [logger:106] 标准化完成: PTFE_20260804202059_Time.txt [thz-scan] -> 1 条信号
+2026-08-04 22:57:06 [INFO] [logger:106] 标准化完成: PVC_20260804202520_Time.txt [thz-scan] -> 1 条信号
+2026-08-04 22:57:06 [INFO] [logger:106] 标准化新增 5 条信号
+2026-08-04 22:57:12 [INFO] [logger:106] 标准数据已导出: C:/Users/30495/Desktop/standardized\GFRP_20260804200528_ReferenceTd.txt (10000 点)
+2026-08-04 22:57:12 [INFO] [logger:106] 标准数据已导出: C:/Users/30495/Desktop/standardized\GFRP_20260804200528_Time_scan1.txt (10000 点)
+2026-08-04 22:57:12 [INFO] [logger:106] 标准数据已导出: C:/Users/30495/Desktop/standardized\GFRP_20260804200528_Time_scan2.txt (10000 点)
+2026-08-04 22:57:12 [INFO] [logger:106] 标准数据已导出: C:/Users/30495/Desktop/standardized\PTFE_20260804202059_Time.txt (10000 点)
+2026-08-04 22:57:12 [INFO] [logger:106] 标准数据已导出: C:/Users/30495/Desktop/standardized\PVC_20260804202520_Time.txt (10000 点)
+2026-08-04 22:57:12 [INFO] [logger:106] 阶段一完成：参考 GFRP_20260804200528_ReferenceTd，样品 4 条，输出 C:/Users/30495/Desktop/standardized
+2026-08-04 22:57:14 [INFO] [logger:106] 阶段一结果已应用: ref=C:\Users\30495\Desktop\standardized\GFRP_20260804200528_ReferenceTd.txt, samples=4
+2026-08-04 22:57:21 [INFO] [logger:106] 开始异步计算
+2026-08-04 22:57:21 [INFO] [logger:106] 开始计算光学参数，样品数量: 4
+2026-08-04 22:57:21 [INFO] [logger:106] 标准化完成: GFRP_20260804200528_ReferenceTd.txt [standard-txt] -> 1 条信号
+2026-08-04 22:57:21 [INFO] [logger:106] 成功读取文件: C:\Users\30495\Desktop\standardized\GFRP_20260804200528_ReferenceTd.txt
+2026-08-04 22:57:21 [INFO] [logger:106] 参考信号读取完成，数据点数: 10000
+2026-08-04 22:57:21 [INFO] [logger:106] 标准化完成: GFRP_20260804200528_Time_scan1.txt [standard-txt] -> 1 条信号
+2026-08-04 22:57:21 [INFO] [logger:106] 成功读取文件: C:\Users\30495\Desktop\standardized\GFRP_20260804200528_Time_scan1.txt
+2026-08-04 22:57:21 [INFO] [logger:106] 样品 GFRP_20260804200528_Time_scan1 读取完成
+2026-08-04 22:57:21 [INFO] [logger:106] 标准化完成: GFRP_20260804200528_Time_scan2.txt [standard-txt] -> 1 条信号
+2026-08-04 22:57:21 [INFO] [logger:106] 成功读取文件: C:\Users\30495\Desktop\standardized\GFRP_20260804200528_Time_scan2.txt
+2026-08-04 22:57:21 [INFO] [logger:106] 样品 GFRP_20260804200528_Time_scan2 读取完成
+2026-08-04 22:57:21 [INFO] [logger:106] 标准化完成: PTFE_20260804202059_Time.txt [standard-txt] -> 1 条信号
+2026-08-04 22:57:21 [INFO] [logger:106] 成功读取文件: C:\Users\30495\Desktop\standardized\PTFE_20260804202059_Time.txt
+2026-08-04 22:57:21 [INFO] [logger:106] 样品 PTFE_20260804202059_Time 读取完成
+2026-08-04 22:57:21 [INFO] [logger:106] 标准化完成: PVC_20260804202520_Time.txt [standard-txt] -> 1 条信号
+2026-08-04 22:57:21 [INFO] [logger:106] 成功读取文件: C:\Users\30495\Desktop\standardized\PVC_20260804202520_Time.txt
+2026-08-04 22:57:21 [INFO] [logger:106] 样品 PVC_20260804202520_Time 读取完成
+2026-08-04 22:57:21 [INFO] [logger:106] 光学参数计算完成
+2026-08-04 22:57:21 [INFO] [logger:106] 计算完成
+2026-08-04 22:58:20 [INFO] [logger:106] 配置已保存
+2026-08-04 22:58:20 [INFO] [logger:106] 程序关闭
+2026-08-04 22:58:21 [INFO] [logger:63] 日志系统初始化完成
+2026-08-04 22:58:21 [INFO] [logger:106] 程序启动
+2026-08-04 22:58:21 [INFO] [logger:106] 正在初始化THz分析系统...
+2026-08-04 22:58:21 [INFO] [logger:106] 配置已加载
+2026-08-04 22:58:21 [INFO] [logger:106] THz分析系统初始化完成
+2026-08-04 23:03:00 [INFO] [logger:63] 日志系统初始化完成
+2026-08-04 23:03:00 [INFO] [logger:106] 正在初始化THz分析系统...
+2026-08-04 23:03:00 [INFO] [logger:106] 配置已加载
+2026-08-04 23:03:23 [INFO] [logger:63] 日志系统初始化完成
+2026-08-04 23:03:23 [INFO] [logger:106] 正在初始化THz分析系统...
+2026-08-04 23:03:23 [INFO] [logger:106] 配置已加载
+2026-08-04 23:03:23 [INFO] [logger:106] THz分析系统初始化完成
+2026-08-04 23:03:38 [INFO] [logger:106] 配置已保存
+2026-08-04 23:03:38 [INFO] [logger:106] 程序关闭
+2026-08-04 23:03:40 [INFO] [logger:63] 日志系统初始化完成
+2026-08-04 23:03:40 [INFO] [logger:106] 程序启动
+2026-08-04 23:03:40 [INFO] [logger:106] 正在初始化THz分析系统...
+2026-08-04 23:03:40 [INFO] [logger:106] 配置已加载
+2026-08-04 23:03:40 [INFO] [logger:106] THz分析系统初始化完成
+2026-08-04 23:03:54 [INFO] [logger:106] 配置已保存
+2026-08-04 23:03:54 [INFO] [logger:106] 程序关闭
+2026-08-04 23:03:55 [INFO] [logger:63] 日志系统初始化完成
+2026-08-04 23:03:55 [INFO] [logger:106] 程序启动
+2026-08-04 23:03:55 [INFO] [logger:106] 正在初始化THz分析系统...
+2026-08-04 23:03:55 [INFO] [logger:106] 配置已加载
+2026-08-04 23:03:55 [INFO] [logger:106] THz分析系统初始化完成
+2026-08-04 23:05:12 [INFO] [logger:106] 配置已保存
+2026-08-04 23:05:12 [INFO] [logger:106] 程序关闭
+2026-08-04 23:05:14 [INFO] [logger:63] 日志系统初始化完成
+2026-08-04 23:05:14 [INFO] [logger:106] 程序启动
+2026-08-04 23:05:14 [INFO] [logger:106] 正在初始化THz分析系统...
+2026-08-04 23:05:14 [INFO] [logger:106] 配置已加载
+2026-08-04 23:05:14 [INFO] [logger:106] THz分析系统初始化完成
+2026-08-04 23:05:16 [INFO] [logger:106] 配置已保存
+2026-08-04 23:05:16 [INFO] [logger:106] 程序关闭
+2026-08-04 23:06:17 [INFO] [logger:63] 日志系统初始化完成
+2026-08-04 23:06:17 [INFO] [logger:106] 程序启动
+2026-08-04 23:06:17 [INFO] [logger:106] 正在初始化THz分析系统...
+2026-08-04 23:06:17 [INFO] [logger:106] 配置已加载
+2026-08-04 23:06:17 [INFO] [logger:106] THz分析系统初始化完成
+2026-08-04 23:06:33 [INFO] [logger:106] 配置已保存
+2026-08-04 23:06:33 [INFO] [logger:106] 程序关闭
+2026-08-04 23:06:36 [INFO] [logger:63] 日志系统初始化完成
+2026-08-04 23:06:36 [INFO] [logger:106] 程序启动
+2026-08-04 23:06:36 [INFO] [logger:106] 正在初始化THz分析系统...
+2026-08-04 23:06:36 [INFO] [logger:106] 配置已加载
+2026-08-04 23:06:36 [INFO] [logger:106] THz分析系统初始化完成
+2026-08-04 23:06:46 [INFO] [logger:106] 自动检测起始行: GFRP_20260804200528_ReferenceTd.txt -> 第 1 行
+2026-08-04 23:06:46 [INFO] [logger:106] 标准化完成: GFRP_20260804200528_ReferenceTd.txt [thz-scan] -> 1 条信号
+2026-08-04 23:06:46 [INFO] [logger:106] 自动检测起始行: GFRP_20260804200528_Time.txt -> 第 1 行
+2026-08-04 23:06:46 [INFO] [logger:106] 标准化完成: GFRP_20260804200528_Time.txt [thz-scan] -> 2 条信号
+2026-08-04 23:06:46 [INFO] [logger:106] 自动检测起始行: PTFE_20260804202059_Time.txt -> 第 1 行
+2026-08-04 23:06:46 [INFO] [logger:106] 标准化完成: PTFE_20260804202059_Time.txt [thz-scan] -> 1 条信号
+2026-08-04 23:06:46 [INFO] [logger:106] 自动检测起始行: PVC_20260804202520_Time.txt -> 第 1 行
+2026-08-04 23:06:46 [INFO] [logger:106] 标准化完成: PVC_20260804202520_Time.txt [thz-scan] -> 1 条信号
+2026-08-04 23:06:46 [INFO] [logger:106] 标准化新增 5 条信号
+2026-08-04 23:06:49 [INFO] [logger:106] 标准数据已导出: C:/Users/30495/Desktop/standardized\GFRP_20260804200528_ReferenceTd.txt (10000 点)
+2026-08-04 23:06:49 [INFO] [logger:106] 标准数据已导出: C:/Users/30495/Desktop/standardized\GFRP_20260804200528_Time_scan1.txt (10000 点)
+2026-08-04 23:06:49 [INFO] [logger:106] 标准数据已导出: C:/Users/30495/Desktop/standardized\GFRP_20260804200528_Time_scan2.txt (10000 点)
+2026-08-04 23:06:49 [INFO] [logger:106] 标准数据已导出: C:/Users/30495/Desktop/standardized\PTFE_20260804202059_Time.txt (10000 点)
+2026-08-04 23:06:49 [INFO] [logger:106] 标准数据已导出: C:/Users/30495/Desktop/standardized\PVC_20260804202520_Time.txt (10000 点)
+2026-08-04 23:06:49 [INFO] [logger:106] 阶段一完成：参考 GFRP_20260804200528_ReferenceTd，样品 4 条，输出 C:/Users/30495/Desktop/standardized
+2026-08-04 23:06:50 [INFO] [logger:106] 阶段一结果已应用: ref=C:\Users\30495\Desktop\standardized\GFRP_20260804200528_ReferenceTd.txt, samples=4
+2026-08-04 23:07:01 [INFO] [logger:106] 开始异步计算
+2026-08-04 23:07:01 [INFO] [logger:106] 开始计算光学参数，样品数量: 4
+2026-08-04 23:07:01 [INFO] [logger:106] 标准化完成: GFRP_20260804200528_ReferenceTd.txt [standard-txt] -> 1 条信号
+2026-08-04 23:07:01 [INFO] [logger:106] 成功读取文件: C:\Users\30495\Desktop\standardized\GFRP_20260804200528_ReferenceTd.txt
+2026-08-04 23:07:01 [INFO] [logger:106] 参考信号读取完成，数据点数: 10000
+2026-08-04 23:07:01 [INFO] [logger:106] 标准化完成: GFRP_20260804200528_Time_scan1.txt [standard-txt] -> 1 条信号
+2026-08-04 23:07:01 [INFO] [logger:106] 成功读取文件: C:\Users\30495\Desktop\standardized\GFRP_20260804200528_Time_scan1.txt
+2026-08-04 23:07:01 [INFO] [logger:106] 样品 GFRP_20260804200528_Time_scan1 读取完成
+2026-08-04 23:07:01 [INFO] [logger:106] 标准化完成: GFRP_20260804200528_Time_scan2.txt [standard-txt] -> 1 条信号
+2026-08-04 23:07:01 [INFO] [logger:106] 成功读取文件: C:\Users\30495\Desktop\standardized\GFRP_20260804200528_Time_scan2.txt
+2026-08-04 23:07:01 [INFO] [logger:106] 样品 GFRP_20260804200528_Time_scan2 读取完成
+2026-08-04 23:07:01 [INFO] [logger:106] 标准化完成: PTFE_20260804202059_Time.txt [standard-txt] -> 1 条信号
+2026-08-04 23:07:01 [INFO] [logger:106] 成功读取文件: C:\Users\30495\Desktop\standardized\PTFE_20260804202059_Time.txt
+2026-08-04 23:07:01 [INFO] [logger:106] 样品 PTFE_20260804202059_Time 读取完成
+2026-08-04 23:07:01 [INFO] [logger:106] 标准化完成: PVC_20260804202520_Time.txt [standard-txt] -> 1 条信号
+2026-08-04 23:07:01 [INFO] [logger:106] 成功读取文件: C:\Users\30495\Desktop\standardized\PVC_20260804202520_Time.txt
+2026-08-04 23:07:01 [INFO] [logger:106] 样品 PVC_20260804202520_Time 读取完成
+2026-08-04 23:07:01 [INFO] [logger:106] 光学参数计算完成
+2026-08-04 23:07:01 [INFO] [logger:106] 计算完成
+2026-08-04 23:07:07 [INFO] [logger:63] 日志系统初始化完成
+2026-08-04 23:07:07 [INFO] [logger:106] 正在初始化THz分析系统...
+2026-08-04 23:07:07 [INFO] [logger:106] 配置已加载
+2026-08-04 23:07:07 [INFO] [logger:106] THz分析系统初始化完成
+2026-08-04 23:07:24 [INFO] [logger:106] 自动检测起始行: 20%环烷酸-20250514180348-spectrum_tukey_windowed.xlsx -> 第 21 行
+2026-08-04 23:07:24 [INFO] [logger:106] 标准化完成: 20%环烷酸-20250514180348-spectrum_tukey_windowed.xlsx [excel] -> 1 条信号
+2026-08-04 23:07:24 [INFO] [logger:106] 自动检测起始行: 20%环烷酸-20250514180922-spectrum_tukey_windowed.xlsx -> 第 21 行
+2026-08-04 23:07:24 [INFO] [logger:106] 标准化完成: 20%环烷酸-20250514180922-spectrum_tukey_windowed.xlsx [excel] -> 1 条信号
+2026-08-04 23:07:24 [INFO] [logger:106] 自动检测起始行: 20%环烷酸-20250514181156-spectrum_tukey_windowed.xlsx -> 第 21 行
+2026-08-04 23:07:25 [INFO] [logger:106] 标准化完成: 20%环烷酸-20250514181156-spectrum_tukey_windowed.xlsx [excel] -> 1 条信号
+2026-08-04 23:07:25 [INFO] [logger:106] 自动检测起始行: 20%甲酸-20250514172032-spectrum_tukey_windowed.xlsx -> 第 21 行
+2026-08-04 23:07:25 [INFO] [logger:106] 标准化完成: 20%甲酸-20250514172032-spectrum_tukey_windowed.xlsx [excel] -> 1 条信号
+2026-08-04 23:07:25 [INFO] [logger:106] 自动检测起始行: 50%环烷酸-20250514175726-spectrum_tukey_windowed.xlsx -> 第 21 行
+2026-08-04 23:07:25 [INFO] [logger:106] 标准化完成: 50%环烷酸-20250514175726-spectrum_tukey_windowed.xlsx [excel] -> 1 条信号
+2026-08-04 23:07:25 [INFO] [logger:106] 自动检测起始行: 50%乙酸-20250514174354-spectrum_tukey_windowed.xlsx -> 第 21 行
+2026-08-04 23:07:26 [INFO] [logger:106] 标准化完成: 50%乙酸-20250514174354-spectrum_tukey_windowed.xlsx [excel] -> 1 条信号
+2026-08-04 23:07:26 [INFO] [logger:106] 自动检测起始行: 80%环烷酸-20250514175441-spectrum_tukey_windowed.xlsx -> 第 21 行
+2026-08-04 23:07:26 [INFO] [logger:106] 标准化完成: 80%环烷酸-20250514175441-spectrum_tukey_windowed.xlsx [excel] -> 1 条信号
+2026-08-04 23:07:26 [INFO] [logger:106] 自动检测起始行: 80%甲酸-20250514171356-spectrum_tukey_windowed.xlsx -> 第 21 行
+2026-08-04 23:07:27 [INFO] [logger:106] 标准化完成: 80%甲酸-20250514171356-spectrum_tukey_windowed.xlsx [excel] -> 1 条信号
+2026-08-04 23:07:27 [INFO] [logger:106] 自动检测起始行: 80%乙酸-20250514173636-spectrum_tukey_windowed.xlsx -> 第 21 行
+2026-08-04 23:07:27 [INFO] [logger:106] 标准化完成: 80%乙酸-20250514173636-spectrum_tukey_windowed.xlsx [excel] -> 1 条信号
+2026-08-04 23:07:27 [INFO] [logger:106] 自动检测起始行: pp盖-20250514171301-spectrum_tukey_windowed.xlsx -> 第 21 行
+2026-08-04 23:07:27 [INFO] [logger:106] 标准化完成: pp盖-20250514171301-spectrum_tukey_windowed.xlsx [excel] -> 1 条信号
+2026-08-04 23:07:27 [INFO] [logger:106] 自动检测起始行: 纯环烷酸-20250514180202-spectrum_tukey_windowed.xlsx -> 第 21 行
+2026-08-04 23:07:28 [INFO] [logger:106] 标准化完成: 纯环烷酸-20250514180202-spectrum_tukey_windowed.xlsx [excel] -> 1 条信号
+2026-08-04 23:07:28 [INFO] [logger:106] 自动检测起始行: 纯甲醇-20250514182540-spectrum_tukey_windowed.xlsx -> 第 21 行
+2026-08-04 23:07:28 [INFO] [logger:106] 标准化完成: 纯甲醇-20250514182540-spectrum_tukey_windowed.xlsx [excel] -> 1 条信号
+2026-08-04 23:07:28 [INFO] [logger:106] 自动检测起始行: 纯甲酸-20250514171758-spectrum_tukey_windowed.xlsx -> 第 21 行
+2026-08-04 23:07:28 [INFO] [logger:106] 标准化完成: 纯甲酸-20250514171758-spectrum_tukey_windowed.xlsx [excel] -> 1 条信号
+2026-08-04 23:07:28 [INFO] [logger:106] 自动检测起始行: 纯乙醇-20250514183749-spectrum_tukey_windowed.xlsx -> 第 21 行
+2026-08-04 23:07:29 [INFO] [logger:106] 标准化完成: 纯乙醇-20250514183749-spectrum_tukey_windowed.xlsx [excel] -> 1 条信号
+2026-08-04 23:07:29 [INFO] [logger:106] 自动检测起始行: 纯乙酸-20250514173342-spectrum_tukey_windowed.xlsx -> 第 21 行
+2026-08-04 23:07:29 [INFO] [logger:106] 标准化完成: 纯乙酸-20250514173342-spectrum_tukey_windowed.xlsx [excel] -> 1 条信号
+2026-08-04 23:07:29 [INFO] [logger:106] 自动检测起始行: 甲酸和乙酸-20250514183305-spectrum_tukey_windowed.xlsx -> 第 21 行
+2026-08-04 23:07:30 [INFO] [logger:106] 标准化完成: 甲酸和乙酸-20250514183305-spectrum_tukey_windowed.xlsx [excel] -> 1 条信号
+2026-08-04 23:07:30 [INFO] [logger:106] 自动检测起始行: 甲酸和乙酸和环烷酸-20250514183508-spectrum_tukey_windowed.xlsx -> 第 21 行
+2026-08-04 23:07:30 [INFO] [logger:106] 标准化完成: 甲酸和乙酸和环烷酸-20250514183508-spectrum_tukey_windowed.xlsx [excel] -> 1 条信号
+2026-08-04 23:07:30 [INFO] [logger:106] 自动检测起始行: 空白油-20250514172258-spectrum_tukey_windowed.xlsx -> 第 21 行
+2026-08-04 23:07:30 [INFO] [logger:106] 标准化完成: 空白油-20250514172258-spectrum_tukey_windowed.xlsx [excel] -> 1 条信号
+2026-08-04 23:07:30 [INFO] [logger:106] 自动检测起始行: 空气-20250514173244-spectrum_tukey_windowed.xlsx -> 第 21 行
+2026-08-04 23:07:31 [INFO] [logger:106] 标准化完成: 空气-20250514173244-spectrum_tukey_windowed.xlsx [excel] -> 1 条信号
+2026-08-04 23:07:31 [INFO] [logger:106] 自动检测起始行: 空气-20250514175154-spectrum_tukey_windowed.xlsx -> 第 21 行
+2026-08-04 23:07:31 [INFO] [logger:106] 标准化完成: 空气-20250514175154-spectrum_tukey_windowed.xlsx [excel] -> 1 条信号
+2026-08-04 23:07:31 [INFO] [logger:106] 自动检测起始行: 空气-20250514182319-spectrum_tukey_windowed.xlsx -> 第 21 行
+2026-08-04 23:07:31 [INFO] [logger:106] 标准化完成: 空气-20250514182319-spectrum_tukey_windowed.xlsx [excel] -> 1 条信号
+2026-08-04 23:07:31 [INFO] [logger:106] 标准化新增 21 条信号
+2026-08-04 23:07:34 [INFO] [logger:106] 标准数据已导出: C:/Users/30495/Desktop/standardized\20%环烷酸-20250514180348-spectrum_tukey_windowed.txt (31971 点)
+2026-08-04 23:07:34 [INFO] [logger:106] 标准数据已导出: C:/Users/30495/Desktop/standardized\20%环烷酸-20250514180922-spectrum_tukey_windowed.txt (31971 点)
+2026-08-04 23:07:34 [INFO] [logger:106] 标准数据已导出: C:/Users/30495/Desktop/standardized\20%环烷酸-20250514181156-spectrum_tukey_windowed.txt (31971 点)
+2026-08-04 23:07:34 [INFO] [logger:106] 标准数据已导出: C:/Users/30495/Desktop/standardized\20%甲酸-20250514172032-spectrum_tukey_windowed.txt (31971 点)
+2026-08-04 23:07:34 [INFO] [logger:106] 标准数据已导出: C:/Users/30495/Desktop/standardized\50%环烷酸-20250514175726-spectrum_tukey_windowed.txt (31971 点)
+2026-08-04 23:07:34 [INFO] [logger:106] 标准数据已导出: C:/Users/30495/Desktop/standardized\50%乙酸-20250514174354-spectrum_tukey_windowed.txt (31971 点)
+2026-08-04 23:07:34 [INFO] [logger:106] 标准数据已导出: C:/Users/30495/Desktop/standardized\80%环烷酸-20250514175441-spectrum_tukey_windowed.txt (31971 点)
+2026-08-04 23:07:34 [INFO] [logger:106] 标准数据已导出: C:/Users/30495/Desktop/standardized\80%甲酸-20250514171356-spectrum_tukey_windowed.txt (31971 点)
+2026-08-04 23:07:34 [INFO] [logger:106] 标准数据已导出: C:/Users/30495/Desktop/standardized\80%乙酸-20250514173636-spectrum_tukey_windowed.txt (31971 点)
+2026-08-04 23:07:34 [INFO] [logger:106] 标准数据已导出: C:/Users/30495/Desktop/standardized\pp盖-20250514171301-spectrum_tukey_windowed.txt (31971 点)
+2026-08-04 23:07:34 [INFO] [logger:106] 标准数据已导出: C:/Users/30495/Desktop/standardized\纯环烷酸-20250514180202-spectrum_tukey_windowed.txt (31971 点)
+2026-08-04 23:07:34 [INFO] [logger:106] 标准数据已导出: C:/Users/30495/Desktop/standardized\纯甲醇-20250514182540-spectrum_tukey_windowed.txt (31971 点)
+2026-08-04 23:07:34 [INFO] [logger:106] 标准数据已导出: C:/Users/30495/Desktop/standardized\纯甲酸-20250514171758-spectrum_tukey_windowed.txt (31971 点)
+2026-08-04 23:07:34 [INFO] [logger:106] 标准数据已导出: C:/Users/30495/Desktop/standardized\纯乙醇-20250514183749-spectrum_tukey_windowed.txt (31971 点)
+2026-08-04 23:07:34 [INFO] [logger:106] 标准数据已导出: C:/Users/30495/Desktop/standardized\纯乙酸-20250514173342-spectrum_tukey_windowed.txt (31971 点)
+2026-08-04 23:07:34 [INFO] [logger:106] 标准数据已导出: C:/Users/30495/Desktop/standardized\甲酸和乙酸-20250514183305-spectrum_tukey_windowed.txt (31971 点)
+2026-08-04 23:07:34 [INFO] [logger:106] 标准数据已导出: C:/Users/30495/Desktop/standardized\甲酸和乙酸和环烷酸-20250514183508-spectrum_tukey_windowed.txt (31971 点)
+2026-08-04 23:07:34 [INFO] [logger:106] 标准数据已导出: C:/Users/30495/Desktop/standardized\空白油-20250514172258-spectrum_tukey_windowed.txt (31971 点)
+2026-08-04 23:07:34 [INFO] [logger:106] 标准数据已导出: C:/Users/30495/Desktop/standardized\空气-20250514173244-spectrum_tukey_windowed.txt (31971 点)
+2026-08-04 23:07:34 [INFO] [logger:106] 标准数据已导出: C:/Users/30495/Desktop/standardized\空气-20250514175154-spectrum_tukey_windowed.txt (31971 点)
+2026-08-04 23:07:35 [INFO] [logger:106] 标准数据已导出: C:/Users/30495/Desktop/standardized\空气-20250514182319-spectrum_tukey_windowed.txt (31971 点)
+2026-08-04 23:07:35 [INFO] [logger:106] 阶段一完成：参考 20%环烷酸-20250514180348-spectrum_tukey_windowed，样品 20 条，输出 C:/Users/30495/Desktop/standardized
+2026-08-04 23:07:36 [INFO] [logger:106] 阶段一结果已应用: ref=C:\Users\30495\Desktop\standardized\20%环烷酸-20250514180348-spectrum_tukey_windowed.txt, samples=20
+2026-08-04 23:07:42 [INFO] [logger:106] 开始异步计算
+2026-08-04 23:07:42 [INFO] [logger:106] 开始计算光学参数，样品数量: 20
+2026-08-04 23:07:43 [INFO] [logger:106] 标准化完成: 20%环烷酸-20250514180348-spectrum_tukey_windowed.txt [standard-txt] -> 1 条信号
+2026-08-04 23:07:43 [INFO] [logger:106] 成功读取文件: C:\Users\30495\Desktop\standardized\20%环烷酸-20250514180348-spectrum_tukey_windowed.txt
+2026-08-04 23:07:43 [INFO] [logger:106] 参考信号读取完成，数据点数: 31971
+2026-08-04 23:07:43 [INFO] [logger:106] 标准化完成: 20%环烷酸-20250514180922-spectrum_tukey_windowed.txt [standard-txt] -> 1 条信号
+2026-08-04 23:07:43 [INFO] [logger:106] 成功读取文件: C:\Users\30495\Desktop\standardized\20%环烷酸-20250514180922-spectrum_tukey_windowed.txt
+2026-08-04 23:07:43 [INFO] [logger:106] 样品 20%环烷酸-20250514180922-spectrum_tukey_windowed 读取完成
+2026-08-04 23:07:43 [INFO] [logger:106] 标准化完成: 20%环烷酸-20250514181156-spectrum_tukey_windowed.txt [standard-txt] -> 1 条信号
+2026-08-04 23:07:43 [INFO] [logger:106] 成功读取文件: C:\Users\30495\Desktop\standardized\20%环烷酸-20250514181156-spectrum_tukey_windowed.txt
+2026-08-04 23:07:43 [INFO] [logger:106] 样品 20%环烷酸-20250514181156-spectrum_tukey_windowed 读取完成
+2026-08-04 23:07:43 [INFO] [logger:106] 标准化完成: 20%甲酸-20250514172032-spectrum_tukey_windowed.txt [standard-txt] -> 1 条信号
+2026-08-04 23:07:43 [INFO] [logger:106] 成功读取文件: C:\Users\30495\Desktop\standardized\20%甲酸-20250514172032-spectrum_tukey_windowed.txt
+2026-08-04 23:07:43 [INFO] [logger:106] 样品 20%甲酸-20250514172032-spectrum_tukey_windowed 读取完成
+2026-08-04 23:07:43 [INFO] [logger:106] 标准化完成: 50%环烷酸-20250514175726-spectrum_tukey_windowed.txt [standard-txt] -> 1 条信号
+2026-08-04 23:07:43 [INFO] [logger:106] 成功读取文件: C:\Users\30495\Desktop\standardized\50%环烷酸-20250514175726-spectrum_tukey_windowed.txt
+2026-08-04 23:07:43 [INFO] [logger:106] 样品 50%环烷酸-20250514175726-spectrum_tukey_windowed 读取完成
+2026-08-04 23:07:43 [INFO] [logger:106] 标准化完成: 50%乙酸-20250514174354-spectrum_tukey_windowed.txt [standard-txt] -> 1 条信号
+2026-08-04 23:07:43 [INFO] [logger:106] 成功读取文件: C:\Users\30495\Desktop\standardized\50%乙酸-20250514174354-spectrum_tukey_windowed.txt
+2026-08-04 23:07:43 [INFO] [logger:106] 样品 50%乙酸-20250514174354-spectrum_tukey_windowed 读取完成
+2026-08-04 23:07:43 [INFO] [logger:106] 标准化完成: 80%环烷酸-20250514175441-spectrum_tukey_windowed.txt [standard-txt] -> 1 条信号
+2026-08-04 23:07:43 [INFO] [logger:106] 成功读取文件: C:\Users\30495\Desktop\standardized\80%环烷酸-20250514175441-spectrum_tukey_windowed.txt
+2026-08-04 23:07:43 [INFO] [logger:106] 样品 80%环烷酸-20250514175441-spectrum_tukey_windowed 读取完成
+2026-08-04 23:07:43 [INFO] [logger:106] 标准化完成: 80%甲酸-20250514171356-spectrum_tukey_windowed.txt [standard-txt] -> 1 条信号
+2026-08-04 23:07:43 [INFO] [logger:106] 成功读取文件: C:\Users\30495\Desktop\standardized\80%甲酸-20250514171356-spectrum_tukey_windowed.txt
+2026-08-04 23:07:43 [INFO] [logger:106] 样品 80%甲酸-20250514171356-spectrum_tukey_windowed 读取完成
+2026-08-04 23:07:43 [INFO] [logger:106] 标准化完成: 80%乙酸-20250514173636-spectrum_tukey_windowed.txt [standard-txt] -> 1 条信号
+2026-08-04 23:07:43 [INFO] [logger:106] 成功读取文件: C:\Users\30495\Desktop\standardized\80%乙酸-20250514173636-spectrum_tukey_windowed.txt
+2026-08-04 23:07:43 [INFO] [logger:106] 样品 80%乙酸-20250514173636-spectrum_tukey_windowed 读取完成
+2026-08-04 23:07:43 [INFO] [logger:106] 标准化完成: pp盖-20250514171301-spectrum_tukey_windowed.txt [standard-txt] -> 1 条信号
+2026-08-04 23:07:43 [INFO] [logger:106] 成功读取文件: C:\Users\30495\Desktop\standardized\pp盖-20250514171301-spectrum_tukey_windowed.txt
+2026-08-04 23:07:43 [INFO] [logger:106] 样品 pp盖-20250514171301-spectrum_tukey_windowed 读取完成
+2026-08-04 23:07:43 [INFO] [logger:106] 标准化完成: 纯环烷酸-20250514180202-spectrum_tukey_windowed.txt [standard-txt] -> 1 条信号
+2026-08-04 23:07:43 [INFO] [logger:106] 成功读取文件: C:\Users\30495\Desktop\standardized\纯环烷酸-20250514180202-spectrum_tukey_windowed.txt
+2026-08-04 23:07:43 [INFO] [logger:106] 样品 纯环烷酸-20250514180202-spectrum_tukey_windowed 读取完成
+2026-08-04 23:07:43 [INFO] [logger:106] 标准化完成: 纯甲醇-20250514182540-spectrum_tukey_windowed.txt [standard-txt] -> 1 条信号
+2026-08-04 23:07:43 [INFO] [logger:106] 成功读取文件: C:\Users\30495\Desktop\standardized\纯甲醇-20250514182540-spectrum_tukey_windowed.txt
+2026-08-04 23:07:43 [INFO] [logger:106] 样品 纯甲醇-20250514182540-spectrum_tukey_windowed 读取完成
+2026-08-04 23:07:43 [INFO] [logger:106] 标准化完成: 纯甲酸-20250514171758-spectrum_tukey_windowed.txt [standard-txt] -> 1 条信号
+2026-08-04 23:07:43 [INFO] [logger:106] 成功读取文件: C:\Users\30495\Desktop\standardized\纯甲酸-20250514171758-spectrum_tukey_windowed.txt
+2026-08-04 23:07:43 [INFO] [logger:106] 样品 纯甲酸-20250514171758-spectrum_tukey_windowed 读取完成
+2026-08-04 23:07:43 [INFO] [logger:106] 标准化完成: 纯乙醇-20250514183749-spectrum_tukey_windowed.txt [standard-txt] -> 1 条信号
+2026-08-04 23:07:43 [INFO] [logger:106] 成功读取文件: C:\Users\30495\Desktop\standardized\纯乙醇-20250514183749-spectrum_tukey_windowed.txt
+2026-08-04 23:07:43 [INFO] [logger:106] 样品 纯乙醇-20250514183749-spectrum_tukey_windowed 读取完成
+2026-08-04 23:07:43 [INFO] [logger:106] 标准化完成: 纯乙酸-20250514173342-spectrum_tukey_windowed.txt [standard-txt] -> 1 条信号
+2026-08-04 23:07:43 [INFO] [logger:106] 成功读取文件: C:\Users\30495\Desktop\standardized\纯乙酸-20250514173342-spectrum_tukey_windowed.txt
+2026-08-04 23:07:43 [INFO] [logger:106] 样品 纯乙酸-20250514173342-spectrum_tukey_windowed 读取完成
+2026-08-04 23:07:43 [INFO] [logger:106] 标准化完成: 甲酸和乙酸-20250514183305-spectrum_tukey_windowed.txt [standard-txt] -> 1 条信号
+2026-08-04 23:07:43 [INFO] [logger:106] 成功读取文件: C:\Users\30495\Desktop\standardized\甲酸和乙酸-20250514183305-spectrum_tukey_windowed.txt
+2026-08-04 23:07:43 [INFO] [logger:106] 样品 甲酸和乙酸-20250514183305-spectrum_tukey_windowed 读取完成
+2026-08-04 23:07:43 [INFO] [logger:106] 标准化完成: 甲酸和乙酸和环烷酸-20250514183508-spectrum_tukey_windowed.txt [standard-txt] -> 1 条信号
+2026-08-04 23:07:43 [INFO] [logger:106] 成功读取文件: C:\Users\30495\Desktop\standardized\甲酸和乙酸和环烷酸-20250514183508-spectrum_tukey_windowed.txt
+2026-08-04 23:07:43 [INFO] [logger:106] 样品 甲酸和乙酸和环烷酸-20250514183508-spectrum_tukey_windowed 读取完成
+2026-08-04 23:07:43 [INFO] [logger:106] 标准化完成: 空白油-20250514172258-spectrum_tukey_windowed.txt [standard-txt] -> 1 条信号
+2026-08-04 23:07:43 [INFO] [logger:106] 成功读取文件: C:\Users\30495\Desktop\standardized\空白油-20250514172258-spectrum_tukey_windowed.txt
+2026-08-04 23:07:43 [INFO] [logger:106] 样品 空白油-20250514172258-spectrum_tukey_windowed 读取完成
+2026-08-04 23:07:43 [INFO] [logger:106] 标准化完成: 空气-20250514173244-spectrum_tukey_windowed.txt [standard-txt] -> 1 条信号
+2026-08-04 23:07:43 [INFO] [logger:106] 成功读取文件: C:\Users\30495\Desktop\standardized\空气-20250514173244-spectrum_tukey_windowed.txt
+2026-08-04 23:07:43 [INFO] [logger:106] 样品 空气-20250514173244-spectrum_tukey_windowed 读取完成
+2026-08-04 23:07:43 [INFO] [logger:106] 标准化完成: 空气-20250514175154-spectrum_tukey_windowed.txt [standard-txt] -> 1 条信号
+2026-08-04 23:07:43 [INFO] [logger:106] 成功读取文件: C:\Users\30495\Desktop\standardized\空气-20250514175154-spectrum_tukey_windowed.txt
+2026-08-04 23:07:43 [INFO] [logger:106] 样品 空气-20250514175154-spectrum_tukey_windowed 读取完成
+2026-08-04 23:07:43 [INFO] [logger:106] 标准化完成: 空气-20250514182319-spectrum_tukey_windowed.txt [standard-txt] -> 1 条信号
+2026-08-04 23:07:43 [INFO] [logger:106] 成功读取文件: C:\Users\30495\Desktop\standardized\空气-20250514182319-spectrum_tukey_windowed.txt
+2026-08-04 23:07:43 [INFO] [logger:106] 样品 空气-20250514182319-spectrum_tukey_windowed 读取完成
+2026-08-04 23:07:43 [INFO] [logger:106] 光学参数计算完成
+2026-08-04 23:07:43 [INFO] [logger:106] 计算完成
+2026-08-04 23:07:58 [INFO] [logger:106] 配置已保存
+2026-08-04 23:07:58 [INFO] [logger:106] 程序关闭
+2026-08-04 23:08:03 [INFO] [logger:63] 日志系统初始化完成
+2026-08-04 23:08:03 [INFO] [logger:106] 程序启动
+2026-08-04 23:08:03 [INFO] [logger:106] 正在初始化THz分析系统...
+2026-08-04 23:08:03 [INFO] [logger:106] 配置已加载
+2026-08-04 23:08:03 [INFO] [logger:106] THz分析系统初始化完成
+2026-08-04 23:10:05 [INFO] [logger:106] 配置已保存
+2026-08-04 23:10:05 [INFO] [logger:106] 程序关闭
+2026-08-04 23:10:06 [INFO] [logger:63] 日志系统初始化完成
+2026-08-04 23:10:06 [INFO] [logger:106] 程序启动
+2026-08-04 23:10:06 [INFO] [logger:106] 正在初始化THz分析系统...
+2026-08-04 23:10:06 [INFO] [logger:106] 配置已加载
+2026-08-04 23:10:06 [INFO] [logger:106] THz分析系统初始化完成
+2026-08-04 23:10:10 [INFO] [logger:106] 配置已保存
+2026-08-04 23:10:10 [INFO] [logger:106] 程序关闭
+2026-08-04 23:10:23 [INFO] [logger:63] 日志系统初始化完成
+2026-08-04 23:10:23 [INFO] [logger:106] 程序启动
+2026-08-04 23:10:23 [INFO] [logger:106] 正在初始化THz分析系统...
+2026-08-04 23:10:23 [INFO] [logger:106] 配置已加载
+2026-08-04 23:10:23 [INFO] [logger:106] THz分析系统初始化完成
+2026-08-04 23:10:33 [INFO] [logger:106] 配置已保存
+2026-08-04 23:10:33 [INFO] [logger:106] 程序关闭
+2026-08-04 23:10:39 [INFO] [logger:63] 日志系统初始化完成
+2026-08-04 23:10:39 [INFO] [logger:106] 正在初始化THz分析系统...
+2026-08-04 23:10:39 [INFO] [logger:106] 配置已加载
+2026-08-04 23:10:39 [INFO] [logger:106] THz分析系统初始化完成
+2026-08-04 23:11:49 [INFO] [logger:63] 日志系统初始化完成
+2026-08-04 23:11:49 [INFO] [logger:106] 正在初始化THz分析系统...
+2026-08-04 23:11:49 [INFO] [logger:106] 配置已加载
+2026-08-04 23:11:49 [INFO] [logger:106] THz分析系统初始化完成
+2026-08-04 23:12:56 [INFO] [logger:63] 日志系统初始化完成
+2026-08-04 23:12:56 [INFO] [logger:106] 正在初始化THz分析系统...
+2026-08-04 23:12:56 [INFO] [logger:106] 配置已加载
+2026-08-04 23:12:56 [INFO] [logger:106] THz分析系统初始化完成
+2026-08-04 23:13:05 [INFO] [logger:63] 日志系统初始化完成
+2026-08-04 23:13:05 [INFO] [logger:106] 程序启动
+2026-08-04 23:13:05 [INFO] [logger:106] 正在初始化THz分析系统...
+2026-08-04 23:13:05 [INFO] [logger:106] 配置已加载
+2026-08-04 23:13:05 [INFO] [logger:106] THz分析系统初始化完成
+2026-08-04 23:13:32 [INFO] [logger:106] 自动检测起始行: GFRP_20260804200528_ReferenceTd.txt -> 第 1 行
+2026-08-04 23:13:32 [INFO] [logger:106] 标准化完成: GFRP_20260804200528_ReferenceTd.txt [thz-scan] -> 1 条信号
+2026-08-04 23:13:32 [INFO] [logger:106] 自动检测起始行: GFRP_20260804200528_Time.txt -> 第 1 行
+2026-08-04 23:13:32 [INFO] [logger:106] 标准化完成: GFRP_20260804200528_Time.txt [thz-scan] -> 2 条信号
+2026-08-04 23:13:32 [INFO] [logger:106] 自动检测起始行: PTFE_20260804202059_Time.txt -> 第 1 行
+2026-08-04 23:13:32 [INFO] [logger:106] 标准化完成: PTFE_20260804202059_Time.txt [thz-scan] -> 1 条信号
+2026-08-04 23:13:32 [INFO] [logger:106] 自动检测起始行: PVC_20260804202520_Time.txt -> 第 1 行
+2026-08-04 23:13:32 [INFO] [logger:106] 标准化完成: PVC_20260804202520_Time.txt [thz-scan] -> 1 条信号
+2026-08-04 23:13:32 [INFO] [logger:106] 标准化新增 5 条信号
+2026-08-04 23:13:36 [INFO] [logger:106] 标准数据已导出: C:/Users/30495/Desktop/standardized\GFRP_20260804200528_ReferenceTd.txt (10000 点)
+2026-08-04 23:13:36 [INFO] [logger:106] 标准数据已导出: C:/Users/30495/Desktop/standardized\GFRP_20260804200528_Time_scan1.txt (10000 点)
+2026-08-04 23:13:36 [INFO] [logger:106] 标准数据已导出: C:/Users/30495/Desktop/standardized\GFRP_20260804200528_Time_scan2.txt (10000 点)
+2026-08-04 23:13:36 [INFO] [logger:106] 标准数据已导出: C:/Users/30495/Desktop/standardized\PTFE_20260804202059_Time.txt (10000 点)
+2026-08-04 23:13:36 [INFO] [logger:106] 标准数据已导出: C:/Users/30495/Desktop/standardized\PVC_20260804202520_Time.txt (10000 点)
+2026-08-04 23:13:36 [INFO] [logger:106] 阶段一完成：参考 GFRP_20260804200528_ReferenceTd，样品 4 条，输出 C:/Users/30495/Desktop/standardized
+2026-08-04 23:13:36 [INFO] [logger:106] 阶段一结果已应用: ref=C:\Users\30495\Desktop\standardized\GFRP_20260804200528_ReferenceTd.txt, samples=4
+2026-08-04 23:13:53 [INFO] [logger:106] 开始异步计算
+2026-08-04 23:13:53 [INFO] [logger:106] 开始计算光学参数，样品数量: 4
+2026-08-04 23:13:53 [INFO] [logger:106] 标准化完成: GFRP_20260804200528_ReferenceTd.txt [standard-txt] -> 1 条信号
+2026-08-04 23:13:53 [INFO] [logger:106] 成功读取文件: C:\Users\30495\Desktop\standardized\GFRP_20260804200528_ReferenceTd.txt
+2026-08-04 23:13:53 [INFO] [logger:106] 参考信号读取完成，数据点数: 10000
+2026-08-04 23:13:53 [INFO] [logger:106] 标准化完成: GFRP_20260804200528_Time_scan1.txt [standard-txt] -> 1 条信号
+2026-08-04 23:13:53 [INFO] [logger:106] 成功读取文件: C:\Users\30495\Desktop\standardized\GFRP_20260804200528_Time_scan1.txt
+2026-08-04 23:13:53 [INFO] [logger:106] 样品 GFRP_20260804200528_Time_scan1 读取完成
+2026-08-04 23:13:53 [INFO] [logger:106] 标准化完成: GFRP_20260804200528_Time_scan2.txt [standard-txt] -> 1 条信号
+2026-08-04 23:13:53 [INFO] [logger:106] 成功读取文件: C:\Users\30495\Desktop\standardized\GFRP_20260804200528_Time_scan2.txt
+2026-08-04 23:13:53 [INFO] [logger:106] 样品 GFRP_20260804200528_Time_scan2 读取完成
+2026-08-04 23:13:53 [INFO] [logger:106] 标准化完成: PTFE_20260804202059_Time.txt [standard-txt] -> 1 条信号
+2026-08-04 23:13:53 [INFO] [logger:106] 成功读取文件: C:\Users\30495\Desktop\standardized\PTFE_20260804202059_Time.txt
+2026-08-04 23:13:53 [INFO] [logger:106] 样品 PTFE_20260804202059_Time 读取完成
+2026-08-04 23:13:53 [INFO] [logger:106] 标准化完成: PVC_20260804202520_Time.txt [standard-txt] -> 1 条信号
+2026-08-04 23:13:53 [INFO] [logger:106] 成功读取文件: C:\Users\30495\Desktop\standardized\PVC_20260804202520_Time.txt
+2026-08-04 23:13:53 [INFO] [logger:106] 样品 PVC_20260804202520_Time 读取完成
+2026-08-04 23:13:53 [INFO] [logger:106] 光学参数计算完成
+2026-08-04 23:13:53 [INFO] [logger:106] 计算完成
+2026-08-04 23:13:57 [INFO] [logger:106] 配置已保存
+2026-08-04 23:13:57 [INFO] [logger:106] 程序关闭
+2026-08-04 23:16:51 [INFO] [logger:63] 日志系统初始化完成
+2026-08-04 23:16:51 [INFO] [logger:106] 正在初始化THz分析系统...
+2026-08-04 23:16:51 [INFO] [logger:106] 配置已加载
+2026-08-04 23:17:03 [INFO] [logger:63] 日志系统初始化完成
+2026-08-04 23:17:03 [INFO] [logger:106] 正在初始化THz分析系统...
+2026-08-04 23:17:03 [INFO] [logger:106] 配置已加载
+2026-08-04 23:17:03 [INFO] [logger:106] THz分析系统初始化完成
+2026-08-04 23:17:16 [INFO] [logger:63] 日志系统初始化完成
+2026-08-04 23:17:16 [INFO] [logger:106] 正在初始化THz分析系统...
+2026-08-04 23:17:16 [INFO] [logger:106] 配置已加载
+2026-08-04 23:17:16 [INFO] [logger:106] THz分析系统初始化完成
+2026-08-04 23:17:16 [INFO] [logger:106] 自动检测起始行: ref.txt -> 第 1 行
+2026-08-04 23:17:16 [INFO] [logger:106] 标准化完成: ref.txt [standard-txt] -> 1 条信号
+2026-08-04 23:17:16 [INFO] [logger:106] 自动检测起始行: sam.txt -> 第 1 行
+2026-08-04 23:17:16 [INFO] [logger:106] 标准化完成: sam.txt [standard-txt] -> 1 条信号
+2026-08-04 23:17:16 [INFO] [logger:106] 标准数据已导出: C:\Users\30495\AppData\Local\Temp\tmpozluyzaq\out\ref.txt (1000 点)
+2026-08-04 23:17:16 [INFO] [logger:106] 标准数据已导出: C:\Users\30495\AppData\Local\Temp\tmpozluyzaq\out\sam.txt (1000 点)
+2026-08-04 23:17:16 [INFO] [logger:106] 阶段一完成：参考 ref，样品 1 条，输出 C:\Users\30495\AppData\Local\Temp\tmpozluyzaq\out
+2026-08-04 23:18:03 [INFO] [logger:63] 日志系统初始化完成
+2026-08-04 23:18:03 [INFO] [logger:106] 程序启动
+2026-08-04 23:18:03 [INFO] [logger:106] 正在初始化THz分析系统...
+2026-08-04 23:18:03 [INFO] [logger:106] 配置已加载
+2026-08-04 23:18:03 [INFO] [logger:106] THz分析系统初始化完成
+2026-08-04 23:18:18 [INFO] [logger:106] 配置已保存
+2026-08-04 23:18:18 [INFO] [logger:106] 程序关闭
+2026-08-04 23:29:15 [INFO] [logger:63] 日志系统初始化完成
+2026-08-04 23:29:15 [INFO] [logger:106] 正在初始化THz分析系统...
+2026-08-04 23:29:15 [INFO] [logger:106] 配置已加载
+2026-08-04 23:29:15 [INFO] [logger:106] THz分析系统初始化完成
+2026-08-04 23:29:30 [INFO] [logger:63] 日志系统初始化完成
+2026-08-04 23:29:30 [INFO] [logger:106] 程序启动
+2026-08-04 23:29:30 [INFO] [logger:106] 正在初始化THz分析系统...
+2026-08-04 23:29:30 [INFO] [logger:106] 配置已加载
+2026-08-04 23:29:30 [INFO] [logger:63] 日志系统初始化完成
+2026-08-04 23:29:30 [INFO] [logger:106] 自动检测起始行: raw.csv -> 第 3 行
+2026-08-04 23:29:30 [INFO] [logger:106] 标准化完成: raw.csv [delimited-text] -> 1 条信号
+2026-08-04 23:29:30 [INFO] [logger:106] 标准数据已导出: C:\Users\30495\AppData\Local\Temp\tmp36brb0yb\std.txt (2 点)
+2026-08-04 23:29:30 [INFO] [logger:106] THz分析系统初始化完成
+2026-08-04 23:29:46 [INFO] [logger:63] 日志系统初始化完成
+2026-08-04 23:29:46 [INFO] [logger:106] 程序启动
+2026-08-04 23:29:46 [INFO] [logger:106] 正在初始化THz分析系统...
+2026-08-04 23:29:46 [INFO] [logger:106] 配置已加载
+2026-08-04 23:29:46 [INFO] [logger:106] THz分析系统初始化完成
+2026-08-04 23:29:47 [INFO] [logger:63] 日志系统初始化完成
+2026-08-04 23:29:47 [INFO] [logger:106] 自动检测起始行: raw.csv -> 第 3 行
+2026-08-04 23:29:47 [INFO] [logger:106] 标准化完成: raw.csv [delimited-text] -> 1 条信号
+2026-08-04 23:29:47 [INFO] [logger:106] 标准数据已导出: C:\Users\30495\AppData\Local\Temp\tmpmgstmk35\std.txt (2 点)
+2026-08-04 23:29:52 [INFO] [logger:63] 日志系统初始化完成
+2026-08-04 23:29:52 [INFO] [logger:106] 程序启动
+2026-08-04 23:29:52 [INFO] [logger:106] 正在初始化THz分析系统...
+2026-08-04 23:29:52 [INFO] [logger:106] 配置已加载
+2026-08-04 23:29:52 [INFO] [logger:106] THz分析系统初始化完成
+2026-08-04 23:29:58 [INFO] [logger:106] 自动检测起始行: GFRP_20260804200528_ReferenceTd.txt -> 第 1 行
+2026-08-04 23:29:58 [INFO] [logger:106] 标准化完成: GFRP_20260804200528_ReferenceTd.txt [thz-scan] -> 1 条信号
+2026-08-04 23:29:58 [INFO] [logger:106] 标准数据已导出: C:/Users/30495/Desktop/standardized\GFRP_20260804200528_ReferenceTd.txt (10000 点)
+2026-08-04 23:29:58 [INFO] [logger:106] 选择参考文件（自动标准化）: C:\Users\30495\Desktop\standardized\GFRP_20260804200528_ReferenceTd.txt
+2026-08-04 23:30:01 [INFO] [logger:106] 自动检测起始行: GFRP_20260804200528_Time.txt -> 第 1 行
+2026-08-04 23:30:01 [INFO] [logger:106] 标准化完成: GFRP_20260804200528_Time.txt [thz-scan] -> 2 条信号
+2026-08-04 23:30:01 [INFO] [logger:106] 标准数据已导出: C:/Users/30495/Desktop/standardized\GFRP_20260804200528_Time_1.txt (10000 点)
+2026-08-04 23:30:01 [INFO] [logger:106] 标准数据已导出: C:/Users/30495/Desktop/standardized\GFRP_20260804200528_Time_2.txt (10000 点)
+2026-08-04 23:30:01 [INFO] [logger:106] 自动检测起始行: PTFE_20260804202059_Time.txt -> 第 1 行
+2026-08-04 23:30:01 [INFO] [logger:106] 标准化完成: PTFE_20260804202059_Time.txt [thz-scan] -> 1 条信号
+2026-08-04 23:30:01 [INFO] [logger:106] 标准数据已导出: C:/Users/30495/Desktop/standardized\PTFE_20260804202059_Time.txt (10000 点)
+2026-08-04 23:30:01 [INFO] [logger:106] 自动检测起始行: PVC_20260804202520_Time.txt -> 第 1 行
+2026-08-04 23:30:01 [INFO] [logger:106] 标准化完成: PVC_20260804202520_Time.txt [thz-scan] -> 1 条信号
+2026-08-04 23:30:01 [INFO] [logger:106] 标准数据已导出: C:/Users/30495/Desktop/standardized\PVC_20260804202520_Time.txt (10000 点)
+2026-08-04 23:30:01 [INFO] [logger:106] 添加 4 个样品文件（自动标准化）
+2026-08-04 23:30:11 [INFO] [logger:106] 开始异步计算
+2026-08-04 23:30:11 [INFO] [logger:106] 开始计算光学参数，样品数量: 4
+2026-08-04 23:30:11 [INFO] [logger:106] 标准化完成: GFRP_20260804200528_ReferenceTd.txt [standard-txt] -> 1 条信号
+2026-08-04 23:30:11 [INFO] [logger:106] 成功读取文件: C:\Users\30495\Desktop\standardized\GFRP_20260804200528_ReferenceTd.txt
+2026-08-04 23:30:11 [INFO] [logger:106] 参考信号读取完成，数据点数: 10000
+2026-08-04 23:30:11 [INFO] [logger:106] 标准化完成: GFRP_20260804200528_Time_1.txt [standard-txt] -> 1 条信号
+2026-08-04 23:30:11 [INFO] [logger:106] 成功读取文件: C:\Users\30495\Desktop\standardized\GFRP_20260804200528_Time_1.txt
+2026-08-04 23:30:11 [INFO] [logger:106] 样品 GFRP_20260804200528_Time_1 读取完成
+2026-08-04 23:30:11 [INFO] [logger:106] 标准化完成: GFRP_20260804200528_Time_2.txt [standard-txt] -> 1 条信号
+2026-08-04 23:30:11 [INFO] [logger:106] 成功读取文件: C:\Users\30495\Desktop\standardized\GFRP_20260804200528_Time_2.txt
+2026-08-04 23:30:11 [INFO] [logger:106] 样品 GFRP_20260804200528_Time_2 读取完成
+2026-08-04 23:30:11 [INFO] [logger:106] 标准化完成: PTFE_20260804202059_Time.txt [standard-txt] -> 1 条信号
+2026-08-04 23:30:11 [INFO] [logger:106] 成功读取文件: C:\Users\30495\Desktop\standardized\PTFE_20260804202059_Time.txt
+2026-08-04 23:30:11 [INFO] [logger:106] 样品 PTFE_20260804202059_Time 读取完成
+2026-08-04 23:30:11 [INFO] [logger:106] 标准化完成: PVC_20260804202520_Time.txt [standard-txt] -> 1 条信号
+2026-08-04 23:30:11 [INFO] [logger:106] 成功读取文件: C:\Users\30495\Desktop\standardized\PVC_20260804202520_Time.txt
+2026-08-04 23:30:11 [INFO] [logger:106] 样品 PVC_20260804202520_Time 读取完成
+2026-08-04 23:30:11 [INFO] [logger:106] 光学参数计算完成
+2026-08-04 23:30:12 [INFO] [logger:106] 计算完成
+2026-08-04 23:30:52 [INFO] [logger:106] 配置已保存
+2026-08-04 23:30:52 [INFO] [logger:106] 程序关闭
+2026-08-04 23:30:53 [INFO] [logger:63] 日志系统初始化完成
+2026-08-04 23:30:53 [INFO] [logger:106] 程序启动
+2026-08-04 23:30:53 [INFO] [logger:106] 正在初始化THz分析系统...
+2026-08-04 23:30:53 [INFO] [logger:106] 配置已加载
+2026-08-04 23:30:53 [INFO] [logger:106] THz分析系统初始化完成
+2026-08-04 23:30:59 [INFO] [logger:63] 日志系统初始化完成
+2026-08-04 23:30:59 [INFO] [logger:106] 程序启动
+2026-08-04 23:30:59 [INFO] [logger:106] 正在初始化THz分析系统...
+2026-08-04 23:30:59 [INFO] [logger:106] 配置已加载
+2026-08-04 23:30:59 [INFO] [logger:106] THz分析系统初始化完成
+2026-08-04 23:31:27 [INFO] [logger:106] 配置已保存
+2026-08-04 23:31:27 [INFO] [logger:106] 程序关闭
+2026-08-04 23:33:13 [INFO] [logger:63] 日志系统初始化完成
+2026-08-04 23:33:13 [INFO] [logger:106] 程序启动
+2026-08-04 23:33:13 [INFO] [logger:106] 正在初始化THz分析系统...
+2026-08-04 23:33:13 [INFO] [logger:106] 配置已加载
+2026-08-04 23:33:13 [INFO] [logger:106] THz分析系统初始化完成
+2026-08-04 23:34:10 [INFO] [logger:63] 日志系统初始化完成
+2026-08-04 23:34:10 [INFO] [logger:106] 正在初始化THz分析系统...
+2026-08-04 23:34:10 [INFO] [logger:106] 配置已加载
+2026-08-04 23:34:10 [INFO] [logger:106] THz分析系统初始化完成
+2026-08-04 23:34:19 [INFO] [logger:63] 日志系统初始化完成
+2026-08-04 23:34:19 [INFO] [logger:106] 自动检测起始行: raw.csv -> 第 3 行
+2026-08-04 23:34:19 [INFO] [logger:106] 标准化完成: raw.csv [delimited-text] -> 1 条信号
+2026-08-04 23:34:19 [INFO] [logger:106] 标准数据已导出: C:\Users\30495\AppData\Local\Temp\tmpyym9vg6g\raw.txt (2 点)
+2026-08-04 23:34:56 [INFO] [logger:63] 日志系统初始化完成
+2026-08-04 23:34:56 [INFO] [logger:106] 程序启动
+2026-08-04 23:34:56 [INFO] [logger:106] 正在初始化THz分析系统...
+2026-08-04 23:34:56 [INFO] [logger:106] 配置已加载
+2026-08-04 23:34:56 [INFO] [logger:106] THz分析系统初始化完成
+2026-08-04 23:34:59 [INFO] [logger:63] 日志系统初始化完成
+2026-08-04 23:34:59 [INFO] [logger:106] 正在初始化THz分析系统...
+2026-08-04 23:34:59 [INFO] [logger:106] 配置已加载
+2026-08-04 23:34:59 [INFO] [logger:106] THz分析系统初始化完成
+2026-08-04 23:35:45 [INFO] [logger:106] 配置已保存
+2026-08-04 23:35:45 [INFO] [logger:106] 程序关闭
+2026-08-04 23:36:18 [INFO] [logger:63] 日志系统初始化完成
+2026-08-04 23:36:18 [INFO] [logger:106] 程序启动
+2026-08-04 23:36:18 [INFO] [logger:106] 正在初始化THz分析系统...
+2026-08-04 23:36:18 [INFO] [logger:106] 配置已加载
+2026-08-04 23:36:18 [INFO] [logger:106] THz分析系统初始化完成
+2026-08-04 23:36:40 [INFO] [logger:106] 配置已保存
+2026-08-04 23:36:40 [INFO] [logger:106] 程序关闭
+2026-08-04 23:36:45 [INFO] [logger:63] 日志系统初始化完成
+2026-08-04 23:36:45 [INFO] [logger:106] 正在初始化THz分析系统...
+2026-08-04 23:36:45 [INFO] [logger:106] 配置已加载
+2026-08-04 23:36:45 [INFO] [logger:106] THz分析系统初始化完成
+2026-08-04 23:37:44 [INFO] [logger:63] 日志系统初始化完成
+2026-08-04 23:37:44 [INFO] [logger:106] 程序启动
+2026-08-04 23:37:44 [INFO] [logger:106] 正在初始化THz分析系统...
+2026-08-04 23:37:44 [INFO] [logger:106] 配置已加载
+2026-08-04 23:37:45 [INFO] [logger:106] THz分析系统初始化完成
+2026-08-04 23:38:27 [INFO] [logger:106] 配置已保存
+2026-08-04 23:38:27 [INFO] [logger:106] 程序关闭
+2026-08-04 23:38:32 [INFO] [logger:63] 日志系统初始化完成
+2026-08-04 23:38:32 [INFO] [logger:106] 正在初始化THz分析系统...
+2026-08-04 23:38:32 [INFO] [logger:106] 配置已加载
+2026-08-04 23:38:32 [INFO] [logger:106] THz分析系统初始化完成
+2026-08-04 23:38:41 [INFO] [logger:63] 日志系统初始化完成
+2026-08-04 23:38:41 [INFO] [logger:106] 正在初始化THz分析系统...
+2026-08-04 23:38:41 [INFO] [logger:106] 配置已加载
+2026-08-04 23:38:41 [INFO] [logger:106] THz分析系统初始化完成
+2026-08-04 23:39:01 [INFO] [logger:63] 日志系统初始化完成
+2026-08-04 23:39:01 [INFO] [logger:106] 程序启动
+2026-08-04 23:39:01 [INFO] [logger:106] 正在初始化THz分析系统...
+2026-08-04 23:39:01 [INFO] [logger:106] 配置已加载
+2026-08-04 23:39:01 [INFO] [logger:106] THz分析系统初始化完成
+2026-08-04 23:39:09 [INFO] [logger:106] 自动检测起始行: GFRP_20260804200528_ReferenceTd.txt -> 第 1 行
+2026-08-04 23:39:09 [INFO] [logger:106] 标准化完成: GFRP_20260804200528_ReferenceTd.txt [thz-scan] -> 1 条信号
+2026-08-04 23:39:09 [INFO] [logger:106] 标准数据已导出: C:/Users/30495/Desktop/standardized\GFRP_20260804200528_ReferenceTd.txt (10000 点)
+2026-08-04 23:39:09 [INFO] [logger:106] 选择参考文件（自动标准化）: C:\Users\30495\Desktop\standardized\GFRP_20260804200528_ReferenceTd.txt
+2026-08-04 23:39:22 [INFO] [logger:106] 自动检测起始行: GFRP_20260804200528_ReferenceTd.txt -> 第 1 行
+2026-08-04 23:39:22 [INFO] [logger:106] 标准化完成: GFRP_20260804200528_ReferenceTd.txt [thz-scan] -> 1 条信号
+2026-08-04 23:39:22 [INFO] [logger:106] 标准数据已导出: C:/Users/30495/Desktop/standardized\GFRP_20260804200528_ReferenceTd.txt (10000 点)
+2026-08-04 23:39:22 [INFO] [logger:106] 选择参考文件（自动标准化）: C:\Users\30495\Desktop\standardized\GFRP_20260804200528_ReferenceTd.txt
+2026-08-04 23:39:26 [INFO] [logger:106] 自动检测起始行: GFRP_20260804200528_Time.txt -> 第 1 行
+2026-08-04 23:39:26 [INFO] [logger:106] 标准化完成: GFRP_20260804200528_Time.txt [thz-scan] -> 2 条信号
+2026-08-04 23:39:26 [INFO] [logger:106] 标准数据已导出: C:/Users/30495/Desktop/standardized\GFRP_20260804200528_Time_1.txt (10000 点)
+2026-08-04 23:39:26 [INFO] [logger:106] 标准数据已导出: C:/Users/30495/Desktop/standardized\GFRP_20260804200528_Time_2.txt (10000 点)
+2026-08-04 23:39:26 [INFO] [logger:106] 自动检测起始行: PTFE_20260804202059_Time.txt -> 第 1 行
+2026-08-04 23:39:26 [INFO] [logger:106] 标准化完成: PTFE_20260804202059_Time.txt [thz-scan] -> 1 条信号
+2026-08-04 23:39:26 [INFO] [logger:106] 标准数据已导出: C:/Users/30495/Desktop/standardized\PTFE_20260804202059_Time.txt (10000 点)
+2026-08-04 23:39:26 [INFO] [logger:106] 自动检测起始行: PVC_20260804202520_Time.txt -> 第 1 行
+2026-08-04 23:39:26 [INFO] [logger:106] 标准化完成: PVC_20260804202520_Time.txt [thz-scan] -> 1 条信号
+2026-08-04 23:39:26 [INFO] [logger:106] 标准数据已导出: C:/Users/30495/Desktop/standardized\PVC_20260804202520_Time.txt (10000 点)
+2026-08-04 23:39:26 [INFO] [logger:106] 添加 4 个样品文件（自动标准化）
+2026-08-04 23:39:46 [INFO] [logger:63] 日志系统初始化完成
+2026-08-04 23:39:46 [INFO] [logger:106] 正在初始化THz分析系统...
+2026-08-04 23:39:46 [INFO] [logger:106] 配置已加载
+2026-08-04 23:39:46 [INFO] [logger:106] THz分析系统初始化完成
+2026-08-04 23:40:28 [INFO] [logger:106] 配置已保存
+2026-08-04 23:40:28 [INFO] [logger:106] 程序关闭
+2026-08-04 23:40:29 [INFO] [logger:63] 日志系统初始化完成
+2026-08-04 23:40:29 [INFO] [logger:106] 程序启动
+2026-08-04 23:40:29 [INFO] [logger:106] 正在初始化THz分析系统...
+2026-08-04 23:40:29 [INFO] [logger:106] 配置已加载
+2026-08-04 23:40:29 [INFO] [logger:106] THz分析系统初始化完成
+2026-08-04 23:40:44 [INFO] [logger:106] 配置已保存
+2026-08-04 23:40:44 [INFO] [logger:106] 程序关闭
+2026-08-04 23:41:59 [INFO] [logger:63] 日志系统初始化完成
+2026-08-04 23:41:59 [INFO] [logger:106] 正在初始化THz分析系统...
+2026-08-04 23:41:59 [INFO] [logger:106] 配置已加载
+2026-08-04 23:41:59 [INFO] [logger:106] THz分析系统初始化完成
+2026-08-04 23:42:14 [INFO] [logger:63] 日志系统初始化完成
+2026-08-04 23:42:14 [INFO] [logger:106] 正在初始化THz分析系统...
+2026-08-04 23:42:14 [INFO] [logger:106] 配置已加载
+2026-08-04 23:42:14 [INFO] [logger:106] THz分析系统初始化完成
+2026-08-04 23:42:28 [INFO] [logger:63] 日志系统初始化完成
+2026-08-04 23:42:28 [INFO] [logger:106] 程序启动
+2026-08-04 23:42:28 [INFO] [logger:106] 正在初始化THz分析系统...
+2026-08-04 23:42:28 [INFO] [logger:106] 配置已加载
+2026-08-04 23:42:28 [INFO] [logger:106] THz分析系统初始化完成
+2026-08-04 23:42:34 [INFO] [logger:106] 配置已保存
+2026-08-04 23:42:34 [INFO] [logger:106] 程序关闭
+2026-08-04 23:43:01 [INFO] [logger:63] 日志系统初始化完成
+2026-08-04 23:43:01 [INFO] [logger:106] 正在初始化THz分析系统...
+2026-08-04 23:43:01 [INFO] [logger:106] 配置已加载
+2026-08-04 23:43:01 [INFO] [logger:106] THz分析系统初始化完成
+2026-08-04 23:45:55 [INFO] [logger:63] 日志系统初始化完成
+2026-08-04 23:45:55 [INFO] [logger:106] 程序启动
+2026-08-04 23:45:55 [INFO] [logger:106] 正在初始化THz分析系统...
+2026-08-04 23:45:55 [INFO] [logger:106] 配置已加载
+2026-08-04 23:45:55 [INFO] [logger:106] THz分析系统初始化完成
+2026-08-04 23:46:09 [INFO] [logger:106] 自动检测起始行: GFRP_20260804200528_Time.txt -> 第 1 行
+2026-08-04 23:46:09 [INFO] [logger:106] 标准化完成: GFRP_20260804200528_Time.txt [thz-scan] -> 2 条信号
+2026-08-04 23:46:09 [INFO] [logger:106] 标准数据已导出: C:/Users/30495/Desktop/standardized\GFRP_20260804200528_Time_1.txt (10000 点)
+2026-08-04 23:46:09 [INFO] [logger:106] 标准数据已导出: C:/Users/30495/Desktop/standardized\GFRP_20260804200528_Time_2.txt (10000 点)
+2026-08-04 23:46:09 [INFO] [logger:106] 自动检测起始行: PTFE_20260804202059_Time.txt -> 第 1 行
+2026-08-04 23:46:09 [INFO] [logger:106] 标准化完成: PTFE_20260804202059_Time.txt [thz-scan] -> 1 条信号
+2026-08-04 23:46:10 [INFO] [logger:106] 标准数据已导出: C:/Users/30495/Desktop/standardized\PTFE_20260804202059_Time.txt (10000 点)
+2026-08-04 23:46:10 [INFO] [logger:106] 自动检测起始行: PVC_20260804202520_Time.txt -> 第 1 行
+2026-08-04 23:46:10 [INFO] [logger:106] 标准化完成: PVC_20260804202520_Time.txt [thz-scan] -> 1 条信号
+2026-08-04 23:46:10 [INFO] [logger:106] 标准数据已导出: C:/Users/30495/Desktop/standardized\PVC_20260804202520_Time.txt (10000 点)
+2026-08-04 23:46:10 [INFO] [logger:106] 添加 4 个样品文件（自动标准化）
+2026-08-04 23:46:11 [INFO] [logger:106] 自动检测起始行: GFRP_20260804200528_ReferenceTd.txt -> 第 1 行
+2026-08-04 23:46:11 [INFO] [logger:106] 标准化完成: GFRP_20260804200528_ReferenceTd.txt [thz-scan] -> 1 条信号
+2026-08-04 23:46:11 [INFO] [logger:106] 标准数据已导出: C:/Users/30495/Desktop/standardized\GFRP_20260804200528_ReferenceTd.txt (10000 点)
+2026-08-04 23:46:11 [INFO] [logger:106] 选择参考文件（自动标准化）: C:\Users\30495\Desktop\standardized\GFRP_20260804200528_ReferenceTd.txt
+2026-08-04 23:46:17 [INFO] [logger:106] 开始异步计算
+2026-08-04 23:46:17 [INFO] [logger:106] 开始计算光学参数，样品数量: 4
+2026-08-04 23:46:17 [INFO] [logger:106] 标准化完成: GFRP_20260804200528_ReferenceTd.txt [standard-txt] -> 1 条信号
+2026-08-04 23:46:17 [INFO] [logger:106] 成功读取文件: C:\Users\30495\Desktop\standardized\GFRP_20260804200528_ReferenceTd.txt
+2026-08-04 23:46:17 [INFO] [logger:106] 参考信号读取完成，数据点数: 10000
+2026-08-04 23:46:17 [INFO] [logger:106] 标准化完成: GFRP_20260804200528_Time_1.txt [standard-txt] -> 1 条信号
+2026-08-04 23:46:17 [INFO] [logger:106] 成功读取文件: C:\Users\30495\Desktop\standardized\GFRP_20260804200528_Time_1.txt
+2026-08-04 23:46:17 [INFO] [logger:106] 样品 GFRP_20260804200528_Time_1 读取完成
+2026-08-04 23:46:17 [INFO] [logger:106] 标准化完成: GFRP_20260804200528_Time_2.txt [standard-txt] -> 1 条信号
+2026-08-04 23:46:17 [INFO] [logger:106] 成功读取文件: C:\Users\30495\Desktop\standardized\GFRP_20260804200528_Time_2.txt
+2026-08-04 23:46:17 [INFO] [logger:106] 样品 GFRP_20260804200528_Time_2 读取完成
+2026-08-04 23:46:17 [INFO] [logger:106] 标准化完成: PTFE_20260804202059_Time.txt [standard-txt] -> 1 条信号
+2026-08-04 23:46:17 [INFO] [logger:106] 成功读取文件: C:\Users\30495\Desktop\standardized\PTFE_20260804202059_Time.txt
+2026-08-04 23:46:17 [INFO] [logger:106] 样品 PTFE_20260804202059_Time 读取完成
+2026-08-04 23:46:17 [INFO] [logger:106] 标准化完成: PVC_20260804202520_Time.txt [standard-txt] -> 1 条信号
+2026-08-04 23:46:17 [INFO] [logger:106] 成功读取文件: C:\Users\30495\Desktop\standardized\PVC_20260804202520_Time.txt
+2026-08-04 23:46:17 [INFO] [logger:106] 样品 PVC_20260804202520_Time 读取完成
+2026-08-04 23:46:17 [INFO] [logger:106] 光学参数计算完成
+2026-08-04 23:46:18 [INFO] [logger:106] 计算完成
+2026-08-04 23:47:13 [INFO] [logger:106] 开始异步计算
+2026-08-04 23:47:13 [INFO] [logger:106] 开始计算光学参数，样品数量: 1
+2026-08-04 23:47:13 [INFO] [logger:106] 标准化完成: GFRP_20260804200528_ReferenceTd.txt [standard-txt] -> 1 条信号
+2026-08-04 23:47:13 [INFO] [logger:106] 成功读取文件: C:\Users\30495\Desktop\standardized\GFRP_20260804200528_ReferenceTd.txt
+2026-08-04 23:47:13 [INFO] [logger:106] 参考信号读取完成，数据点数: 10000
+2026-08-04 23:47:13 [INFO] [logger:106] 标准化完成: GFRP_20260804200528_Time_1.txt [standard-txt] -> 1 条信号
+2026-08-04 23:47:13 [INFO] [logger:106] 成功读取文件: C:\Users\30495\Desktop\standardized\GFRP_20260804200528_Time_1.txt
+2026-08-04 23:47:13 [INFO] [logger:106] 样品 GFRP_20260804200528_Time_1 读取完成
+2026-08-04 23:47:13 [INFO] [logger:106] 光学参数计算完成
+2026-08-04 23:47:13 [INFO] [logger:106] 计算完成
+2026-08-04 23:47:46 [INFO] [logger:106] 自动检测起始行: PVC_20260804202520_Time.txt -> 第 1 行
+2026-08-04 23:47:46 [INFO] [logger:106] 标准化完成: PVC_20260804202520_Time.txt [thz-scan] -> 1 条信号
+2026-08-04 23:47:46 [INFO] [logger:106] 标准数据已导出: C:/Users/30495/Desktop/standardized\PVC_20260804202520_Time.txt (10000 点)
+2026-08-04 23:47:46 [INFO] [logger:106] 添加 1 个样品文件（自动标准化）
+2026-08-04 23:47:52 [INFO] [logger:106] 开始异步计算
+2026-08-04 23:47:52 [INFO] [logger:106] 开始计算光学参数，样品数量: 2
+2026-08-04 23:47:52 [INFO] [logger:106] 标准化完成: GFRP_20260804200528_ReferenceTd.txt [standard-txt] -> 1 条信号
+2026-08-04 23:47:52 [INFO] [logger:106] 成功读取文件: C:\Users\30495\Desktop\standardized\GFRP_20260804200528_ReferenceTd.txt
+2026-08-04 23:47:52 [INFO] [logger:106] 参考信号读取完成，数据点数: 10000
+2026-08-04 23:47:52 [INFO] [logger:106] 标准化完成: GFRP_20260804200528_Time_1.txt [standard-txt] -> 1 条信号
+2026-08-04 23:47:52 [INFO] [logger:106] 成功读取文件: C:\Users\30495\Desktop\standardized\GFRP_20260804200528_Time_1.txt
+2026-08-04 23:47:52 [INFO] [logger:106] 样品 GFRP_20260804200528_Time_1 读取完成
+2026-08-04 23:47:52 [INFO] [logger:106] 标准化完成: PVC_20260804202520_Time.txt [standard-txt] -> 1 条信号
+2026-08-04 23:47:52 [INFO] [logger:106] 成功读取文件: C:\Users\30495\Desktop\standardized\PVC_20260804202520_Time.txt
+2026-08-04 23:47:52 [INFO] [logger:106] 样品 PVC_20260804202520_Time 读取完成
+2026-08-04 23:47:52 [INFO] [logger:106] 光学参数计算完成
+2026-08-04 23:47:52 [INFO] [logger:106] 计算完成
+2026-08-04 23:48:11 [INFO] [logger:106] 开始异步计算
+2026-08-04 23:48:11 [INFO] [logger:106] 开始计算光学参数，样品数量: 1
+2026-08-04 23:48:11 [INFO] [logger:106] 标准化完成: GFRP_20260804200528_ReferenceTd.txt [standard-txt] -> 1 条信号
+2026-08-04 23:48:11 [INFO] [logger:106] 成功读取文件: C:\Users\30495\Desktop\standardized\GFRP_20260804200528_ReferenceTd.txt
+2026-08-04 23:48:11 [INFO] [logger:106] 参考信号读取完成，数据点数: 10000
+2026-08-04 23:48:11 [INFO] [logger:106] 标准化完成: PVC_20260804202520_Time.txt [standard-txt] -> 1 条信号
+2026-08-04 23:48:11 [INFO] [logger:106] 成功读取文件: C:\Users\30495\Desktop\standardized\PVC_20260804202520_Time.txt
+2026-08-04 23:48:11 [INFO] [logger:106] 样品 PVC_20260804202520_Time 读取完成
+2026-08-04 23:48:11 [INFO] [logger:106] 光学参数计算完成
+2026-08-04 23:48:11 [INFO] [logger:106] 计算完成
+2026-08-04 23:48:40 [INFO] [logger:106] 配置已保存
+2026-08-04 23:48:40 [INFO] [logger:106] 程序关闭
+2026-08-04 23:48:44 [INFO] [logger:63] 日志系统初始化完成
+2026-08-04 23:48:44 [INFO] [logger:106] 正在初始化THz分析系统...
+2026-08-04 23:48:44 [INFO] [logger:106] 配置已加载
+2026-08-04 23:48:45 [INFO] [logger:106] THz分析系统初始化完成
+2026-08-04 23:48:45 [INFO] [logger:63] 日志系统初始化完成
+2026-08-04 23:48:45 [INFO] [logger:106] 程序启动
+2026-08-04 23:48:45 [INFO] [logger:106] 正在初始化THz分析系统...
+2026-08-04 23:48:45 [INFO] [logger:106] 配置已加载
+2026-08-04 23:48:45 [INFO] [logger:106] THz分析系统初始化完成
+2026-08-04 23:48:51 [INFO] [logger:106] 自动检测起始行: GFRP_20260804200528_ReferenceTd.txt -> 第 1 行
+2026-08-04 23:48:51 [INFO] [logger:106] 标准化完成: GFRP_20260804200528_ReferenceTd.txt [thz-scan] -> 1 条信号
+2026-08-04 23:48:51 [INFO] [logger:106] 标准数据已导出: C:/Users/30495/Desktop/standardized\GFRP_20260804200528_ReferenceTd.txt (10000 点)
+2026-08-04 23:48:51 [INFO] [logger:106] 选择参考文件（自动标准化）: C:\Users\30495\Desktop\standardized\GFRP_20260804200528_ReferenceTd.txt
+2026-08-04 23:48:54 [INFO] [logger:106] 自动检测起始行: GFRP_20260804200528_Time.txt -> 第 1 行
+2026-08-04 23:48:54 [INFO] [logger:106] 标准化完成: GFRP_20260804200528_Time.txt [thz-scan] -> 2 条信号
+2026-08-04 23:48:54 [INFO] [logger:106] 标准数据已导出: C:/Users/30495/Desktop/standardized\GFRP_20260804200528_Time_1.txt (10000 点)
+2026-08-04 23:48:54 [INFO] [logger:106] 标准数据已导出: C:/Users/30495/Desktop/standardized\GFRP_20260804200528_Time_2.txt (10000 点)
+2026-08-04 23:48:54 [INFO] [logger:106] 添加 2 个样品文件（自动标准化）
+2026-08-04 23:48:58 [INFO] [logger:106] 自动检测起始行: GFRP_20260804200528_Time.txt -> 第 1 行
+2026-08-04 23:48:58 [INFO] [logger:106] 标准化完成: GFRP_20260804200528_Time.txt [thz-scan] -> 2 条信号
+2026-08-04 23:48:58 [INFO] [logger:106] 标准数据已导出: C:/Users/30495/Desktop/standardized\GFRP_20260804200528_Time_1.txt (10000 点)
+2026-08-04 23:48:58 [INFO] [logger:106] 标准数据已导出: C:/Users/30495/Desktop/standardized\GFRP_20260804200528_Time_2.txt (10000 点)
+2026-08-04 23:48:58 [INFO] [logger:106] 自动检测起始行: PTFE_20260804202059_Time.txt -> 第 1 行
+2026-08-04 23:48:58 [INFO] [logger:106] 标准化完成: PTFE_20260804202059_Time.txt [thz-scan] -> 1 条信号
+2026-08-04 23:48:58 [INFO] [logger:106] 标准数据已导出: C:/Users/30495/Desktop/standardized\PTFE_20260804202059_Time.txt (10000 点)
+2026-08-04 23:48:58 [INFO] [logger:106] 自动检测起始行: PVC_20260804202520_Time.txt -> 第 1 行
+2026-08-04 23:48:58 [INFO] [logger:106] 标准化完成: PVC_20260804202520_Time.txt [thz-scan] -> 1 条信号
+2026-08-04 23:48:58 [INFO] [logger:106] 标准数据已导出: C:/Users/30495/Desktop/standardized\PVC_20260804202520_Time.txt (10000 点)
+2026-08-04 23:48:58 [INFO] [logger:106] 添加 4 个样品文件（自动标准化）
+2026-08-04 23:49:02 [INFO] [logger:106] 自动检测起始行: GFRP_20260804200528_Time.txt -> 第 1 行
+2026-08-04 23:49:02 [INFO] [logger:106] 标准化完成: GFRP_20260804200528_Time.txt [thz-scan] -> 2 条信号
+2026-08-04 23:49:02 [INFO] [logger:106] 标准数据已导出: C:/Users/30495/Desktop/standardized\GFRP_20260804200528_Time_1.txt (10000 点)
+2026-08-04 23:49:02 [INFO] [logger:106] 标准数据已导出: C:/Users/30495/Desktop/standardized\GFRP_20260804200528_Time_2.txt (10000 点)
+2026-08-04 23:49:02 [INFO] [logger:106] 自动检测起始行: PTFE_20260804202059_Time.txt -> 第 1 行
+2026-08-04 23:49:02 [INFO] [logger:106] 标准化完成: PTFE_20260804202059_Time.txt [thz-scan] -> 1 条信号
+2026-08-04 23:49:02 [INFO] [logger:106] 标准数据已导出: C:/Users/30495/Desktop/standardized\PTFE_20260804202059_Time.txt (10000 点)
+2026-08-04 23:49:02 [INFO] [logger:106] 自动检测起始行: PVC_20260804202520_Time.txt -> 第 1 行
+2026-08-04 23:49:02 [INFO] [logger:106] 标准化完成: PVC_20260804202520_Time.txt [thz-scan] -> 1 条信号
+2026-08-04 23:49:02 [INFO] [logger:106] 标准数据已导出: C:/Users/30495/Desktop/standardized\PVC_20260804202520_Time.txt (10000 点)
+2026-08-04 23:49:02 [INFO] [logger:106] 添加 4 个样品文件（自动标准化）
+2026-08-04 23:49:03 [INFO] [logger:106] 开始异步计算
+2026-08-04 23:49:03 [INFO] [logger:106] 开始计算光学参数，样品数量: 4
+2026-08-04 23:49:03 [INFO] [logger:106] 标准化完成: GFRP_20260804200528_ReferenceTd.txt [standard-txt] -> 1 条信号
+2026-08-04 23:49:03 [INFO] [logger:106] 成功读取文件: C:\Users\30495\Desktop\standardized\GFRP_20260804200528_ReferenceTd.txt
+2026-08-04 23:49:03 [INFO] [logger:106] 参考信号读取完成，数据点数: 10000
+2026-08-04 23:49:03 [INFO] [logger:106] 标准化完成: GFRP_20260804200528_Time_1.txt [standard-txt] -> 1 条信号
+2026-08-04 23:49:03 [INFO] [logger:106] 成功读取文件: C:\Users\30495\Desktop\standardized\GFRP_20260804200528_Time_1.txt
+2026-08-04 23:49:03 [INFO] [logger:106] 样品 GFRP_20260804200528_Time_1 读取完成
+2026-08-04 23:49:03 [INFO] [logger:106] 标准化完成: GFRP_20260804200528_Time_2.txt [standard-txt] -> 1 条信号
+2026-08-04 23:49:03 [INFO] [logger:106] 成功读取文件: C:\Users\30495\Desktop\standardized\GFRP_20260804200528_Time_2.txt
+2026-08-04 23:49:03 [INFO] [logger:106] 样品 GFRP_20260804200528_Time_2 读取完成
+2026-08-04 23:49:03 [INFO] [logger:106] 标准化完成: PTFE_20260804202059_Time.txt [standard-txt] -> 1 条信号
+2026-08-04 23:49:03 [INFO] [logger:106] 成功读取文件: C:\Users\30495\Desktop\standardized\PTFE_20260804202059_Time.txt
+2026-08-04 23:49:03 [INFO] [logger:106] 样品 PTFE_20260804202059_Time 读取完成
+2026-08-04 23:49:03 [INFO] [logger:106] 标准化完成: PVC_20260804202520_Time.txt [standard-txt] -> 1 条信号
+2026-08-04 23:49:03 [INFO] [logger:106] 成功读取文件: C:\Users\30495\Desktop\standardized\PVC_20260804202520_Time.txt
+2026-08-04 23:49:03 [INFO] [logger:106] 样品 PVC_20260804202520_Time 读取完成
+2026-08-04 23:49:03 [INFO] [logger:106] 光学参数计算完成
+2026-08-04 23:49:04 [INFO] [logger:106] 计算完成
+2026-08-04 23:49:49 [INFO] [logger:106] 开始异步计算
+2026-08-04 23:49:49 [INFO] [logger:106] 开始计算光学参数，样品数量: 4
+2026-08-04 23:49:49 [INFO] [logger:106] 标准化完成: GFRP_20260804200528_ReferenceTd.txt [standard-txt] -> 1 条信号
+2026-08-04 23:49:49 [INFO] [logger:106] 成功读取文件: C:\Users\30495\Desktop\standardized\GFRP_20260804200528_ReferenceTd.txt
+2026-08-04 23:49:49 [INFO] [logger:106] 参考信号读取完成，数据点数: 10000
+2026-08-04 23:49:49 [INFO] [logger:106] 标准化完成: GFRP_20260804200528_Time_1.txt [standard-txt] -> 1 条信号
+2026-08-04 23:49:49 [INFO] [logger:106] 成功读取文件: C:\Users\30495\Desktop\standardized\GFRP_20260804200528_Time_1.txt
+2026-08-04 23:49:49 [INFO] [logger:106] 样品 GFRP_20260804200528_Time_1 读取完成
+2026-08-04 23:49:49 [INFO] [logger:106] 标准化完成: GFRP_20260804200528_Time_2.txt [standard-txt] -> 1 条信号
+2026-08-04 23:49:49 [INFO] [logger:106] 成功读取文件: C:\Users\30495\Desktop\standardized\GFRP_20260804200528_Time_2.txt
+2026-08-04 23:49:49 [INFO] [logger:106] 样品 GFRP_20260804200528_Time_2 读取完成
+2026-08-04 23:49:49 [INFO] [logger:106] 标准化完成: PTFE_20260804202059_Time.txt [standard-txt] -> 1 条信号
+2026-08-04 23:49:49 [INFO] [logger:106] 成功读取文件: C:\Users\30495\Desktop\standardized\PTFE_20260804202059_Time.txt
+2026-08-04 23:49:49 [INFO] [logger:106] 样品 PTFE_20260804202059_Time 读取完成
+2026-08-04 23:49:49 [INFO] [logger:106] 标准化完成: PVC_20260804202520_Time.txt [standard-txt] -> 1 条信号
+2026-08-04 23:49:49 [INFO] [logger:106] 成功读取文件: C:\Users\30495\Desktop\standardized\PVC_20260804202520_Time.txt
+2026-08-04 23:49:49 [INFO] [logger:106] 样品 PVC_20260804202520_Time 读取完成
+2026-08-04 23:49:49 [INFO] [logger:106] 光学参数计算完成
+2026-08-04 23:49:49 [INFO] [logger:106] 计算完成
+2026-08-04 23:51:47 [INFO] [logger:106] 配置已保存
+2026-08-04 23:51:47 [INFO] [logger:106] 程序关闭
+2026-08-04 23:51:53 [INFO] [logger:63] 日志系统初始化完成
+2026-08-04 23:51:53 [INFO] [logger:106] 程序启动
+2026-08-04 23:51:53 [INFO] [logger:106] 正在初始化THz分析系统...
+2026-08-04 23:51:53 [INFO] [logger:106] 配置已加载
+2026-08-04 23:51:53 [INFO] [logger:106] THz分析系统初始化完成
+2026-08-04 23:52:11 [INFO] [logger:106] 配置已保存
+2026-08-04 23:52:11 [INFO] [logger:106] 程序关闭
+2026-08-04 23:52:26 [INFO] [logger:63] 日志系统初始化完成
+2026-08-04 23:52:26 [INFO] [logger:106] 程序启动
+2026-08-04 23:52:26 [INFO] [logger:106] 正在初始化THz分析系统...
+2026-08-04 23:52:26 [INFO] [logger:106] 配置已加载
+2026-08-04 23:52:26 [INFO] [logger:106] THz分析系统初始化完成
+2026-08-04 23:52:39 [INFO] [logger:106] 配置已保存
+2026-08-04 23:52:39 [INFO] [logger:106] 程序关闭
+2026-08-04 23:53:05 [INFO] [logger:63] 日志系统初始化完成
+2026-08-04 23:53:05 [INFO] [logger:106] 程序启动
+2026-08-04 23:53:05 [INFO] [logger:106] 正在初始化THz分析系统...
+2026-08-04 23:53:05 [INFO] [logger:106] 配置已加载
+2026-08-04 23:53:05 [INFO] [logger:106] THz分析系统初始化完成
+2026-08-04 23:53:05 [INFO] [logger:63] 日志系统初始化完成
+2026-08-04 23:53:05 [INFO] [logger:106] 正在初始化THz分析系统...
+2026-08-04 23:53:05 [INFO] [logger:106] 配置已加载
+2026-08-04 23:53:05 [INFO] [logger:106] THz分析系统初始化完成
+2026-08-04 23:53:14 [INFO] [logger:106] 配置已保存
+2026-08-04 23:53:14 [INFO] [logger:106] 程序关闭
+2026-08-04 23:54:06 [INFO] [logger:63] 日志系统初始化完成
+2026-08-04 23:54:06 [INFO] [logger:106] 程序启动
+2026-08-04 23:54:06 [INFO] [logger:106] 正在初始化THz分析系统...
+2026-08-04 23:54:06 [INFO] [logger:106] 配置已加载
+2026-08-04 23:54:06 [INFO] [logger:106] THz分析系统初始化完成
+2026-08-04 23:54:16 [INFO] [logger:106] 配置已保存
+2026-08-04 23:54:16 [INFO] [logger:106] 程序关闭
+2026-08-04 23:54:38 [INFO] [logger:63] 日志系统初始化完成
+2026-08-04 23:54:38 [INFO] [logger:106] 程序启动
+2026-08-04 23:54:38 [INFO] [logger:106] 正在初始化THz分析系统...
+2026-08-04 23:54:38 [INFO] [logger:106] 配置已加载
+2026-08-04 23:54:38 [INFO] [logger:106] THz分析系统初始化完成
+2026-08-04 23:54:38 [INFO] [logger:63] 日志系统初始化完成
+2026-08-04 23:54:38 [INFO] [logger:106] 正在初始化THz分析系统...
+2026-08-04 23:54:38 [INFO] [logger:106] 配置已加载
+2026-08-04 23:54:38 [INFO] [logger:106] THz分析系统初始化完成
+2026-08-04 23:54:40 [INFO] [logger:106] 自动检测起始行: GFRP_20260804200528_ReferenceTd.txt -> 第 1 行
+2026-08-04 23:54:40 [INFO] [logger:106] 标准化完成: GFRP_20260804200528_ReferenceTd.txt [thz-scan] -> 1 条信号
+2026-08-04 23:54:40 [INFO] [logger:106] 标准数据已导出: C:/Users/30495/Desktop/standardized\GFRP_20260804200528_ReferenceTd.txt (10000 点)
+2026-08-04 23:54:40 [INFO] [logger:106] 选择参考文件（自动标准化）: C:\Users\30495\Desktop\standardized\GFRP_20260804200528_ReferenceTd.txt
+2026-08-04 23:55:01 [INFO] [logger:106] 自动检测起始行: GFRP_20260804200528_Time.txt -> 第 1 行
+2026-08-04 23:55:01 [INFO] [logger:106] 标准化完成: GFRP_20260804200528_Time.txt [thz-scan] -> 2 条信号
+2026-08-04 23:55:01 [INFO] [logger:106] 标准数据已导出: C:/Users/30495/Desktop/standardized\GFRP_20260804200528_Time_1.txt (10000 点)
+2026-08-04 23:55:01 [INFO] [logger:106] 标准数据已导出: C:/Users/30495/Desktop/standardized\GFRP_20260804200528_Time_2.txt (10000 点)
+2026-08-04 23:55:01 [INFO] [logger:106] 自动检测起始行: PTFE_20260804202059_Time.txt -> 第 1 行
+2026-08-04 23:55:01 [INFO] [logger:106] 标准化完成: PTFE_20260804202059_Time.txt [thz-scan] -> 1 条信号
+2026-08-04 23:55:01 [INFO] [logger:106] 标准数据已导出: C:/Users/30495/Desktop/standardized\PTFE_20260804202059_Time.txt (10000 点)
+2026-08-04 23:55:01 [INFO] [logger:106] 自动检测起始行: PVC_20260804202520_Time.txt -> 第 1 行
+2026-08-04 23:55:01 [INFO] [logger:106] 标准化完成: PVC_20260804202520_Time.txt [thz-scan] -> 1 条信号
+2026-08-04 23:55:01 [INFO] [logger:106] 标准数据已导出: C:/Users/30495/Desktop/standardized\PVC_20260804202520_Time.txt (10000 点)
+2026-08-04 23:55:01 [INFO] [logger:106] 添加 4 个样品文件（自动标准化）
+2026-08-04 23:55:54 [INFO] [logger:106] 开始异步计算
+2026-08-04 23:55:54 [INFO] [logger:106] 开始计算光学参数，样品数量: 4
+2026-08-04 23:55:54 [INFO] [logger:106] 标准化完成: GFRP_20260804200528_ReferenceTd.txt [standard-txt] -> 1 条信号
+2026-08-04 23:55:54 [INFO] [logger:106] 成功读取文件: C:\Users\30495\Desktop\standardized\GFRP_20260804200528_ReferenceTd.txt
+2026-08-04 23:55:54 [INFO] [logger:106] 参考信号读取完成，数据点数: 10000
+2026-08-04 23:55:54 [INFO] [logger:106] 标准化完成: GFRP_20260804200528_Time_1.txt [standard-txt] -> 1 条信号
+2026-08-04 23:55:54 [INFO] [logger:106] 成功读取文件: C:\Users\30495\Desktop\standardized\GFRP_20260804200528_Time_1.txt
+2026-08-04 23:55:54 [INFO] [logger:106] 样品 GFRP_20260804200528_Time_1 读取完成
+2026-08-04 23:55:54 [INFO] [logger:106] 标准化完成: GFRP_20260804200528_Time_2.txt [standard-txt] -> 1 条信号
+2026-08-04 23:55:54 [INFO] [logger:106] 成功读取文件: C:\Users\30495\Desktop\standardized\GFRP_20260804200528_Time_2.txt
+2026-08-04 23:55:54 [INFO] [logger:106] 样品 GFRP_20260804200528_Time_2 读取完成
+2026-08-04 23:55:54 [INFO] [logger:106] 标准化完成: PTFE_20260804202059_Time.txt [standard-txt] -> 1 条信号
+2026-08-04 23:55:54 [INFO] [logger:106] 成功读取文件: C:\Users\30495\Desktop\standardized\PTFE_20260804202059_Time.txt
+2026-08-04 23:55:54 [INFO] [logger:106] 样品 PTFE_20260804202059_Time 读取完成
+2026-08-04 23:55:54 [INFO] [logger:106] 标准化完成: PVC_20260804202520_Time.txt [standard-txt] -> 1 条信号
+2026-08-04 23:55:54 [INFO] [logger:106] 成功读取文件: C:\Users\30495\Desktop\standardized\PVC_20260804202520_Time.txt
+2026-08-04 23:55:54 [INFO] [logger:106] 样品 PVC_20260804202520_Time 读取完成
+2026-08-04 23:55:54 [INFO] [logger:106] 光学参数计算完成
+2026-08-04 23:55:54 [INFO] [logger:106] 计算完成
+2026-08-04 23:56:05 [INFO] [logger:106] 配置已保存
+2026-08-04 23:56:05 [INFO] [logger:106] 程序关闭
+2026-08-04 23:56:34 [INFO] [logger:63] 日志系统初始化完成
+2026-08-04 23:56:34 [INFO] [logger:106] 正在初始化THz分析系统...
+2026-08-04 23:56:34 [INFO] [logger:106] 配置已加载
+2026-08-04 23:56:34 [INFO] [logger:106] THz分析系统初始化完成
+2026-08-04 23:56:38 [INFO] [logger:63] 日志系统初始化完成
+2026-08-04 23:56:38 [INFO] [logger:106] 程序启动
+2026-08-04 23:56:38 [INFO] [logger:106] 正在初始化THz分析系统...
+2026-08-04 23:56:38 [INFO] [logger:106] 配置已加载
+2026-08-04 23:56:38 [INFO] [logger:106] THz分析系统初始化完成
+2026-08-04 23:56:42 [INFO] [logger:106] 自动检测起始行: GFRP_20260804200528_ReferenceTd.txt -> 第 1 行
+2026-08-04 23:56:42 [INFO] [logger:106] 标准化完成: GFRP_20260804200528_ReferenceTd.txt [thz-scan] -> 1 条信号
+2026-08-04 23:56:42 [INFO] [logger:106] 标准数据已导出: C:/Users/30495/Desktop/standardized\GFRP_20260804200528_ReferenceTd.txt (10000 点)
+2026-08-04 23:56:42 [INFO] [logger:106] 选择参考文件（自动标准化）: C:\Users\30495\Desktop\standardized\GFRP_20260804200528_ReferenceTd.txt
+2026-08-04 23:56:56 [INFO] [logger:106] 自动检测起始行: GFRP_20260804200528_Time.txt -> 第 1 行
+2026-08-04 23:56:56 [INFO] [logger:106] 标准化完成: GFRP_20260804200528_Time.txt [thz-scan] -> 2 条信号
+2026-08-04 23:56:56 [INFO] [logger:106] 标准数据已导出: C:/Users/30495/Desktop/standardized\GFRP_20260804200528_Time_1.txt (10000 点)
+2026-08-04 23:56:56 [INFO] [logger:106] 标准数据已导出: C:/Users/30495/Desktop/standardized\GFRP_20260804200528_Time_2.txt (10000 点)
+2026-08-04 23:56:56 [INFO] [logger:106] 自动检测起始行: PTFE_20260804202059_Time.txt -> 第 1 行
+2026-08-04 23:56:56 [INFO] [logger:106] 标准化完成: PTFE_20260804202059_Time.txt [thz-scan] -> 1 条信号
+2026-08-04 23:56:56 [INFO] [logger:106] 标准数据已导出: C:/Users/30495/Desktop/standardized\PTFE_20260804202059_Time.txt (10000 点)
+2026-08-04 23:56:56 [INFO] [logger:106] 自动检测起始行: PVC_20260804202520_Time.txt -> 第 1 行
+2026-08-04 23:56:56 [INFO] [logger:106] 标准化完成: PVC_20260804202520_Time.txt [thz-scan] -> 1 条信号
+2026-08-04 23:56:56 [INFO] [logger:106] 标准数据已导出: C:/Users/30495/Desktop/standardized\PVC_20260804202520_Time.txt (10000 点)
+2026-08-04 23:56:56 [INFO] [logger:106] 添加 4 个样品文件（自动标准化）
+2026-08-04 23:58:26 [INFO] [logger:106] 开始异步计算
+2026-08-04 23:58:26 [INFO] [logger:106] 开始计算光学参数，样品数量: 4
+2026-08-04 23:58:26 [INFO] [logger:106] 标准化完成: GFRP_20260804200528_ReferenceTd.txt [standard-txt] -> 1 条信号
+2026-08-04 23:58:26 [INFO] [logger:106] 成功读取文件: C:\Users\30495\Desktop\standardized\GFRP_20260804200528_ReferenceTd.txt
+2026-08-04 23:58:26 [INFO] [logger:106] 参考信号读取完成，数据点数: 10000
+2026-08-04 23:58:26 [INFO] [logger:106] 标准化完成: GFRP_20260804200528_Time_1.txt [standard-txt] -> 1 条信号
+2026-08-04 23:58:26 [INFO] [logger:106] 成功读取文件: C:\Users\30495\Desktop\standardized\GFRP_20260804200528_Time_1.txt
+2026-08-04 23:58:26 [INFO] [logger:106] 样品 GFRP_20260804200528_Time_1 读取完成
+2026-08-04 23:58:26 [INFO] [logger:106] 标准化完成: GFRP_20260804200528_Time_2.txt [standard-txt] -> 1 条信号
+2026-08-04 23:58:26 [INFO] [logger:106] 成功读取文件: C:\Users\30495\Desktop\standardized\GFRP_20260804200528_Time_2.txt
+2026-08-04 23:58:26 [INFO] [logger:106] 样品 GFRP_20260804200528_Time_2 读取完成
+2026-08-04 23:58:26 [INFO] [logger:106] 标准化完成: PTFE_20260804202059_Time.txt [standard-txt] -> 1 条信号
+2026-08-04 23:58:26 [INFO] [logger:106] 成功读取文件: C:\Users\30495\Desktop\standardized\PTFE_20260804202059_Time.txt
+2026-08-04 23:58:26 [INFO] [logger:106] 样品 PTFE_20260804202059_Time 读取完成
+2026-08-04 23:58:26 [INFO] [logger:106] 标准化完成: PVC_20260804202520_Time.txt [standard-txt] -> 1 条信号
+2026-08-04 23:58:26 [INFO] [logger:106] 成功读取文件: C:\Users\30495\Desktop\standardized\PVC_20260804202520_Time.txt
+2026-08-04 23:58:26 [INFO] [logger:106] 样品 PVC_20260804202520_Time 读取完成
+2026-08-04 23:58:26 [INFO] [logger:106] 光学参数计算完成
+2026-08-04 23:58:26 [INFO] [logger:106] 计算完成
+2026-08-04 23:58:27 [INFO] [logger:106] 开始异步计算
+2026-08-04 23:58:27 [INFO] [logger:106] 开始计算光学参数，样品数量: 4
+2026-08-04 23:58:27 [INFO] [logger:106] 标准化完成: GFRP_20260804200528_ReferenceTd.txt [standard-txt] -> 1 条信号
+2026-08-04 23:58:27 [INFO] [logger:106] 成功读取文件: C:\Users\30495\Desktop\standardized\GFRP_20260804200528_ReferenceTd.txt
+2026-08-04 23:58:27 [INFO] [logger:106] 参考信号读取完成，数据点数: 10000
+2026-08-04 23:58:27 [INFO] [logger:106] 标准化完成: GFRP_20260804200528_Time_1.txt [standard-txt] -> 1 条信号
+2026-08-04 23:58:27 [INFO] [logger:106] 成功读取文件: C:\Users\30495\Desktop\standardized\GFRP_20260804200528_Time_1.txt
+2026-08-04 23:58:27 [INFO] [logger:106] 样品 GFRP_20260804200528_Time_1 读取完成
+2026-08-04 23:58:27 [INFO] [logger:106] 标准化完成: GFRP_20260804200528_Time_2.txt [standard-txt] -> 1 条信号
+2026-08-04 23:58:27 [INFO] [logger:106] 成功读取文件: C:\Users\30495\Desktop\standardized\GFRP_20260804200528_Time_2.txt
+2026-08-04 23:58:27 [INFO] [logger:106] 样品 GFRP_20260804200528_Time_2 读取完成
+2026-08-04 23:58:27 [INFO] [logger:106] 标准化完成: PTFE_20260804202059_Time.txt [standard-txt] -> 1 条信号
+2026-08-04 23:58:27 [INFO] [logger:106] 成功读取文件: C:\Users\30495\Desktop\standardized\PTFE_20260804202059_Time.txt
+2026-08-04 23:58:27 [INFO] [logger:106] 样品 PTFE_20260804202059_Time 读取完成
+2026-08-04 23:58:27 [INFO] [logger:106] 标准化完成: PVC_20260804202520_Time.txt [standard-txt] -> 1 条信号
+2026-08-04 23:58:27 [INFO] [logger:106] 成功读取文件: C:\Users\30495\Desktop\standardized\PVC_20260804202520_Time.txt
+2026-08-04 23:58:27 [INFO] [logger:106] 样品 PVC_20260804202520_Time 读取完成
+2026-08-04 23:58:27 [INFO] [logger:106] 光学参数计算完成
+2026-08-04 23:58:27 [INFO] [logger:106] 计算完成
+2026-08-04 23:58:50 [INFO] [logger:106] 配置已保存
+2026-08-04 23:58:50 [INFO] [logger:106] 程序关闭
+2026-08-04 23:59:27 [INFO] [logger:63] 日志系统初始化完成
+2026-08-04 23:59:27 [INFO] [logger:106] 正在初始化THz分析系统...
+2026-08-04 23:59:27 [INFO] [logger:106] 配置已加载
+2026-08-04 23:59:27 [INFO] [logger:106] THz分析系统初始化完成
+2026-08-04 23:59:36 [INFO] [logger:63] 日志系统初始化完成
+2026-08-04 23:59:36 [INFO] [logger:106] 程序启动
+2026-08-04 23:59:36 [INFO] [logger:106] 正在初始化THz分析系统...
+2026-08-04 23:59:36 [INFO] [logger:106] 配置已加载
+2026-08-04 23:59:36 [INFO] [logger:106] THz分析系统初始化完成
+2026-08-04 23:59:39 [INFO] [logger:106] 自动检测起始行: GFRP_20260804200528_ReferenceTd.txt -> 第 1 行
+2026-08-04 23:59:39 [INFO] [logger:106] 标准化完成: GFRP_20260804200528_ReferenceTd.txt [thz-scan] -> 1 条信号
+2026-08-04 23:59:39 [INFO] [logger:106] 标准数据已导出: C:/Users/30495/Desktop/standardized\GFRP_20260804200528_ReferenceTd.txt (10000 点)
+2026-08-04 23:59:39 [INFO] [logger:106] 选择参考文件（自动标准化）: C:\Users\30495\Desktop\standardized\GFRP_20260804200528_ReferenceTd.txt
+2026-08-04 23:59:46 [INFO] [logger:106] 自动检测起始行: GFRP_20260804200528_Time.txt -> 第 1 行
+2026-08-04 23:59:46 [INFO] [logger:106] 标准化完成: GFRP_20260804200528_Time.txt [thz-scan] -> 2 条信号
+2026-08-04 23:59:46 [INFO] [logger:106] 标准数据已导出: C:/Users/30495/Desktop/standardized\GFRP_20260804200528_Time_1.txt (10000 点)
+2026-08-04 23:59:46 [INFO] [logger:106] 标准数据已导出: C:/Users/30495/Desktop/standardized\GFRP_20260804200528_Time_2.txt (10000 点)
+2026-08-04 23:59:46 [INFO] [logger:106] 自动检测起始行: PTFE_20260804202059_Time.txt -> 第 1 行
+2026-08-04 23:59:46 [INFO] [logger:106] 标准化完成: PTFE_20260804202059_Time.txt [thz-scan] -> 1 条信号
+2026-08-04 23:59:46 [INFO] [logger:106] 标准数据已导出: C:/Users/30495/Desktop/standardized\PTFE_20260804202059_Time.txt (10000 点)
+2026-08-04 23:59:46 [INFO] [logger:106] 自动检测起始行: PVC_20260804202520_Time.txt -> 第 1 行
+2026-08-04 23:59:46 [INFO] [logger:106] 标准化完成: PVC_20260804202520_Time.txt [thz-scan] -> 1 条信号
+2026-08-04 23:59:46 [INFO] [logger:106] 标准数据已导出: C:/Users/30495/Desktop/standardized\PVC_20260804202520_Time.txt (10000 点)
+2026-08-04 23:59:46 [INFO] [logger:106] 添加 4 个样品文件（自动标准化）
+2026-08-04 23:59:49 [INFO] [logger:106] 自动检测起始行: GFRP_20260804200528_Time.txt -> 第 1 行
+2026-08-04 23:59:49 [INFO] [logger:106] 标准化完成: GFRP_20260804200528_Time.txt [thz-scan] -> 2 条信号
+2026-08-04 23:59:49 [INFO] [logger:106] 标准数据已导出: C:/Users/30495/Desktop/standardized\GFRP_20260804200528_Time_1.txt (10000 点)
+2026-08-04 23:59:49 [INFO] [logger:106] 标准数据已导出: C:/Users/30495/Desktop/standardized\GFRP_20260804200528_Time_2.txt (10000 点)
+2026-08-04 23:59:49 [INFO] [logger:106] 自动检测起始行: PTFE_20260804202059_Time.txt -> 第 1 行
+2026-08-04 23:59:49 [INFO] [logger:106] 标准化完成: PTFE_20260804202059_Time.txt [thz-scan] -> 1 条信号
+2026-08-04 23:59:49 [INFO] [logger:106] 标准数据已导出: C:/Users/30495/Desktop/standardized\PTFE_20260804202059_Time.txt (10000 点)
+2026-08-04 23:59:49 [INFO] [logger:106] 自动检测起始行: PVC_20260804202520_Time.txt -> 第 1 行
+2026-08-04 23:59:49 [INFO] [logger:106] 标准化完成: PVC_20260804202520_Time.txt [thz-scan] -> 1 条信号
+2026-08-04 23:59:49 [INFO] [logger:106] 标准数据已导出: C:/Users/30495/Desktop/standardized\PVC_20260804202520_Time.txt (10000 点)
+2026-08-04 23:59:49 [INFO] [logger:106] 添加 4 个样品文件（自动标准化）
+2026-08-05 00:00:13 [INFO] [logger:106] 配置已保存
+2026-08-05 00:00:13 [INFO] [logger:106] 程序关闭

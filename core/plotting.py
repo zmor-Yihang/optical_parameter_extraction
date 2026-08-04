@@ -13,6 +13,8 @@ from matplotlib.lines import Line2D
 from .physics import OpticalPropertyData
 from .preprocessing import PreparedSignals
 
+# 统一图表标题字号（默认 large≈12pt，此处调小）
+plt.rcParams["axes.titlesize"] = 10
 
 COLORS = (
     "red",
@@ -127,7 +129,7 @@ def create_optical_parameters_figure(
         properties.refractive_indices,
         short_names,
         full_names=sample_names,
-        title="折射率对比",
+        title="折射率",
         ylabel="折射率",
         with_labels=True,
     )
@@ -137,7 +139,7 @@ def create_optical_parameters_figure(
         properties.extinction_coefficients,
         short_names,
         full_names=sample_names,
-        title="消光系数对比",
+        title="消光系数",
         ylabel="消光系数",
         with_labels=False,
     )
@@ -147,7 +149,7 @@ def create_optical_parameters_figure(
         properties.absorption_coefficients,
         short_names,
         full_names=sample_names,
-        title="吸收系数对比",
+        title="吸收系数",
         ylabel="吸收系数 (cm^-1)",
         with_labels=False,
     )
@@ -172,7 +174,7 @@ def create_dielectric_figure(
         properties.dielectric_real,
         short_names,
         full_names=sample_names,
-        title="介电常数实部对比",
+        title="介电常数实部",
         ylabel="介电常数实部 ε'",
         with_labels=True,
     )
@@ -182,7 +184,7 @@ def create_dielectric_figure(
         properties.dielectric_imag,
         short_names,
         full_names=sample_names,
-        title='介电常数虚部对比',
+        title='介电常数虚部',
         ylabel='介电常数虚部 ε"',
         with_labels=False,
     )
@@ -192,7 +194,7 @@ def create_dielectric_figure(
         properties.loss_tangents,
         short_names,
         full_names=sample_names,
-        title="介电损耗对比",
+        title="介电损耗",
         ylabel="介电损耗 tan δ",
         with_labels=False,
     )
@@ -268,6 +270,78 @@ def create_single_series_figure(
     _apply_shared_legend(figure, sample_count=sample_count)
     figure.tight_layout()
     return figure
+
+
+def enable_responsive_fonts(canvas) -> None:
+    """让图表文字随画布尺寸自适应缩放，防止小窗口时文字重叠。
+
+    以画布首次出现时的尺寸为基准，之后窗口放大/缩小时按比例调整
+    标题、轴标签、刻度与图例的字号，并重新做紧凑布局。
+    """
+    figure = canvas.figure
+    state: dict = {"base": None, "sizes": None}
+
+    def _collect_base_sizes() -> None:
+        axes = list(figure.axes)
+        if not axes:
+            return
+        sizes = {"title": 0.0, "xlabel": 0.0, "ylabel": 0.0, "tick": 0.0, "legend": 0.0}
+        sizes["title"] = max(ax.title.get_fontsize() for ax in axes)
+        sizes["xlabel"] = max(ax.xaxis.label.get_fontsize() for ax in axes)
+        sizes["ylabel"] = max(ax.yaxis.label.get_fontsize() for ax in axes)
+        tick_sizes = [
+            label.get_fontsize()
+            for ax in axes
+            for label in list(ax.get_xticklabels()) + list(ax.get_yticklabels())
+        ]
+        if tick_sizes:
+            sizes["tick"] = max(tick_sizes)
+        legend_sizes = [
+            text.get_fontsize()
+            for ax in axes
+            if ax.get_legend() is not None
+            for text in ax.get_legend().get_texts()
+        ]
+        legend_sizes += [
+            text.get_fontsize() for legend in figure.legends for text in legend.get_texts()
+        ]
+        if legend_sizes:
+            sizes["legend"] = max(legend_sizes)
+        state["sizes"] = sizes
+
+    def on_resize(event) -> None:
+        width, height = figure.get_size_inches()
+        if state["base"] is None:
+            # 首次布局：记录基准尺寸与各元素字号
+            state["base"] = (width, height)
+            _collect_base_sizes()
+            return
+        sizes = state["sizes"]
+        if sizes is None:
+            return
+        base_w, base_h = state["base"]
+        scale = min(width / base_w, height / base_h)
+        scale = max(0.6, min(scale, 2.5))
+        for ax in figure.axes:
+            ax.title.set_fontsize(sizes["title"] * scale)
+            ax.xaxis.label.set_fontsize(sizes["xlabel"] * scale)
+            ax.yaxis.label.set_fontsize(sizes["ylabel"] * scale)
+            for label in list(ax.get_xticklabels()) + list(ax.get_yticklabels()):
+                label.set_fontsize(sizes["tick"] * scale)
+            legend = ax.get_legend()
+            if legend is not None:
+                for text in legend.get_texts():
+                    text.set_fontsize(sizes["legend"] * scale)
+        for legend in figure.legends:
+            for text in legend.get_texts():
+                text.set_fontsize(sizes["legend"] * scale)
+        try:
+            figure.tight_layout()
+        except Exception:
+            pass
+        figure.canvas.draw_idle()
+
+    canvas.mpl_connect("resize_event", on_resize)
 
 
 def enable_curve_hover(canvas) -> None:

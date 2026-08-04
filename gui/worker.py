@@ -9,8 +9,9 @@
 from typing import List, Dict, Optional, Any
 from PyQt6.QtCore import QThread, pyqtSignal
 
-from core import calculate_optical_params, CalculationResult, save_results_to_excel
-from core.data_io import save_time_freq_domain_data_to_excel
+from core import calculate_optical_params, CalculationResult, save_results_to_txt
+from core.data_io import save_time_freq_domain_data_to_txt
+from core.standard_format import make_unique_names, standardize_files
 
 
 class CalculationWorker(QThread):
@@ -85,8 +86,55 @@ class CalculationWorker(QThread):
             self.calculation_error.emit(str(e))
 
 
+class StandardizeWorker(QThread):
+    """阶段一：原始数据标准化工作线程"""
+
+    progress_updated = pyqtSignal(int, int, str)  # 当前进度, 总进度, 描述
+    standardize_finished = pyqtSignal(list, list)  # 标准信号列表, 错误信息列表
+    standardize_error = pyqtSignal(str)  # 致命错误
+
+    def __init__(self, parent=None):
+        super().__init__(parent)
+        self.file_paths: List[str] = []
+        self.start_row: int = 0  # 0 = 自动检测
+        self.scan_mode: str = "each"
+
+    def set_parameters(self, file_paths: List[str], start_row: int = 0,
+                       scan_mode: str = "each"):
+        """设置标准化参数
+
+        参数:
+            file_paths: 待转换的原始文件路径
+            start_row: 表格类文件的数据起始行（0=自动检测）
+            scan_mode: 多扫描文件处理方式，'each'=逐条拆分, 'average'=取平均
+        """
+        self.file_paths = list(file_paths)
+        self.start_row = start_row
+        self.scan_mode = scan_mode
+
+    def run(self):
+        try:
+            total = max(1, len(self.file_paths))
+            signals: List[Any] = []
+            errors: List[str] = []
+
+            for index, path in enumerate(self.file_paths, start=1):
+                self.progress_updated.emit(index - 1, total, f"正在解析 {path}...")
+                parsed, failed = standardize_files(
+                    [path], self.start_row, self.scan_mode
+                )
+                signals.extend(parsed)
+                errors.extend(failed)
+
+            make_unique_names(signals)
+            self.progress_updated.emit(total, total, "标准化完成")
+            self.standardize_finished.emit(signals, errors)
+        except Exception as e:
+            self.standardize_error.emit(str(e))
+
+
 class SaveWorker(QThread):
-    """保存Excel工作线程"""
+    """保存 txt 结果工作线程"""
     
     # 信号定义
     progress_updated = pyqtSignal(int, int, str)  # 当前进度, 总进度, 描述
@@ -120,16 +168,19 @@ class SaveWorker(QThread):
                 self.save_error.emit("没有可保存的数据")
                 return
             
-            self.progress_updated.emit(30, 100, "正在写入Excel文件...")
+            self.progress_updated.emit(30, 100, "正在写入 txt 文件...")
             
-            # 根据保存类型调用不同的保存函数
+            # 根据保存类型调用不同的保存函数（统一 txt 输出）
             if self.save_type == "time_freq":
-                save_time_freq_domain_data_to_excel(self.results_data, self.file_path)
+                saved = save_time_freq_domain_data_to_txt(
+                    self.results_data, self.file_path
+                )
+                saved_path = "、".join(saved)
             else:
-                save_results_to_excel(self.results_data, self.file_path)
+                saved_path = save_results_to_txt(self.results_data, self.file_path)
             
             self.progress_updated.emit(100, 100, "保存完成")
-            self.save_finished.emit(self.file_path)
+            self.save_finished.emit(saved_path)
             
         except Exception as e:
             self.save_error.emit(str(e))

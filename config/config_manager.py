@@ -44,7 +44,9 @@ def load_config():
         "use_window": False,         # 是否使用Tukey窗函数
         "window_t_start": 0.0,       # Tukey窗起始时间
         "window_t_end": 30.0,        # Tukey窗结束时间
-        "window_alpha": 0.5          # Tukey窗alpha参数
+        "window_alpha": 0.5,         # Tukey窗alpha参数
+        "standardized_dir": "",      # 阶段一标准 txt 输出目录
+        "scan_mode": "each"          # 多扫描文件处理方式: each / average
     }
     
     if not os.path.exists(config_path):
@@ -54,6 +56,8 @@ def load_config():
         with open(config_path, 'r') as f:
             config = json.load(f)
             # 兼容老配置
+            for key, value in default_config.items():
+                config.setdefault(key, value)
             if "start_row" not in config:
                 config["start_row"] = 1
             if "use_window" not in config:

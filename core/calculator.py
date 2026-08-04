@@ -104,7 +104,13 @@ def calculate_optical_params(
 
         result.prepared_signals = prepared_signals
         result.properties = properties
-        result.data = _build_result_data(prepared_signals, properties)
+        result.data = _build_result_data(
+            prepared_signals,
+            properties,
+            measurements=measurements,
+            thickness=d,
+            use_window=use_window,
+        )
         result.success = True
         progress.update("计算完成")
         info("光学参数计算完成")
@@ -147,9 +153,21 @@ def _record_warnings(result: CalculationResult, warnings: Sequence[str]) -> None
 def _build_result_data(
     prepared_signals: PreparedSignals,
     properties: OpticalPropertyData,
+    measurements=None,
+    thickness: float | None = None,
+    use_window: bool = False,
 ) -> dict[str, Any]:
     """组装当前 GUI 和导出模块依赖的兼容数据结构。"""
+    source_files: dict[str, str] = {}
+    if measurements is not None:
+        source_files["reference"] = measurements.reference.path
+        for sample in measurements.samples:
+            source_files[sample.name] = sample.path
+
     return {
+        "thickness": thickness,
+        "use_window": use_window,
+        "source_files": source_files,
         "F": properties.frequency,
         "Nsam": list(properties.refractive_indices),
         "Ksam": list(properties.extinction_coefficients),

@@ -15,7 +15,7 @@ from PyQt6.QtWidgets import (
     QLabel, QLineEdit, QPushButton, QFileDialog, QGroupBox, 
     QMessageBox, QTabWidget, QCheckBox, QGridLayout,
     QListWidget, QListWidgetItem, QSplitter, QFrame, QComboBox, QScrollArea, 
-    QStyle, QDialog
+    QDialog, QAbstractScrollArea, QStyle
 )
 from PyQt6.QtCore import Qt, QPoint, QRect
 from PyQt6.QtGui import QAction, QFont, QPalette, QColor, QBrush
@@ -23,16 +23,20 @@ from PyQt6.QtGui import QAction, QFont, QPalette, QColor, QBrush
 from config import load_config, save_config, update_thickness_history
 from core import calculate_optical_params, CalculationError, SaveError
 from core.calculator import build_result_figures
+from core.standard_format import (
+    INPUT_FILE_FILTER, standardize_file, write_standard_txt, is_standard_txt,
+)
 from core.plotting import (
     enable_curve_hover,
-    create_single_series_figure,
+    enable_responsive_fonts,
     sample_color,
     short_display_name,
 )
 from utils import info, warning, error
 
-from .worker import CalculationWorker, SaveWorker
+from .worker import CalculationWorker
 from .dialogs import HelpDialog, AboutDialog
+from .standardize_dialog import StandardizeDialog
 from .styles import get_main_window_style, get_menubar_style
 from .status_bar import StatusBar
 
@@ -59,9 +63,6 @@ class THzAnalyzerApp(QMainWindow):
         
         # 存储计算结果
         self.results_data = None
-        
-        # 存储弹出窗口的引用
-        self.popup_windows = {}
         
         # 存储图表数据的引用
         self.fig1 = None
@@ -164,23 +165,31 @@ class THzAnalyzerApp(QMainWindow):
         menubar = self.menuBar()
         menubar.setStyleSheet(get_menubar_style())
         
-        # 文件菜单
+        # 文件菜单：仅退出
         file_menu = menubar.addMenu("文件")
-        
+
         exit_action = QAction("退出", self)
         exit_action.setShortcut("Ctrl+Q")
         exit_action.triggered.connect(self.close)
         file_menu.addAction(exit_action)
-        
-        # 帮助菜单
+
+        # 工具菜单：转换/导出工具
+        tool_menu = menubar.addMenu("工具")
+
+        standardize_action = QAction("导出标准 TXT...", self)
+        standardize_action.setShortcut("Ctrl+D")
+        standardize_action.triggered.connect(self._open_standardize_dialog)
+        tool_menu.addAction(standardize_action)
+
+        # 帮助菜单：使用说明与关于
         help_menu = menubar.addMenu("帮助")
-        
+
         user_guide_action = QAction("使用说明", self)
         user_guide_action.setShortcut("F1")
         user_guide_action.triggered.connect(self._show_help_dialog)
         help_menu.addAction(user_guide_action)
-        
-        about_action = QAction("关于", self)
+
+        about_action = QAction("关于本软件", self)
         about_action.triggered.connect(self._show_about_dialog)
         help_menu.addAction(about_action)
     
@@ -233,10 +242,10 @@ class THzAnalyzerApp(QMainWindow):
         param_layout = QVBoxLayout(param_group)
         param_layout.setSpacing(12)
         
-        # 参考文件选择
+        # 参考文件选择（直接选，代码自动标准化）
         self._create_ref_file_section(param_layout)
         
-        # 样品文件选择
+        # 样品文件选择（直接选，代码自动标准化）
         self._create_sam_file_section(param_layout)
         
         # 参数设置
@@ -247,59 +256,215 @@ class THzAnalyzerApp(QMainWindow):
         
         return param_group
     
-    def _create_ref_file_section(self, parent_layout):
-        """创建参考文件选择区域"""
-        ref_layout = QVBoxLayout()
-        ref_label = QLabel("参考文件")
-        ref_label.setStyleSheet("font-weight: bold; color: #444444;")
-        ref_layout.addWidget(ref_label)
-        
-        ref_input_layout = QHBoxLayout()
-        self.ref_file_edit = QLineEdit()
-        self.ref_file_edit.setReadOnly(True)
-        ref_input_layout.addWidget(self.ref_file_edit)
-        
-        ref_btn = QPushButton("添加")
-        ref_btn.clicked.connect(self._select_ref_file)
-        ref_input_layout.addWidget(ref_btn)
-        
-        ref_layout.addLayout(ref_input_layout)
-        parent_layout.addLayout(ref_layout)
+    def _standardized_dir(self) -> str:
+        """返回自动标准化输出目录（不存在则创建）。"""
+        out = self.config.get("standardized_dir") or os.path.join(
+            os.getcwd(), "standardized"
+        )
+        os.makedirs(out, exist_ok=True)
+        return out
+
+    def _auto_standardize(self, raw_path: str) -> list[str]:
+        """
+        把原始文件自动标准化为标准 txt，返回写出的标准文件路径列表。
+        已是标准 txt 则原样返回。
+        """
+        if is_standard_txt(raw_path):
+            return [raw_path]
+        signals = standardize_file(raw_path, 0)
+        if not signals:
+            return []
+        out_dir = self._standardized_dir()
+        stem = os.path.splitext(os.path.basename(raw_path))[0]
+        paths: list[str] = []
+        for i, sig in enumerate(signals):
+            suffix = f"_{i + 1}" if len(signals) > 1 else ""
+            target = os.path.join(out_dir, f"{stem}{suffix}.txt")
+            path = write_standard_txt(sig, target)
+            paths.append(os.path.abspath(path))
+        return paths
+
+    def _append_ref_list_item(self, file_path: str, name: str, color: str):
+        item = QListWidgetItem(short_display_name(name))
+        item.setForeground(QBrush(QColor(color)))
+        item.setToolTip(file_path)
+        self.ref_list.addItem(item)
+
+    def _append_sam_list_item(self, file_path: str, name: str, color: str):
+        item = QListWidgetItem(short_display_name(name))
+        item.setForeground(QBrush(QColor(color)))
+        item.setToolTip(file_path)
+        self.sam_list.addItem(item)
+
+    def _open_standardize_dialog(self):
+        """打开“导出标准 TXT”工具对话框（仅用于手动导出）"""
+        dialog = StandardizeDialog(self, self.config)
+        dialog.exec()
     
+    def _create_ref_file_section(self, parent_layout):
+        """创建参考文件选择区域（框高度与右侧按钮一致）"""
+        group = QGroupBox("参考文件")
+        layout = QVBoxLayout(group)
+        layout.setSpacing(6)
+
+        content = QHBoxLayout()
+        content.setSpacing(6)
+
+        btn_col = QVBoxLayout()
+        add_ref_btn = QPushButton("添加")
+        add_ref_btn.clicked.connect(self._select_ref_file)
+        btn_col.addWidget(add_ref_btn)
+        btn_col.addStretch()
+
+        # 参考仅 1 条，框高度与按钮一致，保留水平滚动条
+        self.ref_list = QListWidget()
+        self.ref_list.setFixedHeight(add_ref_btn.sizeHint().height() + 20)
+        self.ref_list.setHorizontalScrollBarPolicy(
+            Qt.ScrollBarPolicy.ScrollBarAsNeeded
+        )
+        content.addWidget(self.ref_list, 1)
+        content.addLayout(btn_col)
+
+        layout.addLayout(content)
+        parent_layout.addWidget(group)
+
     def _create_sam_file_section(self, parent_layout):
-        """创建样品文件选择区域"""
-        sam_layout = QVBoxLayout()
-        sam_label = QLabel("样品文件")
-        sam_label.setStyleSheet("font-weight: bold; color: #444444;")
-        sam_layout.addWidget(sam_label)
-        
-        sam_list_layout = QHBoxLayout()
-        self.sam_files_list = QListWidget()
-        self.sam_files_list.setAcceptDrops(True)
-        self.sam_files_list.setDragEnabled(True)
-        self.sam_files_list.setMinimumHeight(120)
-        self.sam_files_list.setToolTip("列表显示短名称，悬停查看完整路径")
-        sam_list_layout.addWidget(self.sam_files_list)
-        
-        sam_btn_layout = QVBoxLayout()
-        
+        """创建样品文件选择区域（框初始高度 = 右侧按钮列高度）"""
+        group = QGroupBox("样品文件")
+        layout = QVBoxLayout(group)
+        layout.setSpacing(6)
+
+        content = QHBoxLayout()
+        content.setSpacing(6)
+
+        btn_col = QVBoxLayout()
         add_sam_btn = QPushButton("添加")
         add_sam_btn.clicked.connect(self._add_sam_file)
-        
         del_sam_btn = QPushButton("删除")
         del_sam_btn.clicked.connect(self._delete_selected_file)
-        
         clear_sam_btn = QPushButton("清空")
         clear_sam_btn.clicked.connect(self._clear_sam_files)
-        
-        sam_btn_layout.addWidget(add_sam_btn)
-        sam_btn_layout.addWidget(del_sam_btn)
-        sam_btn_layout.addWidget(clear_sam_btn)
-        sam_btn_layout.addStretch()
-        
-        sam_list_layout.addLayout(sam_btn_layout)
-        sam_layout.addLayout(sam_list_layout)
-        parent_layout.addLayout(sam_layout)
+        btn_col.addWidget(add_sam_btn)
+        btn_col.addWidget(del_sam_btn)
+        btn_col.addWidget(clear_sam_btn)
+        btn_col.addStretch()
+
+        # 框初始高度 = 三个按钮总高（含间距）；内容多时增高，最高 240 后滚动
+        btn_h = add_sam_btn.sizeHint().height()
+        spacing = btn_col.spacing() if btn_col.spacing() >= 0 else 6
+        col_h = 3 * btn_h + 2 * spacing
+        self.sam_list = QListWidget()
+        self.sam_list.setMinimumHeight(col_h)
+        self.sam_list.setMaximumHeight(240)
+        content.addWidget(self.sam_list, 1)
+        content.addLayout(btn_col)
+
+        layout.addLayout(content)
+        parent_layout.addWidget(group)
+    
+    def _select_ref_file(self):
+        """选择参考文件（直接选原始/标准文件，代码自动标准化）"""
+        initial_dir = self.config.get("last_open_dir", "")
+        if not initial_dir or not os.path.exists(initial_dir):
+            initial_dir = os.getcwd()
+
+        file_path, _ = QFileDialog.getOpenFileName(
+            self, "选择参考文件（原始或标准 txt）", initial_dir, INPUT_FILE_FILTER
+        )
+        if not file_path:
+            return
+
+        std_paths = self._auto_standardize(file_path)
+        if not std_paths:
+            QMessageBox.warning(self, "提示", "无法解析该文件，请检查格式")
+            return
+
+        if len(std_paths) > 1:
+            QMessageBox.information(
+                self, "提示",
+                f"该文件包含 {len(std_paths)} 条扫描，已自动取第 1 条作为参考。"
+            )
+
+        self.ref_file = std_paths[0]
+        self.config["last_open_dir"] = os.path.dirname(file_path)
+        self.ref_list.clear()
+        self._append_ref_list_item(std_paths[0], os.path.basename(std_paths[0]), "#2E7D32")
+        self._update_status("已选择参考文件（已自动标准化）", "ready")
+        info(f"选择参考文件（自动标准化）: {std_paths[0]}")
+
+    def _add_sam_file(self):
+        """添加样品文件（直接选原始/标准文件，代码自动标准化）"""
+        initial_dir = self.config.get("last_open_dir", "")
+        if not initial_dir or not os.path.exists(initial_dir):
+            initial_dir = os.getcwd()
+
+        file_paths, _ = QFileDialog.getOpenFileNames(
+            self, "选择样品文件（原始或标准 txt）", initial_dir, INPUT_FILE_FILTER
+        )
+        if not file_paths:
+            return
+
+        self.config["last_open_dir"] = os.path.dirname(file_paths[0])
+        added = 0
+        for raw in file_paths:
+            std_paths = self._auto_standardize(raw)
+            for p in std_paths:
+                self.sam_files.append(p)
+                name = os.path.splitext(os.path.basename(p))[0]
+                self.sam_names.append(name)
+                self._append_sam_list_item(p, name, sample_color(len(self.sam_list) - 1))
+                idx = len(self.sam_names) - 1
+                self.per_sample_window_params[idx] = None
+                added += 1
+
+        if added:
+            self._refresh_sample_list_colors()
+            self._update_status(f"已添加 {added} 个样品文件（已自动标准化）", "ready")
+            info(f"添加 {added} 个样品文件（自动标准化）")
+
+    def _refresh_sample_list_colors(self):
+        """按样品索引刷新列表颜色标识。"""
+        for index in range(self.sam_list.count()):
+            item = self.sam_list.item(index)
+            if item is None:
+                continue
+            item.setForeground(QBrush(QColor(sample_color(index))))
+            if index < len(self.sam_names):
+                item.setText(short_display_name(self.sam_names[index]))
+            if index < len(self.sam_files):
+                item.setToolTip(self.sam_files[index])
+
+    def _delete_selected_file(self):
+        """删除选中的样品文件"""
+        selected_items = self.sam_list.selectedItems()
+        if not selected_items:
+            QMessageBox.information(self, "提示", "请先选择要删除的样品文件")
+            return
+
+        for item in selected_items:
+            row = self.sam_list.row(item)
+            self.sam_list.takeItem(row)
+            del self.sam_files[row]
+            del self.sam_names[row]
+
+            new_params = {}
+            for k in list(self.per_sample_window_params.keys()):
+                if k < row:
+                    new_params[k] = self.per_sample_window_params[k]
+                elif k > row:
+                    new_params[k - 1] = self.per_sample_window_params[k]
+            self.per_sample_window_params = new_params
+
+        self._refresh_sample_list_colors()
+        self._update_status("已删除选中的样品文件", "ready")
+
+    def _clear_sam_files(self):
+        """清空样品文件列表"""
+        self.sam_files = []
+        self.sam_names = []
+        self.sam_list.clear()
+        self.per_sample_window_params = {}
+        self._update_status("样品文件列表已清空", "ready")
     
     def _create_parameter_section(self, parent_layout):
         """创建参数设置区域"""
@@ -308,15 +473,21 @@ class THzAnalyzerApp(QMainWindow):
         tukey_layout = QVBoxLayout(tukey_group)
         
         switch_layout = QHBoxLayout()
-        
-        self.use_window_checkbox = QCheckBox("启用")
-        switch_layout.addWidget(self.use_window_checkbox)
-        
-        self.window_status_label = QLabel("关")
-        self.window_status_label.setStyleSheet("color: #888888; padding: 0 4px;")
-        switch_layout.addWidget(self.window_status_label)
+        switch_layout.addWidget(QLabel("启用"))
+        switch_layout.addSpacing(6)
+
+        # 左右拨动开关
+        self.use_window_switch = QPushButton()
+        self.use_window_switch.setFixedSize(36, 16)
+        self.use_window_switch.setCheckable(True)
+        self.use_window_switch.setChecked(False)
+        self.use_window_switch.clicked.connect(
+            lambda: self._toggle_window_params(self.use_window_switch.isChecked())
+        )
+        self._style_window_switch(False)
+        switch_layout.addWidget(self.use_window_switch)
         switch_layout.addStretch()
-        
+
         tukey_layout.addLayout(switch_layout)
         
         signal_window_button_layout = QHBoxLayout()
@@ -340,8 +511,7 @@ class THzAnalyzerApp(QMainWindow):
         parent_layout.addWidget(tukey_group)
         
         # 连接信号
-        self.use_window_checkbox.toggled.connect(self._toggle_window_params)
-        self.use_window_checkbox.setChecked(False)
+        self._toggle_window_params(False)
         
         # 样品厚度设置
         thickness_layout = QHBoxLayout()
@@ -392,81 +562,9 @@ class THzAnalyzerApp(QMainWindow):
         run_btn = QPushButton("运行分析")
         run_btn.clicked.connect(self._run_analysis)
         
-        self.save_btn = QPushButton("保存结果")
-        self.save_btn.clicked.connect(self._save_results)
-        self.save_btn.setEnabled(False)
-        
-        self.save_time_freq_btn = QPushButton("保存时频数据")
-        self.save_time_freq_btn.clicked.connect(self._save_time_freq_data)
-        self.save_time_freq_btn.setEnabled(False)
-        
         first_row_layout.addWidget(run_btn)
-        first_row_layout.addWidget(self.save_btn)
-        first_row_layout.addWidget(self.save_time_freq_btn)
         
         button_layout.addLayout(first_row_layout)
-        
-        popup_label = QLabel("弹出图表")
-        popup_label.setStyleSheet("color: #777777; font-size: 11px; margin-top: 4px;")
-        button_layout.addWidget(popup_label)
-        
-        popup_row1 = QHBoxLayout()
-        popup_row1.setSpacing(4)
-        
-        self.popup_time_btn = QPushButton("时域")
-        self.popup_time_btn.clicked.connect(lambda: self._show_single_chart("time"))
-        self.popup_time_btn.setEnabled(False)
-        
-        self.popup_freq_btn = QPushButton("频域")
-        self.popup_freq_btn.clicked.connect(lambda: self._show_single_chart("freq"))
-        self.popup_freq_btn.setEnabled(False)
-        
-        self.popup_n_btn = QPushButton("n")
-        self.popup_n_btn.setToolTip("折射率")
-        self.popup_n_btn.clicked.connect(lambda: self._show_single_chart("refractive"))
-        self.popup_n_btn.setEnabled(False)
-        
-        self.popup_k_btn = QPushButton("k")
-        self.popup_k_btn.setToolTip("消光系数")
-        self.popup_k_btn.clicked.connect(lambda: self._show_single_chart("extinction"))
-        self.popup_k_btn.setEnabled(False)
-        
-        popup_row1.addWidget(self.popup_time_btn)
-        popup_row1.addWidget(self.popup_freq_btn)
-        popup_row1.addWidget(self.popup_n_btn)
-        popup_row1.addWidget(self.popup_k_btn)
-        
-        button_layout.addLayout(popup_row1)
-        
-        popup_row2 = QHBoxLayout()
-        popup_row2.setSpacing(4)
-        
-        self.popup_a_btn = QPushButton("α")
-        self.popup_a_btn.setToolTip("吸收系数")
-        self.popup_a_btn.clicked.connect(lambda: self._show_single_chart("absorption"))
-        self.popup_a_btn.setEnabled(False)
-        
-        self.popup_er_btn = QPushButton("ε'")
-        self.popup_er_btn.setToolTip("介电常数实部")
-        self.popup_er_btn.clicked.connect(lambda: self._show_single_chart("epsilon_real"))
-        self.popup_er_btn.setEnabled(False)
-        
-        self.popup_ei_btn = QPushButton("ε\"")
-        self.popup_ei_btn.setToolTip("介电常数虚部")
-        self.popup_ei_btn.clicked.connect(lambda: self._show_single_chart("epsilon_imag"))
-        self.popup_ei_btn.setEnabled(False)
-        
-        self.popup_tan_btn = QPushButton("tanδ")
-        self.popup_tan_btn.setToolTip("介电损耗")
-        self.popup_tan_btn.clicked.connect(lambda: self._show_single_chart("tan_delta"))
-        self.popup_tan_btn.setEnabled(False)
-        
-        popup_row2.addWidget(self.popup_a_btn)
-        popup_row2.addWidget(self.popup_er_btn)
-        popup_row2.addWidget(self.popup_ei_btn)
-        popup_row2.addWidget(self.popup_tan_btn)
-        
-        button_layout.addLayout(popup_row2)
         parent_layout.addLayout(button_layout)
     
     def _create_right_panel(self):
@@ -496,115 +594,55 @@ class THzAnalyzerApp(QMainWindow):
         if self.status_bar:
             self.status_bar.set_status(message, status_type)
     
-    def _toggle_window_params(self, enabled: bool):
-        """切换窗函数参数"""
+    def _style_window_switch(self, enabled: bool):
+        """更新左右拨动开关的外观（开=绿色右移，关=灰色左移）"""
         if enabled:
-            self.window_status_label.setText("开")
-            self.window_status_label.setStyleSheet("color: #555555; padding: 0 4px;")
-            self.set_signal_window_btn.setEnabled(True)
+            self.use_window_switch.setStyleSheet(
+                "QPushButton {"
+                "  background-color: #2E7D32;"
+                "  border: none;"
+                "  border-radius: 12px;"
+                "}"
+                "QPushButton::checked {"
+                "  background-color: #2E7D32;"
+                "}"
+                # 滑块：用子控件表示拨动圆点（左/右）
+                "QPushButton {"
+                "  text-align: right;"
+                "  padding-right: 3px;"
+                "}"
+            )
+            # 用圆点字符表示滑块位置
+            self.use_window_switch.setText("●")
+            self.use_window_switch.setStyleSheet(
+                "QPushButton {"
+                "  background-color: #2E7D32;"
+                "  border: none;"
+                "  border-radius: 8px;"
+                "  color: #FFFFFF;"
+                "  font-size: 9px;"
+                "  text-align: right;"
+                "  padding-right: 2px;"
+                "}"
+            )
         else:
-            self.window_status_label.setText("关")
-            self.window_status_label.setStyleSheet("color: #888888; padding: 0 4px;")
-            self.set_signal_window_btn.setEnabled(False)
-    
-    def _select_ref_file(self):
-        """选择参考文件"""
-        initial_dir = self.config.get("last_open_dir", "")
-        if not initial_dir or not os.path.exists(initial_dir):
-            initial_dir = os.getcwd()
-        
-        file_path, _ = QFileDialog.getOpenFileName(
-            self, "选择参考文件", initial_dir,
-            "数据文件 (*.xlsx *.xls *.txt);;Excel文件 (*.xlsx *.xls);;文本文件 (*.txt);;所有文件 (*.*)"
-        )
-        
-        if file_path:
-            self.ref_file = file_path
-            self.config["last_open_dir"] = os.path.dirname(file_path)
-            file_name = os.path.basename(file_path)
-            self.ref_file_edit.setText(short_display_name(file_name))
-            self.ref_file_edit.setToolTip(file_path)
-            self._update_status("已选择参考文件", "ready")
-            info(f"选择参考文件: {file_path}")
-    
-    def _add_sam_file(self):
-        """添加样品文件"""
-        initial_dir = self.config.get("last_open_dir", "")
-        if not initial_dir or not os.path.exists(initial_dir):
-            initial_dir = os.getcwd()
-        
-        file_paths, _ = QFileDialog.getOpenFileNames(
-            self, "选择样品文件", initial_dir,
-            "数据文件 (*.xlsx *.xls *.txt);;Excel文件 (*.xlsx *.xls);;文本文件 (*.txt);;所有文件 (*.*)"
-        )
-        
-        if file_paths:
-            self.config["last_open_dir"] = os.path.dirname(file_paths[0])
-            
-            for file_path in file_paths:
-                self.sam_files.append(file_path)
-                file_name = os.path.splitext(os.path.basename(file_path))[0]
-                self.sam_names.append(file_name)
-                self._append_sample_list_item(file_path, file_name)
-                
-                idx = len(self.sam_names) - 1
-                self.per_sample_window_params[idx] = None
-            
-            self._refresh_sample_list_colors()
-            self._update_status(f"已添加 {len(file_paths)} 个样品文件", "ready")
-            info(f"添加 {len(file_paths)} 个样品文件")
-    
-    def _append_sample_list_item(self, file_path: str, sample_name: str):
-        """添加带短名称、颜色与路径提示的列表项。"""
-        item = QListWidgetItem(short_display_name(sample_name))
-        item.setToolTip(file_path)
-        item.setData(Qt.ItemDataRole.UserRole, file_path)
-        self.sam_files_list.addItem(item)
+            self.use_window_switch.setText("●")
+            self.use_window_switch.setStyleSheet(
+                "QPushButton {"
+                "  background-color: #B0B0B0;"
+                "  border: none;"
+                "  border-radius: 8px;"
+                "  color: #FFFFFF;"
+                "  font-size: 9px;"
+                "  text-align: left;"
+                "  padding-left: 2px;"
+                "}"
+            )
 
-    def _refresh_sample_list_colors(self):
-        """按样品索引刷新列表颜色标识。"""
-        for index in range(self.sam_files_list.count()):
-            item = self.sam_files_list.item(index)
-            if item is None:
-                continue
-            item.setForeground(QBrush(QColor(sample_color(index))))
-            if index < len(self.sam_names):
-                item.setText(short_display_name(self.sam_names[index]))
-            if index < len(self.sam_files):
-                item.setToolTip(self.sam_files[index])
-
-    def _delete_selected_file(self):
-        """删除选中的样品文件"""
-        selected_items = self.sam_files_list.selectedItems()
-        if not selected_items:
-            QMessageBox.information(self, "提示", "请先选择要删除的样品文件")
-            return
-        
-        for item in selected_items:
-            row = self.sam_files_list.row(item)
-            self.sam_files_list.takeItem(row)
-            del self.sam_files[row]
-            del self.sam_names[row]
-            
-            # 更新窗函数参数索引
-            new_params = {}
-            for k in list(self.per_sample_window_params.keys()):
-                if k < row:
-                    new_params[k] = self.per_sample_window_params[k]
-                elif k > row:
-                    new_params[k - 1] = self.per_sample_window_params[k]
-            self.per_sample_window_params = new_params
-        
-        self._refresh_sample_list_colors()
-        self._update_status("已删除选中的样品文件", "ready")
-    
-    def _clear_sam_files(self):
-        """清空样品文件列表"""
-        self.sam_files = []
-        self.sam_names = []
-        self.sam_files_list.clear()
-        self.per_sample_window_params = {}
-        self._update_status("样品文件列表已清空", "ready")
+    def _toggle_window_params(self, enabled: bool):
+        """切换窗函数参数（左右拨动开关）"""
+        self._style_window_switch(enabled)
+        self.set_signal_window_btn.setEnabled(enabled)
     
     def _open_signal_window_dialog(self):
         """打开窗函数参数设置对话框"""
@@ -834,7 +872,7 @@ class THzAnalyzerApp(QMainWindow):
             self._clear_tabs()
             
             # 获取窗函数参数
-            use_window = self.use_window_checkbox.isChecked()
+            use_window = self.use_window_switch.isChecked()
             self.config["use_window"] = use_window
             
             per_sample_params_list = []
@@ -905,25 +943,9 @@ class THzAnalyzerApp(QMainWindow):
             self.fig3 = result.fig3
             self._display_charts(result.fig1, result.fig2, result.fig3)
             self._update_status("计算完成", "success")
-            # 启用所有按钮
-            self._set_popup_buttons_enabled(True)
             info("计算完成")
         else:
             self._update_status("计算失败", "error")
-            self._set_popup_buttons_enabled(False)
-    
-    def _set_popup_buttons_enabled(self, enabled: bool):
-        """设置弹出图表按钮的启用状态"""
-        self.save_btn.setEnabled(enabled)
-        self.save_time_freq_btn.setEnabled(enabled)
-        self.popup_time_btn.setEnabled(enabled)
-        self.popup_freq_btn.setEnabled(enabled)
-        self.popup_n_btn.setEnabled(enabled)
-        self.popup_k_btn.setEnabled(enabled)
-        self.popup_a_btn.setEnabled(enabled)
-        self.popup_er_btn.setEnabled(enabled)
-        self.popup_ei_btn.setEnabled(enabled)
-        self.popup_tan_btn.setEnabled(enabled)
     
     def _on_calculation_error(self, error_message: str):
         """计算错误回调"""
@@ -956,6 +978,7 @@ class THzAnalyzerApp(QMainWindow):
         """显示图表"""
         # 显示时域和频域图表
         canvas1 = FigureCanvas(fig1)
+        enable_responsive_fonts(canvas1)
         enable_curve_hover(canvas1)
         toolbar1 = NavigationToolbar(canvas1, self.tab1)
         self.tab1.layout().addWidget(toolbar1)
@@ -963,6 +986,7 @@ class THzAnalyzerApp(QMainWindow):
         
         # 显示光学参数图表
         canvas2 = FigureCanvas(fig2)
+        enable_responsive_fonts(canvas2)
         enable_curve_hover(canvas2)
         toolbar2 = NavigationToolbar(canvas2, self.tab2)
         self.tab2.layout().addWidget(toolbar2)
@@ -970,307 +994,11 @@ class THzAnalyzerApp(QMainWindow):
         
         # 显示介电特性图表
         canvas3 = FigureCanvas(fig3)
+        enable_responsive_fonts(canvas3)
         enable_curve_hover(canvas3)
         toolbar3 = NavigationToolbar(canvas3, self.tab3)
         self.tab3.layout().addWidget(toolbar3)
         self.tab3.layout().addWidget(canvas3)
-    
-    def _show_single_chart(self, chart_type: str):
-        """
-        弹出显示单个图表
-        
-        Args:
-            chart_type: 图表类型
-        """
-        if self.results_data is None:
-            QMessageBox.warning(self, "警告", "没有可显示的数据，请先运行分析")
-            return
-        
-        # 关闭已存在的同类型窗口
-        if chart_type in self.popup_windows:
-            try:
-                self.popup_windows[chart_type].close()
-            except:
-                pass
-        
-        # 图表配置
-        chart_config = {
-            'time': {
-                'title': '时域信号',
-                'xlabel': '延迟 (ps)',
-                'ylabel': '振幅',
-                'data_key': None,  # 特殊处理
-            },
-            'freq': {
-                'title': '频域信号',
-                'xlabel': '频率 (THz)',
-                'ylabel': '振幅 (dB)',
-                'data_key': None,  # 特殊处理
-            },
-            'refractive': {
-                'title': '折射率',
-                'xlabel': '频率 (THz)',
-                'ylabel': '折射率 n',
-                'data_key': 'Nsam',
-            },
-            'extinction': {
-                'title': '消光系数',
-                'xlabel': '频率 (THz)',
-                'ylabel': '消光系数 k',
-                'data_key': 'Ksam',
-            },
-            'absorption': {
-                'title': '吸收系数',
-                'xlabel': '频率 (THz)',
-                'ylabel': '吸收系数 (cm⁻¹)',
-                'data_key': 'Asam',
-            },
-            'epsilon_real': {
-                'title': '介电常数实部',
-                'xlabel': '频率 (THz)',
-                'ylabel': "介电常数实部 ε'",
-                'data_key': 'Epsilon_real',
-            },
-            'epsilon_imag': {
-                'title': '介电常数虚部',
-                'xlabel': '频率 (THz)',
-                'ylabel': 'ε"',
-                'data_key': 'Epsilon_imag',
-            },
-            'tan_delta': {
-                'title': '介电损耗',
-                'xlabel': '频率 (THz)',
-                'ylabel': 'tan δ',
-                'data_key': 'TanDelta',
-            },
-        }
-        
-        if chart_type not in chart_config:
-            return
-        
-        config = chart_config[chart_type]
-        
-        # 创建新窗口
-        popup_window = QMainWindow()
-        popup_window.setWindowTitle(config['title'])
-        popup_window.setMinimumSize(900, 600)
-        
-        central_widget = QWidget()
-        popup_window.setCentralWidget(central_widget)
-        layout = QVBoxLayout(central_widget)
-        layout.setContentsMargins(10, 10, 10, 10)
-        
-        # 创建图表
-        fig = self._create_single_figure(chart_type, config)
-        
-        if fig is None:
-            QMessageBox.warning(self, "警告", f"{config['title']}数据不可用")
-            return
-        
-        canvas = FigureCanvas(fig)
-        enable_curve_hover(canvas)
-        toolbar = NavigationToolbar(canvas, popup_window)
-        
-        layout.addWidget(toolbar)
-        layout.addWidget(canvas)
-        
-        # 保存窗口引用
-        self.popup_windows[chart_type] = popup_window
-        popup_window.show()
-    
-    def _create_single_figure(self, chart_type: str, config: dict):
-        """创建单个图表"""
-        F = self.results_data['F']
-        sam_names = self.results_data['sam_names']
-        
-        # 特殊处理时域和频域信号（需要从fig1中提取）
-        if chart_type == 'time':
-            if self.fig1 is None:
-                return None
-            try:
-                return create_single_series_figure(
-                    title=config['title'],
-                    xlabel=config['xlabel'],
-                    ylabel=config['ylabel'],
-                    frequency=None,
-                    series=(),
-                    sample_names=sam_names,
-                    xlim=None,
-                    source_lines=self.fig1.axes[0].get_lines(),
-                )
-            except Exception:
-                return None
-                
-        if chart_type == 'freq':
-            if self.fig1 is None:
-                return None
-            try:
-                return create_single_series_figure(
-                    title=config['title'],
-                    xlabel=config['xlabel'],
-                    ylabel=config['ylabel'],
-                    frequency=None,
-                    series=(),
-                    sample_names=sam_names,
-                    xlim=(0, 5),
-                    source_lines=self.fig1.axes[1].get_lines(),
-                )
-            except Exception:
-                return None
-
-        data_key = config['data_key']
-        if data_key not in self.results_data:
-            return None
-
-        data_list = self.results_data[data_key]
-        return create_single_series_figure(
-            title=config['title'],
-            xlabel=config['xlabel'],
-            ylabel=config['ylabel'],
-            frequency=F,
-            series=data_list,
-            sample_names=sam_names,
-            xlim=(0, 5),
-        )
-    
-    def _save_results(self):
-        """保存计算结果"""
-        if self.results_data is None:
-            QMessageBox.warning(self, "警告", "没有可保存的计算结果，请先运行分析")
-            return
-        
-        # 检查是否正在保存
-        if self.save_worker is not None and self.save_worker.isRunning():
-            QMessageBox.warning(self, "警告", "正在保存中，请稍候...")
-            return
-        
-        initial_dir = self.config.get("last_save_dir", "")
-        if not initial_dir or not os.path.exists(initial_dir):
-            initial_dir = os.getcwd()
-        
-        file_path, _ = QFileDialog.getSaveFileName(
-            self, "保存结果", initial_dir,
-            "Excel文件 (*.xlsx);;所有文件 (*.*)"
-        )
-        
-        if file_path:
-            if not file_path.lower().endswith('.xlsx'):
-                file_path += '.xlsx'
-            
-            self.config["last_save_dir"] = os.path.dirname(file_path)
-            
-            # 显示进度条
-            self._update_status("正在保存结果...", "working")
-            if self.status_bar:
-                self.status_bar.show_progress(True)
-            
-            # 禁用保存按钮防止重复点击
-            self.save_btn.setEnabled(False)
-            
-            # 创建保存工作线程
-            self.save_worker = SaveWorker()
-            self.save_worker.set_parameters(self.results_data, file_path)
-            
-            # 连接信号
-            self.save_worker.progress_updated.connect(self._on_save_progress)
-            self.save_worker.save_finished.connect(self._on_save_finished)
-            self.save_worker.save_error.connect(self._on_save_error)
-            
-            # 启动保存
-            self.save_worker.start()
-            info("开始异步保存Excel")
-    
-    def _on_save_progress(self, current: int, total: int, message: str):
-        """保存进度更新回调"""
-        if self.status_bar:
-            self.status_bar.update_progress(current, total, message)
-    
-    def _on_save_finished(self, file_path: str):
-        """保存完成回调"""
-        if self.status_bar:
-            self.status_bar.show_progress(False)
-        
-        self.save_btn.setEnabled(True)
-        self._update_status(f"结果已保存到: {os.path.basename(file_path)}", "success")
-        QMessageBox.information(self, "保存成功", f"计算结果已保存到:\n{file_path}")
-        info(f"结果已保存到: {file_path}")
-    
-    def _on_save_error(self, error_message: str):
-        """保存错误回调"""
-        if self.status_bar:
-            self.status_bar.show_progress(False)
-        
-        self.save_btn.setEnabled(True)
-        self._update_status("保存失败", "error")
-        QMessageBox.critical(self, "保存错误", error_message)
-        error(f"保存失败: {error_message}")
-    
-    def _on_save_time_freq_finished(self, file_path: str):
-        """保存时频域数据完成回调"""
-        if self.status_bar:
-            self.status_bar.show_progress(False)
-        
-        self.save_time_freq_btn.setEnabled(True)
-        self._update_status(f"时频域数据已保存到: {os.path.basename(file_path)}", "success")
-        QMessageBox.information(self, "保存成功", f"时频域数据（包括频域）已保存到:\n{file_path}")
-        info(f"时频域数据已保存到: {file_path}")
-    
-    def _on_save_time_freq_error(self, error_message: str):
-        """保存时频域数据错误回调"""
-        if self.status_bar:
-            self.status_bar.show_progress(False)
-        
-        self.save_time_freq_btn.setEnabled(True)
-        self._update_status("保存失败", "error")
-        QMessageBox.critical(self, "保存错误", error_message)
-        error(f"保存时频域数据失败: {error_message}")
-    
-    def _save_time_freq_data(self):
-        """保存加窗后的时频域数据（包括频域）为Excel文件"""
-        if self.results_data is None:
-            QMessageBox.warning(self, "警告", "没有可保存的时频域数据，请先运行分析")
-            return
-        
-        # 检查是否正在保存
-        if self.save_worker is not None and self.save_worker.isRunning():
-            QMessageBox.warning(self, "警告", "正在保存中，请稍候...")
-            return
-        
-        initial_dir = self.config.get("last_save_dir", "")
-        if not initial_dir or not os.path.exists(initial_dir):
-            initial_dir = os.getcwd()
-        
-        file_path, _ = QFileDialog.getSaveFileName(
-            self, "保存时频域数据", initial_dir,
-            "Excel文件 (*.xlsx);;所有文件 (*.*)"
-        )
-        
-        if file_path:
-            if not file_path.lower().endswith('.xlsx'):
-                file_path += '.xlsx'
-            
-            self.config["last_save_dir"] = os.path.dirname(file_path)
-            
-            # 显示进度条
-            self._update_status("正在保存时频域数据...", "working")
-            if self.status_bar:
-                self.status_bar.show_progress(True)
-            
-            # 禁用保存按钮防止重复点击
-            self.save_time_freq_btn.setEnabled(False)
-            
-            # 创建保存工作线程，指定保存类型为time_freq
-            self.save_worker = SaveWorker()
-            self.save_worker.set_parameters(self.results_data, file_path, save_type="time_freq")
-            
-            # 连接信号
-            self.save_worker.progress_updated.connect(self._on_save_progress)
-            self.save_worker.save_finished.connect(self._on_save_time_freq_finished)
-            self.save_worker.save_error.connect(self._on_save_time_freq_error)
-            
-            # 启动保存
-            self.save_worker.start()
-            info("开始异步保存时频域数据（包括频域）")
     
     def _show_help_dialog(self):
         """显示帮助对话框"""
@@ -1288,53 +1016,24 @@ class THzAnalyzerApp(QMainWindow):
             event.acceptProposedAction()
     
     def dropEvent(self, event):
-        """拖放事件"""
+        """拖放事件：引导用户使用标准化对话框（唯一入口）"""
         urls = event.mimeData().urls()
-        pos = event.position().toPoint()
-        
-        sam_files_rect = self.sam_files_list.geometry()
-        sam_files_global_pos = self.sam_files_list.mapTo(self, QPoint(0, 0))
-        sam_files_area = QRect(sam_files_global_pos, sam_files_rect.size())
-        
-        ref_edit_rect = self.ref_file_edit.geometry()
-        ref_edit_global_pos = self.ref_file_edit.mapTo(self, QPoint(0, 0))
-        ref_edit_area = QRect(ref_edit_global_pos, ref_edit_rect.size())
-        
-        if ref_edit_area.contains(pos):
-            if urls:
-                file_path = urls[0].toLocalFile()
-                if os.path.isfile(file_path) and file_path.lower().endswith(('.xlsx', '.xls', '.txt')):
-                    self.ref_file = file_path
-                    self.ref_file_edit.setText(short_display_name(os.path.basename(file_path)))
-                    self.ref_file_edit.setToolTip(file_path)
-                    self._update_status("已选择参考文件", "ready")
-        else:
-            added = 0
-            for url in urls:
-                file_path = url.toLocalFile()
-                if os.path.isfile(file_path) and file_path.lower().endswith(('.xlsx', '.xls', '.txt')):
-                    self.sam_files.append(file_path)
-                    file_name = os.path.splitext(os.path.basename(file_path))[0]
-                    self.sam_names.append(file_name)
-                    self._append_sample_list_item(file_path, file_name)
-                    idx = len(self.sam_names) - 1
-                    self.per_sample_window_params[idx] = None
-                    added += 1
-            
-            if added:
-                self._refresh_sample_list_colors()
-                self._update_status(f"已添加 {added} 个样品文件", "ready")
+        file_paths = [
+            u.toLocalFile() for u in urls
+            if os.path.isfile(u.toLocalFile())
+        ]
+        if not file_paths:
+            return
+        QMessageBox.information(
+            self, "提示",
+            f"检测到 {len(file_paths)} 个文件。\n\n"
+            "请使用「第一步：数据标准化」按钮导入原始数据，\n"
+            "在对话框中统一格式并指定参考/样品角色。"
+        )
     
     def _on_closing(self, event):
         """窗口关闭事件"""
         try:
-            # 关闭所有弹出窗口
-            for window in self.popup_windows.values():
-                try:
-                    window.close()
-                except:
-                    pass
-            
             # 清理状态栏资源
             if self.status_bar:
                 self.status_bar.cleanup()

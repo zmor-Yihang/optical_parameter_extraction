@@ -115,6 +115,27 @@ uv run python main.py
 uv run auto-py-to-exe
 ```
 
+### 打包为单个安装包（推荐分发方式）
+
+直接在用户机器上跑 `onedir` 文件夹太麻烦、`onefile` 单 exe 启动又慢。
+本项目用 **Inno Setup** 把 `onedir` 程序整体封装成一个 `install.exe`：
+用户双击安装、装好的是解压好的程序（启动快），也带正常卸载入口。
+
+1. 安装 Inno Setup 6（免费）：
+   ```powershell
+   winget install JRSoftware.InnoSetup
+   ```
+2. 一键构建：
+   ```powershell
+   .\build_installer.ps1
+   ```
+   产物为 `installer-output\install.exe`，可直接分发。
+3. 安装位置为 `%LOCALAPPDATA%\光学参数提取系统`（无需管理员权限，
+   程序可正常写入 `thz_config.json` 与 `logs/`）。
+
+> 手动构建：先 `uv run pyinstaller --onedir --windowed --name THzAnalyzer --distpath output main.py`，
+> 再用 Inno Setup Compiler 打开 `installer.iss` 编译。脚本与安装配置见 `installer.iss`。
+
 ## 注意事项
 
 - 确保数据文件格式正确（Excel .xlsx格式）

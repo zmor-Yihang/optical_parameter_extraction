@@ -83,6 +83,43 @@ def get_main_window_style() -> str:
             background-color: #F0F0F0;
         }
 
+        /* 细滚动条 */
+        QListWidget QScrollBar:vertical {
+            background: #F5F5F5;
+            width: 8px;
+            margin: 0;
+            border: none;
+        }
+        QListWidget QScrollBar::handle:vertical {
+            background: #C0C0C0;
+            min-height: 20px;
+            border-radius: 4px;
+        }
+        QListWidget QScrollBar::handle:vertical:hover {
+            background: #A8A8A8;
+        }
+        QListWidget QScrollBar:horizontal {
+            background: #F5F5F5;
+            height: 8px;
+            margin: 0;
+            border: none;
+        }
+        QListWidget QScrollBar::handle:horizontal {
+            background: #C0C0C0;
+            min-width: 20px;
+            border-radius: 4px;
+        }
+        QListWidget QScrollBar::handle:horizontal:hover {
+            background: #A8A8A8;
+        }
+        QListWidget QScrollBar::add-line, QListWidget QScrollBar::sub-line {
+            width: 0px;
+            height: 0px;
+        }
+        QListWidget QScrollBar::add-page, QListWidget QScrollBar::sub-page {
+            background: transparent;
+        }
+
         QLineEdit {
             background-color: #FFFFFF;
             border: 1px solid #D0D0D0;
