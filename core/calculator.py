@@ -64,6 +64,7 @@ def calculate_optical_params(
     use_window: bool = False,
     ref_window_params: dict[str, float] | None = None,
     per_sample_window_params: Sequence[dict[str, float] | None] | None = None,
+    per_sample_thickness: Sequence[float | None] | None = None,
     progress_callback: ProgressCallback | None = None,
 ) -> CalculationResult:
     """
@@ -100,7 +101,11 @@ def calculate_optical_params(
             info("参考信号窗函数已应用")
 
         progress.update("执行FFT及光学参数计算...")
-        properties = calculate_optical_properties(prepared_signals, d)
+        properties = calculate_optical_properties(
+            prepared_signals,
+            d,
+            per_sample_thickness_mm=per_sample_thickness,
+        )
 
         result.prepared_signals = prepared_signals
         result.properties = properties
@@ -110,6 +115,7 @@ def calculate_optical_params(
             measurements=measurements,
             thickness=d,
             use_window=use_window,
+            per_sample_thickness=per_sample_thickness,
         )
         result.success = True
         progress.update("计算完成")
@@ -156,6 +162,7 @@ def _build_result_data(
     measurements=None,
     thickness: float | None = None,
     use_window: bool = False,
+    per_sample_thickness: Sequence[float | None] | None = None,
 ) -> dict[str, Any]:
     """组装当前 GUI 和导出模块依赖的兼容数据结构。"""
     source_files: dict[str, str] = {}
@@ -167,6 +174,7 @@ def _build_result_data(
     return {
         "thickness": thickness,
         "use_window": use_window,
+        "per_sample_thickness": list(per_sample_thickness) if per_sample_thickness else None,
         "source_files": source_files,
         "F": properties.frequency,
         "Nsam": list(properties.refractive_indices),

@@ -59,9 +59,8 @@ def load_measurements(
 
 
 def _load_signal(file_path: str, name: str, start_row: int) -> LoadedSignal:
-    data = read_data_file(file_path, start_row)
-    time = data.iloc[:, 0].to_numpy(dtype=float, copy=True)
-    amplitude = data.iloc[:, 1].to_numpy(dtype=float, copy=True)
+    signal = read_data_file(file_path, start_row)
+    time, amplitude = signal.to_arrays()
     return LoadedSignal(
         name=name,
         path=file_path,

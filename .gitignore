@@ -1,10 +1,66 @@
-# Python-generated files
+# ---- Python 生成文件 ----
 __pycache__/
 *.py[oc]
 build/
 dist/
 wheels/
 *.egg-info
+.eggs/
+*.egg
 
-# Virtual environments
-.venv
+# ---- 虚拟环境 ----
+.venv/
+venv/
+env/
+ENV/
+
+# ---- 运行时产物（不应入库）----
+logs/
+thz_config.json
+standardized/
+
+# ---- 构建/打包产物 ----
+output/
+output-nuitka/
+installer-output/
+*.spec
+*.manifest
+
+# ---- 测试/质量工具缓存 ----
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+.coverage.*
+htmlcov/
+.tox/
+.nox/
+hypothesis/
+
+# ---- IDE / 编辑器 ----
+.idea/
+.vscode/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.swp
+*.swo
+*~
+.spotlight_index/
+
+# ---- 环境与密钥 ----
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+
+# ---- 操作系统文件 ----
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# ---- 其他 ----
+.cache/
+*.log.bak

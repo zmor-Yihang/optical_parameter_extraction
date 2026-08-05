@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from collections.abc import Sequence
 
-import matplotlib.pyplot as plt
+import matplotlib
 import numpy as np
 from matplotlib.backend_bases import MouseEvent
 from matplotlib.figure import Figure
@@ -14,7 +14,7 @@ from .physics import OpticalPropertyData
 from .preprocessing import PreparedSignals
 
 # 统一图表标题字号（默认 large≈12pt，此处调小）
-plt.rcParams["axes.titlesize"] = 10
+matplotlib.rcParams["axes.titlesize"] = 10
 
 COLORS = (
     "red",
@@ -54,7 +54,7 @@ def create_time_frequency_figure(
     properties: OpticalPropertyData,
 ) -> Figure:
     """创建时域与频域信号图。"""
-    figure = plt.figure(figsize=(9, 7))
+    figure = Figure(figsize=(9, 7))
     figure.patch.set_facecolor("#F5F5F5")
 
     short_names = tuple(short_display_name(name) for name in signals.sample_names)
@@ -90,8 +90,8 @@ def create_time_frequency_figure(
         _magnitude_to_db(properties.reference_fft_magnitude),
         "k",
         linewidth=2,
-        label="参考光谱",
-        gid="参考光谱",
+        label="参考信号",
+        gid="参考信号",
     )
     for index, magnitude in enumerate(properties.sample_fft_magnitudes):
         frequency_axis.plot(
@@ -119,7 +119,7 @@ def create_optical_parameters_figure(
     properties: OpticalPropertyData,
 ) -> Figure:
     """创建折射率、消光系数和吸收系数图。"""
-    figure = plt.figure(figsize=(9, 10))
+    figure = Figure(figsize=(9, 10))
     figure.patch.set_facecolor("#F5F5F5")
     short_names = tuple(short_display_name(name) for name in sample_names)
 
@@ -164,7 +164,7 @@ def create_dielectric_figure(
     properties: OpticalPropertyData,
 ) -> Figure:
     """创建介电常数和介电损耗图。"""
-    figure = plt.figure(figsize=(9, 10))
+    figure = Figure(figsize=(9, 10))
     figure.patch.set_facecolor("#F5F5F5")
     short_names = tuple(short_display_name(name) for name in sample_names)
 
@@ -216,12 +216,12 @@ def create_single_series_figure(
     source_lines: Sequence[Line2D] | None = None,
 ) -> Figure:
     """创建弹出窗口用的单图（复用图例策略）。"""
-    figure = plt.figure(figsize=(10, 6))
+    figure = Figure(figsize=(10, 6))
     figure.patch.set_facecolor("#F5F5F5")
     axis = figure.add_subplot(1, 1, 1)
     axis.set_facecolor("#F8F8F8")
 
-    reference_labels = {"参考信号", "参考光谱"}
+    reference_labels = {"参考信号"}
 
     if source_lines is not None:
         sample_count = 0

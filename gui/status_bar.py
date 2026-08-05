@@ -108,6 +108,3 @@ class StatusBar(QWidget):
 
         self.progress_label.setText(message)
         QApplication.processEvents()
-
-    def cleanup(self):
-        pass

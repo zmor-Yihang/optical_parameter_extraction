@@ -11,8 +11,14 @@ from .calculator import (
 from .data_io import (
     read_data_file,
     load_standard_signal,
+    read_table_csv,
+    write_table_csv,
     read_table_txt,
     write_table_txt,
+    save_results_to_csv,
+    save_time_freq_domain_data_to_csv,
+    save_results_to_excel,
+    save_time_freq_domain_data_to_excel,
     save_results_to_txt,
     save_time_freq_domain_data_to_txt,
 )
@@ -49,6 +55,8 @@ __all__ = [
     'write_table_txt',
     'save_results_to_txt',
     'save_time_freq_domain_data_to_txt',
+    'save_results_to_excel',
+    'save_time_freq_domain_data_to_excel',
     'StandardSignal',
     'INPUT_FILE_FILTER',
     'SUPPORTED_INPUT_EXTENSIONS',

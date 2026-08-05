@@ -13,6 +13,8 @@ from datetime import datetime
 from logging.handlers import RotatingFileHandler
 from typing import Optional
 
+from utils.app_paths import get_app_base_dir
+
 
 class THzLogger:
     """THz光学参数分析系统的日志管理类"""
@@ -64,14 +66,7 @@ class THzLogger:
     
     def _get_log_directory(self) -> str:
         """获取日志文件目录"""
-        if hasattr(sys, '_MEIPASS'):
-            # PyInstaller 打包环境
-            base_path = os.path.dirname(sys.executable)
-        else:
-            # 开发环境
-            base_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-        
-        return os.path.join(base_path, 'logs')
+        return os.path.join(get_app_base_dir(), 'logs')
     
     def _add_console_handler(self):
         """添加控制台日志处理器"""

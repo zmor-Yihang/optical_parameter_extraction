@@ -28,7 +28,6 @@ from dataclasses import dataclass, field
 from datetime import datetime
 
 import numpy as np
-import pandas as pd
 
 from utils import info, warning
 from .exceptions import DataReadError, SaveError
@@ -131,9 +130,9 @@ class StandardSignal:
     def source_format(self) -> str:
         return self.metadata.get("source_format", "")
 
-    def to_dataframe(self) -> pd.DataFrame:
-        """转换为两列 DataFrame（列名 time / intensity，供计算层使用）。"""
-        return pd.DataFrame({"time": self.time, "intensity": self.amplitude})
+    def to_arrays(self) -> tuple[np.ndarray, np.ndarray]:
+        """返回 (时间, 幅值) 两个一维数组的副本，供计算层使用。"""
+        return self.time.copy(), self.amplitude.copy()
 
     def describe(self) -> str:
         return (
@@ -226,25 +225,20 @@ def detect_data_start_row(
 
     ext = os.path.splitext(file_path)[1].lower()
 
-    # Excel 文件：用 pandas 试读前几行
+    # Excel 文件：读前若干行，找第一段连续可解析为两个数值的位置
     if ext in (".xlsx", ".xls"):
-        for trial_start in range(max(0, max_probe - 10), max_probe + 1):
-            try:
-                df = pd.read_excel(
-                    file_path,
-                    skiprows=trial_start,
-                    header=None,
-                    nrows=min_consecutive,
-                    engine="openpyxl",
-                )
-                if df.shape[0] >= min_consecutive and df.shape[1] >= 2:
-                    converted = df.iloc[:, :2].apply(
-                        pd.to_numeric, errors="coerce"
-                    )
-                    if not converted.isna().any().any():
-                        return trial_start + 1
-            except Exception:
-                continue
+        try:
+            rows = _read_excel_rows(file_path, max_rows=max_probe + min_consecutive)
+        except Exception:
+            return 1
+        consecutive = 0
+        for i, row in enumerate(rows):
+            if _row_to_pair(row) is not None:
+                consecutive += 1
+                if consecutive >= min_consecutive:
+                    return i - consecutive + 2
+            else:
+                consecutive = 0
         return 1
 
     # 文本文件：逐行探测
@@ -257,8 +251,9 @@ def detect_data_start_row(
         if ok:
             consecutive += 1
             if consecutive >= min_consecutive:
-                # 回退到连续数值段的起始行
-                return i - consecutive + min_consecutive + 1  # 1-based
+                # 回退到连续数值段的起始行（1-based）
+                # 该段第一行的 0-based 下标为 i-consecutive+1，故 +2 转 1-based
+                return i - consecutive + 2
         else:
             consecutive = 0
 
@@ -412,62 +407,104 @@ def _parse_thz_scan(
     return signals
 
 
+def _read_excel_rows(file_path: str, max_rows: int | None = None) -> list[tuple]:
+    """用 openpyxl 读取工作表的前两列（替代 pandas.read_excel）。"""
+    ext = os.path.splitext(file_path)[1].lower()
+    if ext == ".xls":
+        raise DataReadError(
+            file_path,
+            "不支持旧版 .xls 格式，请在 Excel 中另存为 .xlsx 后再导入",
+        )
+    from openpyxl import load_workbook
+
+    workbook = load_workbook(file_path, read_only=True, data_only=True)
+    try:
+        sheet = workbook.active
+        rows = []
+        for i, row in enumerate(sheet.iter_rows(values_only=True)):
+            if max_rows is not None and i >= max_rows:
+                break
+            rows.append(row if row is not None else ())
+        return rows
+    finally:
+        workbook.close()
+
+
+def _row_to_pair(row) -> tuple[float, float] | None:
+    """把一行单元格转换为 (时间, 幅值)，无法解析时返回 None。"""
+    if row is None or len(row) < 2:
+        return None
+    try:
+        first = float(row[0])
+        second = float(row[1])
+    except (TypeError, ValueError):
+        return None
+    if not (np.isfinite(first) and np.isfinite(second)):
+        return None
+    return first, second
+
+
+def _read_delimited_pairs(file_path: str, skip: int) -> list[tuple[float, float]]:
+    """解析任意分隔符（制表符/逗号/空白）的两列文本。
+
+    替代原来逐个分隔符试探 pandas.read_csv 的做法：单次扫描、逐行自适应，
+    速度更快，也不再需要 pandas。'#' 开头与空行自动跳过。
+    """
+    pairs: list[tuple[float, float]] = []
+    with open(file_path, "r", encoding="utf-8-sig", errors="replace") as fh:
+        for index, raw in enumerate(fh):
+            if index < skip:
+                continue
+            line = raw.strip()
+            if not line or line.startswith("#"):
+                continue
+            if "\t" in line:
+                parts = line.split("\t")
+            elif "," in line:
+                parts = line.split(",")
+            else:
+                parts = line.split()
+            parts = [p for p in (item.strip() for item in parts) if p]
+            if len(parts) < 2:
+                continue
+            try:
+                first = float(parts[0])
+                second = float(parts[1])
+            except ValueError:
+                continue          # 表头等非数值行直接跳过
+            if np.isfinite(first) and np.isfinite(second):
+                pairs.append((first, second))
+    return pairs
+
+
 def _parse_two_column_table(file_path: str, start_row: int = 1) -> StandardSignal:
     """解析 Excel / 任意分隔符文本的前两列。"""
     ext = os.path.splitext(file_path)[1].lower()
     skip = max(0, int(start_row) - 1)
 
     if ext in (".xlsx", ".xls"):
-        data = pd.read_excel(
-            file_path, skiprows=skip, header=None, engine="openpyxl"
-        )
         source_format = FORMAT_EXCEL
+        rows = _read_excel_rows(file_path)[skip:]
+        pairs = [pair for pair in (_row_to_pair(row) for row in rows) if pair]
+        if not rows:
+            raise DataReadError(file_path, "数据文件必须至少包含两列：时间和幅值")
     else:
         source_format = FORMAT_DELIMITED
-        data = None
-        last_error: Exception | None = None
-        for kwargs in (
-            {"sep": None, "engine": "python"},
-            {"sep": r"\s+", "engine": "python"},
-            {"sep": ",", "engine": "python"},
-            {"sep": "\t", "engine": "python"},
-        ):
-            try:
-                candidate = pd.read_csv(
-                    file_path,
-                    skiprows=skip,
-                    header=None,
-                    comment="#",
-                    skip_blank_lines=True,
-                    **kwargs,
-                )
-                if candidate.shape[1] >= 2:
-                    data = candidate
-                    break
-            except Exception as exc:  # noqa: BLE001 - 逐个尝试分隔符
-                last_error = exc
-        if data is None:
-            raise DataReadError(
-                file_path,
-                f"无法解析文本文件（尝试了多种分隔符）：{last_error}",
-            )
+        pairs = _read_delimited_pairs(file_path, skip)
 
-    if data.shape[1] < 2:
-        raise DataReadError(file_path, "数据文件必须至少包含两列：时间和幅值")
-
-    frame = data.iloc[:, :2].apply(pd.to_numeric, errors="coerce").dropna()
-    if len(frame) < 2:
+    if len(pairs) < 2:
         raise DataReadError(
             file_path,
             "有效数值行不足，请检查“数据起始行”设置是否正确",
         )
 
+    values = np.asarray(pairs, dtype=float)
     meta = _common_metadata(file_path, source_format)
     meta["start_row"] = str(int(start_row))
     return StandardSignal(
         name=_base_name(file_path),
-        time=frame.iloc[:, 0].to_numpy(dtype=float),
-        amplitude=frame.iloc[:, 1].to_numpy(dtype=float),
+        time=values[:, 0],
+        amplitude=values[:, 1],
         metadata=meta,
     )
 

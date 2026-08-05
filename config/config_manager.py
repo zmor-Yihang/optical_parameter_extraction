@@ -1,20 +1,15 @@
 import os
-import sys
 import json
 
 from utils import info, warning, error
+from utils.app_paths import get_app_base_dir
 
 
 def get_config_path():
     """获取配置文件的路径"""
     try:
-        # 使用_MEIPASS获取临时解压目录
-        if hasattr(sys, '_MEIPASS'):
-            base_path = os.path.dirname(sys.executable)
-        else:
-            # 使用当前脚本目录
-            base_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-        return os.path.join(base_path, 'thz_config.json')
+        # 打包环境(exe 所在目录)或开发环境(项目根目录)
+        return os.path.join(get_app_base_dir(), 'thz_config.json')
     except Exception:
         # 如果出错，回退到当前工作目录
         return os.path.join(os.getcwd(), 'thz_config.json')
@@ -55,19 +50,9 @@ def load_config():
     try:
         with open(config_path, 'r') as f:
             config = json.load(f)
-            # 兼容老配置
+            # 兼容老配置：缺失的键用默认值补齐
             for key, value in default_config.items():
                 config.setdefault(key, value)
-            if "start_row" not in config:
-                config["start_row"] = 1
-            if "use_window" not in config:
-                config["use_window"] = False
-            if "window_t_start" not in config:
-                config["window_t_start"] = 0.0
-            if "window_t_end" not in config:
-                config["window_t_end"] = 30.0
-            if "window_alpha" not in config:
-                config["window_alpha"] = 0.5
             info("配置已加载")
             return config
     except Exception as e:

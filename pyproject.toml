@@ -1,14 +1,20 @@
 [project]
 name = "optical-parameter-extraction"
-version = "0.1.0"
-description = "Add your description here"
+version = "4.6.1"
+description = "THz 时域光谱光学参数提取系统"
 readme = "README.md"
-requires-python = ">=3.13"
+requires-python = ">=3.11"
 dependencies = [
-    "auto-py-to-exe>=2.48.1",
     "matplotlib>=3.10.7",
+    "numpy>=2.0",
     "openpyxl>=3.1.5",
-    "pandas>=2.3.3",
     "pyqt6>=6.10.0",
-    "scipy>=1.16.3",
+]
+
+# 打包/构建相关依赖，按需安装：uv sync --extra build
+[project.optional-dependencies]
+build = [
+    "auto-py-to-exe>=2.48.1",
+    "nuitka>=2.6",
+    "pyinstaller>=6.10",
 ]

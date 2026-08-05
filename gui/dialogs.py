@@ -44,13 +44,14 @@ class HelpDialog(QDialog):
     <li><b>选择参考/样品文件</b>：在左侧"参考文件""样品文件"区域点击"添加"
         <ul style="margin-left: 12px; margin-top: 4px;">
             <li>支持格式：BT-FTS 时域扫描 txt、Excel (.xlsx/.xls)、CSV、任意分隔符两列文本、以及已导出的标准 txt</li>
-            <li>选择后会<b>自动标准化</b>：原始格式被转换为第一列时间(ps)、第二列幅值的标准 txt（写入 standardized 目录），分析直接使用这些标准文件</li>
+            <li>选择后会<b>自动标准化</b>：原始格式被转换为第一列时间(ps)、第二列幅值的标准 txt（暂存于系统临时目录，不在项目目录生成文件夹），分析直接使用这些标准文件；如需保留，用"工具 → 导出标准格式"导出到指定目录</li>
             <li>多扫描文件会自动拆分为多条；样品支持批量添加、删除、清空</li>
         </ul>
     </li>
-    <li><b>导出标准 TXT（可选工具）</b>：菜单"文件 → 数据标准化"或左侧"打开导出工具"
+    <li><b>导出标准格式（工具）</b>：菜单"工具 → 导出标准格式"（快捷键 Ctrl+D）
         <ul style="margin-left: 12px; margin-top: 4px;">
-            <li>把任意原始格式批量转换为两列标准 txt 并导出到磁盘，供后续直接选择使用</li>
+            <li>把当前"参考文件"与"样品文件"中的标准 txt 一次性复制导出</li>
+            <li>点击后弹出目录选择框，直接导出到所选目录（无需其他界面配置）</li>
             <li>标准 txt 的注释头记录来源文件、扫描序号、采样参数，保证结果可追溯</li>
         </ul>
     </li>
@@ -164,7 +165,7 @@ class AboutDialog(QDialog):
 
 <table style="width: 100%; margin: 8px 0;">
     <tr><td style="width: 100px; color: #666666;"><b>版本</b></td><td>v4.6.0</td></tr>
-    <tr><td style="color: #666666;"><b>更新日期</b></td><td>2025年12月5日</td></tr>
+    <tr><td style="color: #666666;"><b>更新日期</b></td><td>2026年8月5日</td></tr>
     <tr><td style="color: #666666;"><b>开发框架</b></td><td>Python 3 + PyQt6 + Matplotlib</td></tr>
 </table>
 
@@ -176,7 +177,7 @@ class AboutDialog(QDialog):
     <li><b>Tukey窗函数</b>：可调参数的窗函数，去除多次反射干扰</li>
     <li><b>批量处理</b>：支持同时分析多个样品，自动对比显示</li>
     <li><b>统一数据格式</b>：多来源格式一键转换为两列标准 txt，全流程可追溯</li>
-    <li><b>结果导出</b>：所有结果统一保存为 txt 格式</li>
+    <li><b>结果导出</b>：所有结果统一保存为 CSV 格式（逗号分隔、带表头）</li>
     <li><b>异步计算</b>：后台线程计算，不阻塞界面</li>
 </ul>
 
