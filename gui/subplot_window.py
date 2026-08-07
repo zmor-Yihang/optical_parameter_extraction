@@ -28,6 +28,7 @@ from PyQt6.QtWidgets import (
     QHBoxLayout,
     QLabel,
     QPushButton,
+    QSizePolicy,
     QSplitter,
     QTextBrowser,
     QVBoxLayout,
@@ -139,6 +140,8 @@ class SubplotDetailWindow(QWidget):
         self.title_label.setStyleSheet("color: #333333;")
         self.title_label.setWordWrap(True)
         info_layout.addWidget(self.title_label)
+        # 弹簧：把标题固定在顶部、摘要固定在底部，避免两者紧贴
+        info_layout.addStretch()
 
         self.summary_text = QTextBrowser()
         self.summary_text.setReadOnly(True)
@@ -233,13 +236,17 @@ class SubplotDetailWindow(QWidget):
         figure.tight_layout()
 
         canvas = FigureCanvas(figure)
+        # 让画布随窗口放大而扩展，放大时子图区域跟随放大
+        canvas.setSizePolicy(
+            QSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Expanding)
+        )
         # matplotlib 自带导航工具栏：放大 / 缩小 / 拖拽平移 / 复位 / 保存图片
         toolbar = NavigationToolbar(canvas, self.plot_container)
         # 自定义坐标范围条：X/Y 量程手动设置（填写后点「应用」生效，「自动」复原）
         axis_bar = AxisRangeBar(canvas)
         self.plot_layout.addWidget(toolbar)
         self.plot_layout.addWidget(axis_bar)
-        self.plot_layout.addWidget(canvas)
+        self.plot_layout.addWidget(canvas, 1)
         self._toolbar = toolbar
         self._axis_bar = axis_bar
         self._canvas = canvas

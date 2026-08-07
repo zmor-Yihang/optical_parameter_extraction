@@ -219,15 +219,6 @@ class THzAnalyzerApp(QMainWindow):
         left_layout.addWidget(param_group)
         left_layout.addStretch()
 
-        # 子图详情
-        detail_btn = QPushButton("查看子图详情")
-        detail_btn.setToolTip(
-            "弹出窗口查看每个子图的放大图表与关键指标摘要，\n"
-            "支持子图切换，窗口可拖动、可调整大小"
-        )
-        detail_btn.clicked.connect(self._show_subplot_details)
-        left_layout.addWidget(detail_btn)
-        
         # 版权信息
         version_label = QLabel("NUAA THz Group  v4.6.0")
         version_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
@@ -673,6 +664,17 @@ class THzAnalyzerApp(QMainWindow):
         save_row.addWidget(self.save_tf_btn)
         button_layout.addLayout(save_row)
 
+        detail_row = QHBoxLayout()
+        self.detail_btn = QPushButton("查看子图详情")
+        self.detail_btn.setEnabled(False)
+        self.detail_btn.setToolTip(
+            "弹出窗口查看每个子图的放大图表与关键指标摘要，\n"
+            "支持子图切换，窗口可拖动、可调整大小"
+        )
+        self.detail_btn.clicked.connect(self._show_subplot_details)
+        detail_row.addWidget(self.detail_btn)
+        button_layout.addLayout(detail_row)
+
         parent_layout.addLayout(button_layout)
 
     def _set_popup_buttons_enabled(self, enabled: bool):
@@ -681,6 +683,8 @@ class THzAnalyzerApp(QMainWindow):
             self.save_btn.setEnabled(enabled)
         if hasattr(self, "save_tf_btn"):
             self.save_tf_btn.setEnabled(enabled)
+        if hasattr(self, "detail_btn"):
+            self.detail_btn.setEnabled(enabled)
 
     def _save_results(self):
         """保存光学参数结果（Excel，每个样品一个工作表）。"""

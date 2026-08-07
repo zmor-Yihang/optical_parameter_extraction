@@ -1179,3 +1179,42 @@
 2026-08-05 17:37:33 [INFO] [logger:101] 计算完成
 2026-08-05 17:42:25 [INFO] [logger:101] 配置已保存
 2026-08-05 17:42:25 [INFO] [logger:101] 程序关闭
+2026-08-05 20:00:09 [INFO] [logger:65] 日志系统初始化完成
+2026-08-05 20:00:09 [INFO] [logger:101] 程序启动
+2026-08-05 20:00:09 [INFO] [logger:101] 正在初始化THz分析系统...
+2026-08-05 20:00:09 [INFO] [logger:101] 配置已加载
+2026-08-05 20:00:09 [INFO] [logger:101] THz分析系统初始化完成
+2026-08-05 20:00:17 [INFO] [logger:101] 配置已保存
+2026-08-05 20:00:17 [INFO] [logger:101] 程序关闭
+2026-08-05 20:01:57 [INFO] [logger:65] 日志系统初始化完成
+2026-08-05 20:01:57 [INFO] [logger:101] 程序启动
+2026-08-05 20:01:57 [INFO] [logger:101] 正在初始化THz分析系统...
+2026-08-05 20:01:57 [INFO] [logger:101] 配置已加载
+2026-08-05 20:01:58 [INFO] [logger:101] THz分析系统初始化完成
+2026-08-05 20:02:00 [INFO] [logger:101] 自动检测起始行: GFRP_20260804200528_ReferenceTd.txt -> 第 1 行
+2026-08-05 20:02:00 [INFO] [logger:101] 标准化完成: GFRP_20260804200528_ReferenceTd.txt [thz-scan] -> 1 条信号
+2026-08-05 20:02:00 [INFO] [logger:101] 标准数据已导出: C:\Users\30495\AppData\Local\Temp\THzAnalyzer_standardized\GFRP_20260804200528_ReferenceTd.txt (10000 点)
+2026-08-05 20:02:00 [INFO] [logger:101] 选择参考文件（自动标准化）: C:\Users\30495\AppData\Local\Temp\THzAnalyzer_standardized\GFRP_20260804200528_ReferenceTd.txt
+2026-08-05 20:02:02 [INFO] [logger:101] 自动检测起始行: PTFE_20260804202059_Time.txt -> 第 1 行
+2026-08-05 20:02:02 [INFO] [logger:101] 标准化完成: PTFE_20260804202059_Time.txt [thz-scan] -> 1 条信号
+2026-08-05 20:02:02 [INFO] [logger:101] 标准数据已导出: C:\Users\30495\AppData\Local\Temp\THzAnalyzer_standardized\PTFE_20260804202059_Time.txt (10000 点)
+2026-08-05 20:02:02 [INFO] [logger:101] 自动检测起始行: PVC_20260804202520_Time.txt -> 第 1 行
+2026-08-05 20:02:02 [INFO] [logger:101] 标准化完成: PVC_20260804202520_Time.txt [thz-scan] -> 1 条信号
+2026-08-05 20:02:02 [INFO] [logger:101] 标准数据已导出: C:\Users\30495\AppData\Local\Temp\THzAnalyzer_standardized\PVC_20260804202520_Time.txt (10000 点)
+2026-08-05 20:02:02 [INFO] [logger:101] 添加 2 个样品文件（自动标准化）
+2026-08-05 20:02:03 [INFO] [logger:101] 开始异步计算
+2026-08-05 20:02:03 [INFO] [logger:101] 开始计算光学参数，样品数量: 2
+2026-08-05 20:02:03 [INFO] [logger:101] 标准化完成: GFRP_20260804200528_ReferenceTd.txt [standard-txt] -> 1 条信号
+2026-08-05 20:02:03 [INFO] [logger:101] 成功读取文件: C:\Users\30495\AppData\Local\Temp\THzAnalyzer_standardized\GFRP_20260804200528_ReferenceTd.txt
+2026-08-05 20:02:03 [INFO] [logger:101] 参考信号读取完成，数据点数: 10000
+2026-08-05 20:02:03 [INFO] [logger:101] 标准化完成: PTFE_20260804202059_Time.txt [standard-txt] -> 1 条信号
+2026-08-05 20:02:03 [INFO] [logger:101] 成功读取文件: C:\Users\30495\AppData\Local\Temp\THzAnalyzer_standardized\PTFE_20260804202059_Time.txt
+2026-08-05 20:02:03 [INFO] [logger:101] 样品 PTFE_20260804202059_Time 读取完成
+2026-08-05 20:02:03 [INFO] [logger:101] 标准化完成: PVC_20260804202520_Time.txt [standard-txt] -> 1 条信号
+2026-08-05 20:02:03 [INFO] [logger:101] 成功读取文件: C:\Users\30495\AppData\Local\Temp\THzAnalyzer_standardized\PVC_20260804202520_Time.txt
+2026-08-05 20:02:03 [INFO] [logger:101] 样品 PVC_20260804202520_Time 读取完成
+2026-08-05 20:02:03 [INFO] [logger:101] 光学参数计算完成
+2026-08-05 20:02:03 [INFO] [logger:101] 计算完成
+2026-08-05 20:02:04 [INFO] [logger:101] 已打开子图详情窗口
+2026-08-05 20:02:16 [INFO] [logger:101] 配置已保存
+2026-08-05 20:02:16 [INFO] [logger:101] 程序关闭
