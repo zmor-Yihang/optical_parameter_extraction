@@ -21,6 +21,7 @@ import numpy as np
 
 from utils import info, exception
 from .exceptions import DataReadError, SaveError
+from .results import AnalysisResult
 from .standard_format import (
     NUMBER_FORMAT,
     delay_um_to_ps,
@@ -317,25 +318,20 @@ def _stack_time_freq_tables(time_rows, time_headers, freq_rows, freq_headers) ->
     return {"headers": headers, "rows": rows}
 
 
-def _result_metadata(results_data, extra=None):
+def _result_metadata(results: AnalysisResult, extra=None):
     metadata = {
         "stage": "2-optical-parameters",
-        "sample_count": str(len(results_data.get("sam_names", []) or [])),
+        "sample_count": str(len(results.sample_names)),
     }
-    thickness = results_data.get("thickness")
-    if thickness is not None:
-        metadata["thickness_mm"] = str(thickness)
-    per_sample = results_data.get("per_sample_thickness")
-    if per_sample:
+    if results.thickness is not None:
+        metadata["thickness_mm"] = str(results.thickness)
+    if results.per_sample_thickness:
         metadata["per_sample_thickness_mm"] = ";".join(
-            str(value) if value is not None else "" for value in per_sample
+            str(value) if value is not None else "" for value in results.per_sample_thickness
         )
-    if results_data.get("use_window") is not None:
-        metadata["use_window"] = str(results_data.get("use_window"))
-    sources = results_data.get("source_files")
-    if isinstance(sources, Mapping):
-        for key, value in sources.items():
-            metadata[f"source.{key}"] = value
+    metadata["use_window"] = str(bool(results.use_window))
+    for key, value in results.source_files.items():
+        metadata[f"source.{key}"] = value
     metadata.update(extra or {})
     return metadata
 
@@ -344,12 +340,12 @@ def _result_metadata(results_data, extra=None):
 # 结果保存（统一 CSV）
 # ---------------------------------------------------------------------------
 
-def save_results_to_csv(results_data, filename):
+def save_results_to_csv(results: AnalysisResult, filename):
     """
     将光学参数计算结果保存为 CSV。
 
     参数:
-        results_data: 计算结果数据字典
+        results: 分析结果数据（AnalysisResult）
         filename: 保存的文件路径（非 .csv 后缀会自动改为 .csv）
 
     返回:
@@ -358,30 +354,29 @@ def save_results_to_csv(results_data, filename):
     target = _ensure_csv_path(filename)
     info(f"开始保存光学参数到: {target}")
 
-    frequency = results_data.get("F")
+    frequency = results.frequency
     if frequency is None:
         raise SaveError(target, "结果中缺少频率数据")
 
-    sam_names = results_data.get("sam_names", []) or []
     columns = {"Frequency[THz]": frequency}
-    for i, name in enumerate(sam_names):
-        columns[f"{name}|n"] = results_data["Nsam"][i]
-        columns[f"{name}|k"] = results_data["Ksam"][i]
-        columns[f"{name}|alpha[cm^-1]"] = results_data["Asam"][i]
-        columns[f"{name}|eps_real"] = results_data["Epsilon_real"][i]
-        columns[f"{name}|eps_imag"] = results_data["Epsilon_imag"][i]
-        columns[f"{name}|tan_delta"] = results_data["TanDelta"][i]
+    for i, name in enumerate(results.sample_names):
+        columns[f"{name}|n"] = results.refractive_indices[i]
+        columns[f"{name}|k"] = results.extinction_coefficients[i]
+        columns[f"{name}|alpha[cm^-1]"] = results.absorption_coefficients[i]
+        columns[f"{name}|eps_real"] = results.dielectric_real[i]
+        columns[f"{name}|eps_imag"] = results.dielectric_imag[i]
+        columns[f"{name}|tan_delta"] = results.loss_tangents[i]
 
-    metadata = _result_metadata(results_data, {"content": "optical-parameters"})
+    metadata = _result_metadata(results, {"content": "optical-parameters"})
     return write_table_csv(target, columns, metadata)
 
 
-def save_time_freq_domain_data_to_csv(results_data, filename):
+def save_time_freq_domain_data_to_csv(results: AnalysisResult, filename):
     """
     将加窗后的时域、频域数据分别保存为 CSV。
 
     参数:
-        results_data: 计算结果数据字典
+        results: 分析结果数据（AnalysisResult）
         filename: 基准路径，实际生成 *_时域.csv 与 *_频域.csv
 
     返回:
@@ -391,30 +386,29 @@ def save_time_freq_domain_data_to_csv(results_data, filename):
     root, _ext = os.path.splitext(target)
     info(f"开始保存时频域数据到: {root}_时域.csv / {root}_频域.csv")
 
-    sam_names = results_data.get("sam_names", []) or []
-    time_data = results_data.get("time_data")
-    ref_windowed = results_data.get("ref_windowed")
-    samples_windowed = results_data.get("samples_windowed") or []
-    frequency = results_data.get("F")
-    ref_fft = results_data.get("ref_fft")
-    samples_fft = results_data.get("samples_fft") or []
+    sam_names = results.sample_names
+    samples_windowed = results.samples_windowed or ()
+    samples_fft = results.sample_fft_magnitudes or ()
 
     saved = []
 
-    if time_data is not None and ref_windowed is not None:
-        columns = {"Time[ps]": time_data, "Reference|windowed": ref_windowed}
+    if results.time is not None and results.ref_windowed is not None:
+        columns = {"Time[ps]": results.time, "Reference|windowed": results.ref_windowed}
         for i, name in enumerate(sam_names):
             if i < len(samples_windowed):
                 columns[f"{name}|windowed"] = samples_windowed[i]
-        metadata = _result_metadata(results_data, {"content": "time-domain"})
+        metadata = _result_metadata(results, {"content": "time-domain"})
         saved.append(write_table_csv(f"{root}_时域.csv", columns, metadata))
 
-    if frequency is not None and ref_fft is not None:
-        columns = {"Frequency[THz]": frequency, "Reference|magnitude": ref_fft}
+    if results.frequency is not None and results.reference_fft_magnitude is not None:
+        columns = {
+            "Frequency[THz]": results.frequency,
+            "Reference|magnitude": results.reference_fft_magnitude,
+        }
         for i, name in enumerate(sam_names):
             if i < len(samples_fft):
                 columns[f"{name}|magnitude"] = samples_fft[i]
-        metadata = _result_metadata(results_data, {"content": "frequency-domain"})
+        metadata = _result_metadata(results, {"content": "frequency-domain"})
         saved.append(write_table_csv(f"{root}_频域.csv", columns, metadata))
 
     if not saved:
@@ -427,11 +421,11 @@ def save_time_freq_domain_data_to_csv(results_data, filename):
 # 结果保存（Excel，每个文件一个工作表，工作表名用文件名）
 # ---------------------------------------------------------------------------
 
-def save_results_to_excel(results_data, filename):
+def save_results_to_excel(results: AnalysisResult, filename):
     """将光学参数计算结果保存为 Excel，每个样品文件一个工作表，工作表名使用文件名。
 
     参数:
-        results_data: 计算结果数据字典
+        results: 分析结果数据（AnalysisResult）
         filename: 保存的文件路径（非 .xlsx 后缀会自动改为 .xlsx）
 
     返回:
@@ -440,15 +434,15 @@ def save_results_to_excel(results_data, filename):
     target = _ensure_xlsx_path(filename)
     info(f"开始保存光学参数到: {target}")
 
-    frequency = results_data.get("F")
+    frequency = results.frequency
     if frequency is None:
         raise SaveError(target, "结果中缺少频率数据")
 
-    sam_names = results_data.get("sam_names", []) or []
+    sam_names = results.sample_names
     if not sam_names:
         raise SaveError(target, "没有可写出的样品数据")
 
-    source_files = results_data.get("source_files")
+    source_files = results.source_files
     sheets = {}
     for i, name in enumerate(sam_names):
         sheet_title = _source_stem(source_files, name, str(name))
@@ -465,12 +459,12 @@ def save_results_to_excel(results_data, filename):
             "rows": list(
                 zip(
                     frequency,
-                    results_data["Nsam"][i],
-                    results_data["Ksam"][i],
-                    results_data["Asam"][i],
-                    results_data["Epsilon_real"][i],
-                    results_data["Epsilon_imag"][i],
-                    results_data["TanDelta"][i],
+                    results.refractive_indices[i],
+                    results.extinction_coefficients[i],
+                    results.absorption_coefficients[i],
+                    results.dielectric_real[i],
+                    results.dielectric_imag[i],
+                    results.loss_tangents[i],
                 )
             ),
         }
@@ -478,7 +472,7 @@ def save_results_to_excel(results_data, filename):
     return _write_excel_workbook(target, sheets)
 
 
-def save_time_freq_domain_data_to_excel(results_data, filename):
+def save_time_freq_domain_data_to_excel(results: AnalysisResult, filename):
     """将加窗后的时域、频域数据保存为 Excel，每个文件一个工作表，工作表名使用文件名。
 
     每个工作表内先写时域表（Time[ps]、参考加窗、该样品加窗），
@@ -486,7 +480,7 @@ def save_time_freq_domain_data_to_excel(results_data, filename):
     参考文件单独占一个工作表。
 
     参数:
-        results_data: 计算结果数据字典
+        results: 分析结果数据（AnalysisResult）
         filename: 保存的文件路径（非 .xlsx 后缀会自动改为 .xlsx）
 
     返回:
@@ -495,15 +489,15 @@ def save_time_freq_domain_data_to_excel(results_data, filename):
     target = _ensure_xlsx_path(filename)
     info(f"开始保存时频域数据到: {target}")
 
-    sam_names = results_data.get("sam_names", []) or []
-    time_data = results_data.get("time_data")
-    ref_windowed = results_data.get("ref_windowed")
-    samples_windowed = results_data.get("samples_windowed") or []
-    frequency = results_data.get("F")
-    ref_fft = results_data.get("ref_fft")
-    samples_fft = results_data.get("samples_fft") or []
+    sam_names = results.sample_names
+    time_data = results.time
+    ref_windowed = results.ref_windowed
+    samples_windowed = results.samples_windowed or ()
+    frequency = results.frequency
+    ref_fft = results.reference_fft_magnitude
+    samples_fft = results.sample_fft_magnitudes or ()
 
-    source_files = results_data.get("source_files")
+    source_files = results.source_files
     ref_title = _source_stem(source_files, "reference", "Reference")
 
     sheets = {}

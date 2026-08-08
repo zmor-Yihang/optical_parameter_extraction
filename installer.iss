@@ -4,7 +4,10 @@
 ; 使用方式：用 Inno Setup Compiler 打开本文件编译，或直接运行 build_installer.ps1
 
 #define MyAppName "Thz Analyzer"
-#define MyAppVersion "4.6.0"
+; 版本号由 build_installer.ps1 从 core/version.py 读取并以 /D 参数注入
+#ifndef MyAppVersion
+#define MyAppVersion "1.0.0"
+#endif
 #define MyAppPublisher "THz"
 #define MyAppExeName "THzAnalyzer.exe"
 #define MyAppIcon "app.ico"
@@ -28,6 +31,9 @@ SolidCompression=yes
 WizardStyle=modern
 SetupIconFile={#MyAppIcon}
 UninstallDisplayIcon={app}\{#MyAppExeName}
+; 覆盖前自动关闭正在运行的程序（配合在线更新流程，升级更顺畅）
+CloseApplications=yes
+RestartApplications=no
 
 [Languages]
 ; 简体中文语言文件需要单独下载（Inno Setup 6 默认不附带）。

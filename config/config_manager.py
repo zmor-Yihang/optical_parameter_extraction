@@ -3,6 +3,7 @@ import json
 
 from utils import info, warning, error
 from utils.app_paths import get_app_base_dir
+from core.version import UPDATE_URL
 
 
 def get_config_path():
@@ -41,7 +42,10 @@ def load_config():
         "window_t_end": 30.0,        # Tukey窗结束时间
         "window_alpha": 0.5,         # Tukey窗alpha参数
         "standardized_dir": "",      # 阶段一标准 txt 输出目录
-        "scan_mode": "each"          # 多扫描文件处理方式: each / average
+        "scan_mode": "each",         # 多扫描文件处理方式: each / average
+        "auto_check_update": True,   # 启动时自动检查更新
+        "last_update_check": "",     # 上次检查更新时间（ISO 格式，用于控制检查频率）
+        "update_source": UPDATE_URL  # 更新源地址（version.json）
     }
     
     if not os.path.exists(config_path):

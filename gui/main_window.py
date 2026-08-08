@@ -4,9 +4,12 @@
 THz光学参数分析系统主窗口
 """
 
+import logging
 import os
 import shutil
 import tempfile
+from datetime import datetime
+
 import matplotlib
 matplotlib.use('QtAgg')  # 使用Qt6兼容后端
 import matplotlib.pyplot as plt
@@ -18,14 +21,18 @@ from PyQt6.QtWidgets import (
     QMessageBox, QTabWidget, QListWidget, QListWidgetItem, QSplitter,
     QComboBox, QScrollArea, QDialog, QStyle,
 )
-from PyQt6.QtCore import Qt
+from PyQt6.QtCore import Qt, QTimer
 from PyQt6.QtGui import QAction, QFont, QPalette, QColor, QBrush
 
 from config import load_config, save_config, update_thickness_history
 from core import calculate_optical_params
 from core.calculator import build_result_figures
 from core.standard_format import (
-    INPUT_FILE_FILTER, standardize_file, write_standard_txt, is_standard_txt,
+    INPUT_FILE_FILTER,
+    standardize_file,
+    write_standard_txt,
+    is_standard_txt,
+    read_standard_txt,
 )
 from core.plotting import (
     enable_curve_hover,
@@ -34,9 +41,13 @@ from core.plotting import (
     short_display_name,
 )
 from utils import info, warning, error
+from core.version import APP_VERSION, UPDATE_URL
+from core.updater import is_newer
 
 from .worker import CalculationWorker, SaveWorker
-from .dialogs import HelpDialog, AboutDialog
+from .update_checker import UpdateCheckWorker
+from .log_handler import LogViewHandler, log_line_html
+from .dialogs import HelpDialog, AboutDialog, UpdateDialog, LogDialog
 from .styles import get_main_window_style, get_menubar_style
 from .status_bar import StatusBar
 from .axis_range import AxisRangeBar
@@ -61,6 +72,10 @@ class THzAnalyzerApp(QMainWindow):
         self.ref_file = ""
         self.sam_files = []
         self.sam_names = []
+        # 已标准化的内存信号（StandardSignal），与 ref_file / sam_files 一一对应，
+        # 计算时直接复用，避免二次标准化
+        self.ref_signal = None
+        self.sam_signals = []
         
         # 存储窗函数参数
         self.ref_window_params = None
@@ -94,10 +109,16 @@ class THzAnalyzerApp(QMainWindow):
         # 创建界面
         self._init_ui()
         
+        # 将全局日志流接到左下角日志面板
+        self._attach_log_handler()
+        
         # 绑定窗口关闭事件
         self.closeEvent = self._on_closing
 
         info("THz分析系统初始化完成")
+
+        # 启动后延迟执行静默更新检查（不阻塞界面初始化）
+        QTimer.singleShot(3000, self._check_updates_auto)
 
     def _init_ui(self):
         """初始化用户界面"""
@@ -175,7 +196,6 @@ class THzAnalyzerApp(QMainWindow):
         file_menu = menubar.addMenu("文件")
 
         exit_action = QAction("退出", self)
-        exit_action.setShortcut("Ctrl+Q")
         exit_action.triggered.connect(self.close)
         file_menu.addAction(exit_action)
 
@@ -183,17 +203,25 @@ class THzAnalyzerApp(QMainWindow):
         tool_menu = menubar.addMenu("工具")
 
         export_action = QAction("导出标准格式...", self)
-        export_action.setShortcut("Ctrl+D")
         export_action.triggered.connect(self._export_standard_files)
         tool_menu.addAction(export_action)
+
+        # 日志菜单：查看运行日志
+        log_menu = menubar.addMenu("日志")
+        view_log_action = QAction("查看运行日志...", self)
+        view_log_action.triggered.connect(self._show_log_dialog)
+        log_menu.addAction(view_log_action)
 
         # 帮助菜单：使用说明与关于
         help_menu = menubar.addMenu("帮助")
 
         user_guide_action = QAction("使用说明", self)
-        user_guide_action.setShortcut("F1")
         user_guide_action.triggered.connect(self._show_help_dialog)
         help_menu.addAction(user_guide_action)
+
+        check_update_action = QAction("检查更新...", self)
+        check_update_action.triggered.connect(lambda: self._check_for_updates(True))
+        help_menu.addAction(check_update_action)
 
         about_action = QAction("关于本软件", self)
         about_action.triggered.connect(self._show_about_dialog)
@@ -218,12 +246,39 @@ class THzAnalyzerApp(QMainWindow):
         param_group = self._create_param_group()
         left_layout.addWidget(param_group)
         left_layout.addStretch()
-
-        # 版权信息
-        version_label = QLabel("NUAA THz Group  v4.6.0")
-        version_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        version_label.setStyleSheet("color: #888888; font-size: 11px;")
-        left_layout.addWidget(version_label)
+    
+    def _attach_log_handler(self):
+        """把全局日志流接到主窗口（经 Qt 信号跨线程安全投递），
+        日志窗口未打开时暂存在内存缓存中。
+        注意：handler 不设置 parent，避免主窗口销毁时 Qt 删除其 C++
+        对象，导致 logging.shutdown() 在退出时访问已删除对象而报错。"""
+        self._pending_logs = []
+        self.log_handler = LogViewHandler()
+        self.log_handler.message_appended.connect(self._append_log_message)
+        logging.getLogger("THzAnalyzer").addHandler(self.log_handler)
+    
+    def _append_log_message(self, message: str, level: str):
+        """在主线程处理一条日志：日志窗口已打开则实时追加，否则缓存。"""
+        html = log_line_html(message, level)
+        dialog = getattr(self, "log_dialog", None)
+        if dialog is not None and dialog.isVisible():
+            dialog.append_html(html)
+            return
+        self._pending_logs.append(html)
+        if len(self._pending_logs) > 1000:
+            del self._pending_logs[: len(self._pending_logs) - 1000]
+    
+    def _show_log_dialog(self):
+        """打开（或激活）运行日志窗口，并灌入缓存的日志。"""
+        if getattr(self, "log_dialog", None) is None:
+            self.log_dialog = LogDialog(self)
+        if not self.log_dialog.isVisible():
+            for html in self._pending_logs:
+                self.log_dialog.append_html(html)
+            self._pending_logs = []
+        self.log_dialog.show()
+        self.log_dialog.raise_()
+        self.log_dialog.activateWindow()
     
     def _show_subplot_details(self):
         """弹出非模态窗口，展示每个结果子图的标题、图表与关键指标摘要。"""
@@ -293,25 +348,28 @@ class THzAnalyzerApp(QMainWindow):
         except OSError:
             pass
 
-    def _auto_standardize(self, raw_path: str) -> list[str]:
+    def _auto_standardize(self, raw_path: str) -> list:
         """
-        把原始文件自动标准化为标准 txt，返回写出的标准文件路径列表。
-        已是标准 txt 则原样返回。
+        把原始文件自动标准化为内存中的 StandardSignal 列表，并写出对应标准 txt。
+
+        返回的每个信号均通过 metadata["standard_file"] 记录其临时 txt 路径，
+        计算时可直接复用内存信号，避免二次标准化。已是标准 txt 则原样读入。
         """
         if is_standard_txt(raw_path):
-            return [raw_path]
+            signal = read_standard_txt(raw_path)
+            return [signal]
+
         signals = standardize_file(raw_path, 0)
         if not signals:
             return []
         out_dir = self._standardized_dir()
         stem = os.path.splitext(os.path.basename(raw_path))[0]
-        paths: list[str] = []
         for i, sig in enumerate(signals):
             suffix = f"_{i + 1}" if len(signals) > 1 else ""
             target = os.path.join(out_dir, f"{stem}{suffix}.txt")
             path = write_standard_txt(sig, target)
-            paths.append(os.path.abspath(path))
-        return paths
+            sig.metadata["standard_file"] = os.path.abspath(path)
+        return signals
 
     def _append_ref_list_item(self, file_path: str, name: str, color: str):
         item = QListWidgetItem(short_display_name(name))
@@ -445,23 +503,24 @@ class THzAnalyzerApp(QMainWindow):
         if not file_path:
             return
 
-        std_paths = self._auto_standardize(file_path)
-        if not std_paths:
+        signals = self._auto_standardize(file_path)
+        if not signals:
             QMessageBox.warning(self, "提示", "无法解析该文件，请检查格式")
             return
 
-        if len(std_paths) > 1:
+        if len(signals) > 1:
             QMessageBox.information(
                 self, "提示",
-                f"该文件包含 {len(std_paths)} 条扫描，已自动取第 1 条作为参考。"
+                f"该文件包含 {len(signals)} 条扫描，已自动取第 1 条作为参考。"
             )
 
-        self.ref_file = std_paths[0]
+        self.ref_signal = signals[0]
+        self.ref_file = self.ref_signal.metadata.get("standard_file", file_path)
         self.config["last_open_dir"] = os.path.dirname(file_path)
         self.ref_list.clear()
-        self._append_ref_list_item(std_paths[0], os.path.basename(std_paths[0]), "#2E7D32")
+        self._append_ref_list_item(self.ref_file, os.path.basename(self.ref_file), "#2E7D32")
         self._update_status("已选择参考文件（已自动标准化）", "ready")
-        info(f"选择参考文件（自动标准化）: {std_paths[0]}")
+        info(f"选择参考文件（自动标准化）: {self.ref_file}")
 
     def _add_sam_file(self):
         """添加样品文件（直接选原始/标准文件，代码自动标准化）"""
@@ -478,12 +537,14 @@ class THzAnalyzerApp(QMainWindow):
         self.config["last_open_dir"] = os.path.dirname(file_paths[0])
         added = 0
         for raw in file_paths:
-            std_paths = self._auto_standardize(raw)
-            for p in std_paths:
-                self.sam_files.append(p)
-                name = os.path.splitext(os.path.basename(p))[0]
+            signals = self._auto_standardize(raw)
+            for signal in signals:
+                path = signal.metadata.get("standard_file", raw)
+                self.sam_files.append(path)
+                self.sam_signals.append(signal)
+                name = os.path.splitext(os.path.basename(path))[0]
                 self.sam_names.append(name)
-                self._append_sam_list_item(p, name, sample_color(len(self.sam_list) - 1))
+                self._append_sam_list_item(path, name, sample_color(len(self.sam_list) - 1))
                 idx = len(self.sam_names) - 1
                 self.per_sample_window_params[idx] = None
                 self.per_sample_thickness[idx] = None
@@ -513,27 +574,25 @@ class THzAnalyzerApp(QMainWindow):
             QMessageBox.information(self, "提示", "请先选择要删除的样品文件")
             return
 
-        for item in selected_items:
-            row = self.sam_list.row(item)
+        # selectedItems() 是选中时刻的快照，正序逐个 takeItem 会导致后续
+        # 行号与实际条目错位（误删/漏删）。改为先收集行号、降序删除。
+        rows = sorted(
+            (self.sam_list.row(item) for item in selected_items),
+            reverse=True,
+        )
+        for row in rows:
+            if row < 0 or row >= len(self.sam_files):
+                continue
             self.sam_list.takeItem(row)
             del self.sam_files[row]
             del self.sam_names[row]
-
-            new_params = {}
-            for k in list(self.per_sample_window_params.keys()):
-                if k < row:
-                    new_params[k] = self.per_sample_window_params[k]
-                elif k > row:
-                    new_params[k - 1] = self.per_sample_window_params[k]
-            self.per_sample_window_params = new_params
-
-            new_thickness = {}
-            for k in list(self.per_sample_thickness.keys()):
-                if k < row:
-                    new_thickness[k] = self.per_sample_thickness[k]
-                elif k > row:
-                    new_thickness[k - 1] = self.per_sample_thickness[k]
-            self.per_sample_thickness = new_thickness
+            del self.sam_signals[row]
+            self.per_sample_window_params = _shift_indexed_dict(
+                self.per_sample_window_params, row
+            )
+            self.per_sample_thickness = _shift_indexed_dict(
+                self.per_sample_thickness, row
+            )
 
         self._refresh_sample_list_colors()
         self._update_status("已删除选中的样品文件", "ready")
@@ -542,6 +601,7 @@ class THzAnalyzerApp(QMainWindow):
         """清空样品文件列表"""
         self.sam_files = []
         self.sam_names = []
+        self.sam_signals = []
         self.sam_list.clear()
         self.per_sample_window_params = {}
         self.per_sample_thickness = {}
@@ -641,7 +701,6 @@ class THzAnalyzerApp(QMainWindow):
         start_row_layout.setSpacing(8)
         
         parent_layout.addLayout(start_row_layout)
-        parent_layout.addLayout(thickness_layout)
     
     def _create_button_section(self, parent_layout):
         """创建按钮区域"""
@@ -1221,7 +1280,7 @@ class THzAnalyzerApp(QMainWindow):
                 self.per_sample_thickness.get(i) for i in range(len(self.sam_names))
             ]
             
-            # 创建计算工作线程
+            # 创建计算工作线程（传入内存信号，复用已标准化结果，避免二次标准化）
             self.calc_worker = CalculationWorker()
             self.calc_worker.set_parameters(
                 ref_file=self.ref_file,
@@ -1232,7 +1291,9 @@ class THzAnalyzerApp(QMainWindow):
                 use_window=use_window,
                 ref_window_params=self.ref_window_params,
                 per_sample_window_params=per_sample_params_list,
-                per_sample_thickness=per_sample_thickness_list
+                per_sample_thickness=per_sample_thickness_list,
+                ref_signal=self.ref_signal,
+                sam_signals=list(self.sam_signals),
             )
             
             # 连接信号
@@ -1371,6 +1432,77 @@ class THzAnalyzerApp(QMainWindow):
         """显示关于对话框"""
         dialog = AboutDialog(self)
         dialog.exec()
+
+    def _check_updates_auto(self):
+        """启动后自动检查更新：受自动检查开关与 24 小时频率限制，失败静默。"""
+        if not self.config.get("auto_check_update", True):
+            return
+        last_check = self.config.get("last_update_check", "")
+        if last_check:
+            try:
+                last_dt = datetime.fromisoformat(last_check)
+                if (datetime.now() - last_dt).total_seconds() < 24 * 3600:
+                    return
+            except ValueError:
+                pass
+        self._check_for_updates(manual=False)
+
+    def _check_for_updates(self, manual: bool):
+        """检查是否有新版本。
+
+        manual=True（帮助菜单触发）时，无更新或失败会弹窗提示；
+        manual=False（启动自动检查）时静默处理，仅在发现新版本时提示。
+        """
+        if getattr(self, "update_worker", None) is not None and self.update_worker.isRunning():
+            self._update_status("正在检查更新...", "working")
+            return
+        self.update_worker = UpdateCheckWorker(
+            self.config.get("update_source") or UPDATE_URL,
+            APP_VERSION,
+        )
+        self.update_worker.check_finished.connect(
+            lambda update_info: self._on_update_check_finished(update_info, manual)
+        )
+        self.update_worker.check_error.connect(
+            lambda message: self._on_update_check_error(message, manual)
+        )
+        self._update_status("正在检查更新...", "working")
+        self.update_worker.start()
+
+    def _on_update_check_finished(self, update_info, manual: bool):
+        """更新检查完成回调。"""
+        self.config["last_update_check"] = datetime.now().isoformat(timespec="seconds")
+        if is_newer(APP_VERSION, update_info.version):
+            self._update_status(f"发现新版本 v{update_info.version}", "success")
+            self._show_update_dialog(update_info)
+        else:
+            self._update_status("已是最新版本", "ready")
+            if manual:
+                QMessageBox.information(
+                    self, "检查更新", f"当前已是最新版本 v{APP_VERSION}"
+                )
+
+    def _on_update_check_error(self, message: str, manual: bool):
+        """更新检查失败回调。"""
+        self.config["last_update_check"] = datetime.now().isoformat(timespec="seconds")
+        self._update_status("更新检查失败", "error")
+        if manual:
+            QMessageBox.warning(self, "检查更新", f"更新检查失败：\n{message}")
+        else:
+            warning(f"自动更新检查失败: {message}")
+
+    def _show_update_dialog(self, update_info):
+        """显示新版本提示对话框。"""
+        dialog = UpdateDialog(update_info, self)
+        dialog.install_requested.connect(self._quit_for_update)
+        dialog.exec()
+
+    def _quit_for_update(self):
+        """安装程序已启动，保存配置并关闭主窗口（由 closeEvent 完成收尾）。"""
+        try:
+            save_config(self.config)
+        finally:
+            self.close()
     
     def dragEnterEvent(self, event):
         """拖拽进入事件"""
@@ -1396,36 +1528,40 @@ class THzAnalyzerApp(QMainWindow):
 
         if len(file_paths) == 1:
             # 单文件 -> 参考
-            std_paths = self._auto_standardize(file_paths[0])
-            if not std_paths:
+            signals = self._auto_standardize(file_paths[0])
+            if not signals:
                 QMessageBox.warning(self, "提示", "无法解析该文件，请检查格式")
                 event.acceptProposedAction()
                 return
-            if len(std_paths) > 1:
+            if len(signals) > 1:
                 QMessageBox.information(
                     self, "提示",
-                    f"该文件包含 {len(std_paths)} 条扫描，已自动取第 1 条作为参考。"
+                    f"该文件包含 {len(signals)} 条扫描，已自动取第 1 条作为参考。"
                 )
-            self.ref_file = std_paths[0]
+            self.ref_signal = signals[0]
+            self.ref_file = self.ref_signal.metadata.get("standard_file", file_paths[0])
             self.ref_list.clear()
             self._append_ref_list_item(
-                std_paths[0], os.path.basename(std_paths[0]), "#2E7D32"
+                self.ref_file, os.path.basename(self.ref_file), "#2E7D32"
             )
             self._update_status("已拖拽添加参考文件（已自动标准化）", "ready")
-            info(f"拖拽添加参考文件（自动标准化）: {std_paths[0]}")
+            info(f"拖拽添加参考文件（自动标准化）: {self.ref_file}")
         else:
             # 多文件 -> 样品
             added = 0
             for raw in file_paths:
-                std_paths = self._auto_standardize(raw)
-                for p in std_paths:
-                    self.sam_files.append(p)
-                    name = os.path.splitext(os.path.basename(p))[0]
+                signals = self._auto_standardize(raw)
+                for signal in signals:
+                    path = signal.metadata.get("standard_file", raw)
+                    self.sam_files.append(path)
+                    self.sam_signals.append(signal)
+                    name = os.path.splitext(os.path.basename(path))[0]
                     self.sam_names.append(name)
                     self._append_sam_list_item(
-                        p, name, sample_color(len(self.sam_list) - 1)
+                        path, name, sample_color(len(self.sam_list) - 1)
                     )
                     self.per_sample_window_params[len(self.sam_names) - 1] = None
+                    self.per_sample_thickness[len(self.sam_names) - 1] = None
                     added += 1
             if added:
                 self._refresh_sample_list_colors()
@@ -1439,6 +1575,15 @@ class THzAnalyzerApp(QMainWindow):
     def _on_closing(self, event):
         """窗口关闭事件"""
         try:
+            # 先从日志器移除界面 handler 并断开信号，避免窗口销毁后仍被写入
+            if getattr(self, "log_handler", None) is not None:
+                logger = logging.getLogger("THzAnalyzer")
+                logger.removeHandler(self.log_handler)
+                try:
+                    self.log_handler.message_appended.disconnect(self._append_log_message)
+                except (TypeError, RuntimeError):
+                    pass
+                self.log_handler = None
             save_config(self.config)
             self._release_figures()
             plt.close('all')
@@ -1458,3 +1603,17 @@ def _unique_dest(path: str) -> str:
     while os.path.exists(f"{stem}_{counter}{ext}"):
         counter += 1
     return f"{stem}_{counter}{ext}"
+
+
+def _shift_indexed_dict(mapping: dict, removed_index: int) -> dict:
+    """删除第 removed_index 项后重排整数键字典（大于 removed_index 的键减 1）。
+
+    用于样品删除后同步重建逐样品窗参数 / 厚度配置的索引映射。
+    """
+    shifted = {}
+    for key, value in mapping.items():
+        if key < removed_index:
+            shifted[key] = value
+        elif key > removed_index:
+            shifted[key - 1] = value
+    return shifted

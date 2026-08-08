@@ -4,9 +4,21 @@
 对话框模块
 """
 
+import os
+import subprocess
+import tempfile
+
+from PyQt6.QtCore import Qt, pyqtSignal
 from PyQt6.QtWidgets import (
-    QDialog, QVBoxLayout, QHBoxLayout, QTextBrowser, QPushButton
+    QDialog, QVBoxLayout, QHBoxLayout, QTextBrowser, QPushButton,
+    QLabel, QGroupBox, QProgressBar, QMessageBox, QPlainTextEdit,
 )
+
+from core.version import APP_VERSION
+from core.updater import UpdateInfo, sha256_of
+from utils import info
+
+from .update_checker import UpdateDownloadWorker
 
 
 class HelpDialog(QDialog):
@@ -164,7 +176,7 @@ class AboutDialog(QDialog):
 <hr style="border: 1px solid #EEEEEE; margin: 12px 0;">
 
 <table style="width: 100%; margin: 8px 0;">
-    <tr><td style="width: 100px; color: #666666;"><b>版本</b></td><td>v4.6.0</td></tr>
+    <tr><td style="width: 100px; color: #666666;"><b>版本</b></td><td>v@VERSION@</td></tr>
     <tr><td style="color: #666666;"><b>更新日期</b></td><td>2026年8月5日</td></tr>
     <tr><td style="color: #666666;"><b>开发框架</b></td><td>Python 3 + PyQt6 + Matplotlib</td></tr>
 </table>
@@ -199,7 +211,7 @@ class AboutDialog(QDialog):
 </p>
 """
 
-        text_browser.setHtml(about_html)
+        text_browser.setHtml(about_html.replace("@VERSION@", APP_VERSION))
         layout.addWidget(text_browser)
 
         button_layout = QHBoxLayout()
@@ -221,3 +233,254 @@ class AboutDialog(QDialog):
         button_layout.addWidget(ok_btn)
         button_layout.addStretch()
         layout.addLayout(button_layout)
+
+
+class UpdateDialog(QDialog):
+    """新版本提示与在线更新对话框。
+
+    提供「立即更新」（下载 → SHA256 校验 → 启动安装程序）与「稍后」两种操作；
+    点击立即更新并确认后，通过 install_requested 信号请求主窗口退出。
+    """
+
+    install_requested = pyqtSignal()
+
+    def __init__(self, update_info: UpdateInfo, parent=None):
+        super().__init__(parent)
+        self.update_info = update_info
+        self.download_worker = None
+        self.setWindowTitle("发现新版本")
+        self.setMinimumSize(540, 460)
+        self.setStyleSheet("QDialog { background-color: #FFFFFF; }")
+        self._setup_ui()
+
+    def _setup_ui(self):
+        layout = QVBoxLayout(self)
+        layout.setContentsMargins(16, 16, 16, 16)
+        layout.setSpacing(10)
+
+        header = QLabel(f"发现新版本 v{self.update_info.version}")
+        header.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        header.setStyleSheet("font-size: 15pt; font-weight: bold; color: #2E7D32;")
+        layout.addWidget(header)
+
+        current_label = QLabel(f"当前版本 v{APP_VERSION}")
+        current_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        current_label.setStyleSheet("color: #777777; font-size: 10pt;")
+        layout.addWidget(current_label)
+
+        if self.update_info.release_date:
+            date_label = QLabel(f"发布日期：{self.update_info.release_date}")
+            date_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
+            date_label.setStyleSheet("color: #666666; font-size: 9pt;")
+            layout.addWidget(date_label)
+
+        changelog_group = QGroupBox("更新内容")
+        changelog_group.setStyleSheet("""
+            QGroupBox {
+                font-weight: bold;
+                border: 1px solid #D0D0D0;
+                border-radius: 4px;
+                margin-top: 8px;
+                padding-top: 8px;
+                background-color: #FFFFFF;
+                color: #333333;
+            }
+            QGroupBox::title {
+                subcontrol-origin: margin;
+                left: 8px;
+                padding: 0 4px;
+                color: #555555;
+            }
+        """)
+        cl_layout = QVBoxLayout(changelog_group)
+        self.changelog_browser = QTextBrowser()
+        self.changelog_browser.setOpenExternalLinks(False)
+        self.changelog_browser.setPlainText(self.update_info.changelog or "暂无更新说明")
+        self.changelog_browser.setStyleSheet(
+            "QTextBrowser { border: none; background-color: #FAFAFA; font-size: 10pt; color: #333333; }"
+        )
+        cl_layout.addWidget(self.changelog_browser)
+        layout.addWidget(changelog_group, 1)
+
+        self.status_label = QLabel("")
+        self.status_label.setVisible(False)
+        self.status_label.setStyleSheet("color: #666666; font-size: 9pt;")
+        layout.addWidget(self.status_label)
+
+        self.progress_bar = QProgressBar()
+        self.progress_bar.setVisible(False)
+        self.progress_bar.setFixedHeight(14)
+        layout.addWidget(self.progress_bar)
+
+        button_layout = QHBoxLayout()
+        button_layout.addStretch()
+        self.later_btn = QPushButton("稍后")
+        self.later_btn.setStyleSheet("""
+            QPushButton {
+                background-color: #F5F5F5;
+                color: #333333;
+                border: 1px solid #D0D0D0;
+                border-radius: 3px;
+                padding: 6px 24px;
+            }
+            QPushButton:hover {
+                background-color: #EBEBEB;
+            }
+            QPushButton:disabled {
+                color: #A0A0A0;
+            }
+        """)
+        self.later_btn.clicked.connect(self.reject)
+        button_layout.addWidget(self.later_btn)
+
+        self.update_btn = QPushButton("立即更新")
+        self.update_btn.setStyleSheet("""
+            QPushButton {
+                background-color: #2E7D32;
+                color: #FFFFFF;
+                border: none;
+                border-radius: 3px;
+                padding: 6px 24px;
+            }
+            QPushButton:hover {
+                background-color: #256B29;
+            }
+            QPushButton:disabled {
+                background-color: #A0A0A0;
+            }
+        """)
+        self.update_btn.clicked.connect(self._start_download)
+        button_layout.addWidget(self.update_btn)
+        button_layout.addStretch()
+        layout.addLayout(button_layout)
+
+    def _start_download(self):
+        """开始下载安装包到系统临时目录。"""
+        dest_dir = os.path.join(tempfile.gettempdir(), "THzAnalyzer_update")
+        os.makedirs(dest_dir, exist_ok=True)
+        dest_path = os.path.join(dest_dir, "install.exe")
+
+        self.update_btn.setEnabled(False)
+        self.later_btn.setEnabled(False)
+        self.progress_bar.setVisible(True)
+        self.status_label.setVisible(True)
+        self.status_label.setText("正在下载更新...")
+
+        self.download_worker = UpdateDownloadWorker(
+            self.update_info.download_url, dest_path, self
+        )
+        self.download_worker.progress_updated.connect(self._on_download_progress)
+        self.download_worker.download_finished.connect(self._on_download_finished)
+        self.download_worker.download_error.connect(self._on_download_error)
+        self.download_worker.start()
+
+    def _on_download_progress(self, downloaded: int, total: int):
+        """下载进度回调。"""
+        if total > 0:
+            self.progress_bar.setRange(0, total)
+            self.progress_bar.setValue(downloaded)
+            percent = int(downloaded / total * 100)
+            self.status_label.setText(f"正在下载更新... {percent}%")
+        else:
+            self.progress_bar.setRange(0, 0)
+
+    def _on_download_error(self, message: str):
+        """下载失败回调。"""
+        self._reset_buttons()
+        QMessageBox.critical(
+            self, "下载失败",
+            f"更新包下载失败：\n{message}\n\n"
+            f"可手动访问以下地址下载安装：\n{self.update_info.download_url}",
+        )
+
+    def _on_download_finished(self, dest_path: str):
+        """下载完成：校验完整性，确认后启动安装程序。"""
+        # SHA256 完整性校验（更新源提供时）
+        if self.update_info.sha256:
+            try:
+                actual = sha256_of(dest_path)
+            except OSError as exc:
+                QMessageBox.critical(self, "校验失败", f"无法读取已下载文件：{exc}")
+                self._reset_buttons()
+                return
+            if actual.lower() != self.update_info.sha256.lower():
+                try:
+                    os.remove(dest_path)
+                except OSError:
+                    pass
+                QMessageBox.critical(
+                    self, "校验失败",
+                    "安装包校验失败（文件可能已损坏），请稍后重试或手动下载安装。",
+                )
+                self._reset_buttons()
+                return
+
+        ret = QMessageBox.question(
+            self, "确认更新",
+            "更新将关闭当前程序并启动安装向导。\n"
+            "请按安装向导完成升级，升级后需重新打开本软件。\n\n是否继续？",
+            QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No,
+            QMessageBox.StandardButton.Yes,
+        )
+        if ret != QMessageBox.StandardButton.Yes:
+            self._reset_buttons()
+            return
+
+        try:
+            subprocess.Popen([dest_path], cwd=tempfile.gettempdir())
+        except OSError as exc:
+            QMessageBox.critical(self, "启动失败", f"无法启动安装程序：\n{exc}")
+            self._reset_buttons()
+            return
+
+        info("已启动更新安装程序，程序即将退出")
+        self.install_requested.emit()
+        self.accept()
+
+    def _reset_buttons(self):
+        """恢复按钮与进度显示到初始状态。"""
+        self.update_btn.setEnabled(True)
+        self.later_btn.setEnabled(True)
+        self.progress_bar.setVisible(False)
+        self.status_label.setVisible(False)
+
+
+class LogDialog(QDialog):
+    """运行日志查看窗口（非模态，从菜单栏「日志」打开）。"""
+
+    def __init__(self, parent=None):
+        super().__init__(parent)
+        self.setWindowTitle("运行日志")
+        self.setMinimumSize(640, 400)
+        self.resize(720, 460)
+
+        layout = QVBoxLayout(self)
+        layout.setContentsMargins(10, 10, 10, 10)
+        layout.setSpacing(8)
+
+        self.log_view = QPlainTextEdit()
+        self.log_view.setReadOnly(True)
+        self.log_view.setMaximumBlockCount(2000)
+        self.log_view.setStyleSheet("""
+            QPlainTextEdit {
+                background-color: #FFFFFF;
+                color: #333333;
+                font-family: Consolas, "Courier New", monospace;
+                font-size: 11px;
+                border: 1px solid #D0D0D0;
+                border-radius: 3px;
+            }
+        """)
+        layout.addWidget(self.log_view, 1)
+
+        btn_row = QHBoxLayout()
+        btn_row.addStretch()
+        clear_btn = QPushButton("清空显示")
+        clear_btn.setToolTip("仅清空当前窗口显示，不影响日志文件")
+        clear_btn.clicked.connect(self.log_view.clear)
+        btn_row.addWidget(clear_btn)
+        layout.addLayout(btn_row)
+
+    def append_html(self, html: str):
+        """追加一行带颜色的日志。"""
+        self.log_view.appendHtml(html)

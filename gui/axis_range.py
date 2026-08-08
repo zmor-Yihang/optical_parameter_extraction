@@ -19,6 +19,7 @@ from __future__ import annotations
 from PyQt6.QtCore import Qt
 from PyQt6.QtWidgets import (
     QComboBox,
+    QGridLayout,
     QHBoxLayout,
     QLabel,
     QLineEdit,
@@ -41,10 +42,18 @@ def _parse_float(text: str) -> float | None:
 class AxisRangeBar(QWidget):
     """手动设置 matplotlib 坐标轴显示范围的交互控件条。"""
 
-    def __init__(self, canvas, parent=None):
+    def __init__(
+        self,
+        canvas,
+        parent=None,
+        vertical: bool = False,
+        show_axes_combo: bool = True,
+    ):
         super().__init__(parent)
         self.canvas = canvas
         self.figure = canvas.figure
+        self._vertical = vertical
+        self._show_axes_combo = show_axes_combo
         self._updating = False
         # 记录绘图完成时的初始显示范围，「自动」按钮据此复原
         self._default_limits = {
@@ -56,12 +65,24 @@ class AxisRangeBar(QWidget):
             "AxisRangeBar QLineEdit { background-color: #FFFFFF; }"
         )
         self._setup_ui()
-        self._refresh_axes_combo()
+        if self._show_axes_combo:
+            self._refresh_axes_combo()
+        else:
+            self._sync_from_axes()
 
     # ------------------------------------------------------------------
     # UI 构建
     # ------------------------------------------------------------------
     def _setup_ui(self):
+        if self._vertical:
+            self._setup_vertical_ui()
+        else:
+            self._setup_horizontal_ui()
+
+    # ------------------------------------------------------------------
+    # 横向布局（默认）：标题 + 子图下拉 + X/Y 范围 + 应用 / 自动
+    # ------------------------------------------------------------------
+    def _setup_horizontal_ui(self):
         layout = QHBoxLayout(self)
         layout.setContentsMargins(6, 3, 6, 3)
         layout.setSpacing(5)
@@ -111,13 +132,86 @@ class AxisRangeBar(QWidget):
 
         layout.addStretch()
 
-    def _make_edit(self, layout: QHBoxLayout, short: str, long_tip: str) -> QLineEdit:
+    # ------------------------------------------------------------------
+    # 竖向布局（左侧窄面板用）：标题 + X/Y 范围 + 应用 / 自动，可选子图下拉
+    # ------------------------------------------------------------------
+    def _setup_vertical_ui(self):
+        layout = QGridLayout(self)
+        layout.setContentsMargins(6, 4, 6, 4)
+        layout.setHorizontalSpacing(6)
+        layout.setVerticalSpacing(4)
+
+        title = QLabel("坐标范围")
+        title.setToolTip(
+            "手动设置图表显示范围：\n"
+            "· X 轴范围 / Y 轴范围 分组，每组最小/最大值可独立填写，留空表示保持当前\n"
+            "· 填写后点「应用」生效，输入过程不改变图表\n"
+            "· 「自动」恢复绘图时的初始默认显示范围"
+        )
+        title.setStyleSheet("color: #555555; font-weight: bold;")
+        layout.addWidget(title, 0, 0, 1, 4)
+
+        row = 1
+        if self._show_axes_combo:
+            layout.addWidget(QLabel("子图:"), row, 0)
+            self.axes_combo = QComboBox()
+            self.axes_combo.setMinimumWidth(110)
+            self.axes_combo.currentIndexChanged.connect(
+                lambda _index: self._sync_from_axes()
+            )
+            layout.addWidget(self.axes_combo, row, 1, 1, 3)
+            row += 1
+
+        x_label = QLabel("X 轴范围:")
+        x_label.setStyleSheet("color: #555555;")
+        layout.addWidget(x_label, row, 0)
+        self.xmin_edit = self._make_edit(
+            layout, "Xmin", "X 轴最小值（留空 = 保持当前）", row, 1
+        )
+        self.xmax_edit = self._make_edit(
+            layout, "Xmax", "X 轴最大值（留空 = 保持当前）", row, 2
+        )
+
+        row += 1
+        y_label = QLabel("Y 轴范围:")
+        y_label.setStyleSheet("color: #555555;")
+        layout.addWidget(y_label, row, 0)
+        self.ymin_edit = self._make_edit(
+            layout, "Ymin", "Y 轴最小值（留空 = 保持当前）", row, 1
+        )
+        self.ymax_edit = self._make_edit(
+            layout, "Ymax", "Y 轴最大值（留空 = 保持当前）", row, 2
+        )
+
+        row += 1
+        apply_btn = QPushButton("应用")
+        apply_btn.clicked.connect(self._apply)
+        layout.addWidget(apply_btn, row, 1)
+
+        auto_btn = QPushButton("自动")
+        auto_btn.setToolTip("恢复初始默认显示范围")
+        auto_btn.clicked.connect(self._auto)
+        layout.addWidget(auto_btn, row, 2)
+
+        layout.setColumnStretch(3, 1)
+
+    def _make_edit(
+        self,
+        layout: QHBoxLayout | QGridLayout,
+        short: str,
+        long_tip: str,
+        row: int | None = None,
+        col: int | None = None,
+    ) -> QLineEdit:
         edit = QLineEdit()
         edit.setFixedWidth(58)
         edit.setPlaceholderText(short)
         edit.setToolTip(long_tip)
         edit.setAlignment(Qt.AlignmentFlag.AlignRight)
-        layout.addWidget(edit)
+        if row is not None and col is not None:
+            layout.addWidget(edit, row, col)
+        else:
+            layout.addWidget(edit)
         return edit
 
     # ------------------------------------------------------------------
@@ -138,9 +232,13 @@ class AxisRangeBar(QWidget):
         self._sync_from_axes()
 
     def _selected_axes(self) -> list:
-        """返回当前选择要应用的 Axes 列表（仅单个子图）。"""
-        target = self.axes_combo.currentData()
-        return [target] if target is not None else []
+        """返回当前选择要应用的 Axes 列表（仅单个子图；无子图下拉时应用全部）。"""
+        combo = getattr(self, "axes_combo", None)
+        if combo is not None:
+            target = combo.currentData()
+            if target is not None:
+                return [target]
+        return list(self.figure.axes)
 
     # ------------------------------------------------------------------
     # 范围应用

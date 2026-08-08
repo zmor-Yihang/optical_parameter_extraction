@@ -84,7 +84,13 @@ if (-not $isccPath) {
     throw "未找到 Inno Setup 编译器 (ISCC.exe)。请先安装: winget install JRSoftware.InnoSetup"
 }
 
-& $isccPath "installer.iss"
+# 从 core/version.py 读取版本号，保证安装包版本与程序界面一致
+$versionMatch = Select-String -Path "core\version.py" -Pattern '^__version__\s*=\s*"([^"]+)"'
+if (-not $versionMatch) { throw "无法从 core/version.py 读取版本号" }
+$appVersion = $versionMatch.Matches[0].Groups[1].Value
+Write-Host "安装包版本: v$appVersion" -ForegroundColor Cyan
+
+& $isccPath "/DMyAppVersion=$appVersion" "installer.iss"
 if ($LASTEXITCODE -ne 0) { throw "Inno Setup 编译失败" }
 
 $installer = Join-Path $InstallerDir "install.exe"

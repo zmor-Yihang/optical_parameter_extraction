@@ -7,7 +7,6 @@
 """
 
 import os
-import sys
 import logging
 from datetime import datetime
 from logging.handlers import RotatingFileHandler
@@ -47,19 +46,12 @@ class THzLogger:
         self.logger.handlers.clear()
         
         # 创建格式化器
-        self.console_formatter = logging.Formatter(
-            '%(asctime)s [%(levelname)s] %(message)s',
-            datefmt='%H:%M:%S'
-        )
         self.file_formatter = logging.Formatter(
             '%(asctime)s [%(levelname)s] [%(module)s:%(lineno)d] %(message)s',
             datefmt='%Y-%m-%d %H:%M:%S'
         )
         
-        # 添加控制台处理器
-        self._add_console_handler()
-        
-        # 添加文件处理器
+        # 添加文件处理器（界面左下角日志面板由 gui/log_handler.py 负责挂接）
         self._add_file_handler()
         
         self.logger.info("日志系统初始化完成")
@@ -67,13 +59,6 @@ class THzLogger:
     def _get_log_directory(self) -> str:
         """获取日志文件目录"""
         return os.path.join(get_app_base_dir(), 'logs')
-    
-    def _add_console_handler(self):
-        """添加控制台日志处理器"""
-        console_handler = logging.StreamHandler(sys.stdout)
-        console_handler.setLevel(logging.INFO)
-        console_handler.setFormatter(self.console_formatter)
-        self.logger.addHandler(console_handler)
     
     def _add_file_handler(self):
         """添加文件日志处理器（带日志轮转）"""

@@ -17,7 +17,9 @@ from .plotting import (
     create_time_frequency_figure,
 )
 from .preprocessing import PreparedSignals, preprocess_measurements
+from .results import AnalysisResult
 from .signal_loading import load_measurements
+from .standard_format import StandardSignal
 
 
 ProgressCallback = Callable[[int, int, str], None]
@@ -48,7 +50,8 @@ class CalculationResult:
         self.fig1: Figure | None = None
         self.fig2: Figure | None = None
         self.fig3: Figure | None = None
-        self.data: dict[str, Any] | None = None
+        #: 供保存/导出层消费的统一结果数据（AnalysisResult，替代旧 dict）
+        self.data: AnalysisResult | None = None
         self.prepared_signals: PreparedSignals | None = None
         self.properties: OpticalPropertyData | None = None
         self.warnings: list[str] = []
@@ -66,12 +69,19 @@ def calculate_optical_params(
     per_sample_window_params: Sequence[dict[str, float] | None] | None = None,
     per_sample_thickness: Sequence[float | None] | None = None,
     progress_callback: ProgressCallback | None = None,
+    ref_signal: StandardSignal | None = None,
+    sam_signals: Sequence[StandardSignal | None] | None = None,
 ) -> CalculationResult:
     """
     执行加载、预处理和物理计算。
 
     不在此创建 Matplotlib Figure，避免后台线程触发 GUI 后端警告。
     图表请在主线程调用 build_result_figures。
+
+    参数:
+        ref_signal / sam_signals: 可选的、已在 GUI 中标准化过的内存信号。
+            传入后跳过重复的文件读取与格式解析（避免二次标准化开销）。
+            为 None 的项回退到按对应文件路径从磁盘读取。
     """
     result = CalculationResult()
     progress = CalculationProgress(progress_callback)
@@ -87,6 +97,8 @@ def calculate_optical_params(
             sam_names=sam_names,
             start_row=start_row,
             progress_reporter=progress.update,
+            ref_signal=ref_signal,
+            sam_signals=sam_signals,
         )
 
         progress.update("预处理信号...")
@@ -163,30 +175,35 @@ def _build_result_data(
     thickness: float | None = None,
     use_window: bool = False,
     per_sample_thickness: Sequence[float | None] | None = None,
-) -> dict[str, Any]:
-    """组装当前 GUI 和导出模块依赖的兼容数据结构。"""
+) -> AnalysisResult:
+    """组装供保存/导出层消费的统一结果数据（AnalysisResult）。
+
+    直接持有 numpy 数组，不再转成 Python list；源文件信息来自加载结果。
+    """
     source_files: dict[str, str] = {}
     if measurements is not None:
         source_files["reference"] = measurements.reference.path
         for sample in measurements.samples:
             source_files[sample.name] = sample.path
 
-    return {
-        "thickness": thickness,
-        "use_window": use_window,
-        "per_sample_thickness": list(per_sample_thickness) if per_sample_thickness else None,
-        "source_files": source_files,
-        "F": properties.frequency,
-        "Nsam": list(properties.refractive_indices),
-        "Ksam": list(properties.extinction_coefficients),
-        "Asam": list(properties.absorption_coefficients),
-        "Epsilon_real": list(properties.dielectric_real),
-        "Epsilon_imag": list(properties.dielectric_imag),
-        "TanDelta": list(properties.loss_tangents),
-        "sam_names": list(prepared_signals.sample_names),
-        "time_data": prepared_signals.time,
-        "ref_windowed": prepared_signals.reference,
-        "samples_windowed": list(prepared_signals.samples),
-        "ref_fft": properties.reference_fft_magnitude,
-        "samples_fft": list(properties.sample_fft_magnitudes),
-    }
+    return AnalysisResult(
+        frequency=properties.frequency,
+        sample_names=prepared_signals.sample_names,
+        refractive_indices=properties.refractive_indices,
+        extinction_coefficients=properties.extinction_coefficients,
+        absorption_coefficients=properties.absorption_coefficients,
+        dielectric_real=properties.dielectric_real,
+        dielectric_imag=properties.dielectric_imag,
+        loss_tangents=properties.loss_tangents,
+        reference_fft_magnitude=properties.reference_fft_magnitude,
+        sample_fft_magnitudes=properties.sample_fft_magnitudes,
+        time=prepared_signals.time,
+        ref_windowed=prepared_signals.reference,
+        samples_windowed=prepared_signals.samples,
+        source_files=source_files,
+        thickness=thickness,
+        per_sample_thickness=(
+            tuple(per_sample_thickness) if per_sample_thickness else None
+        ),
+        use_window=use_window,
+    )

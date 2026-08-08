@@ -14,6 +14,8 @@ from core.data_io import (
     save_results_to_excel,
     save_time_freq_domain_data_to_excel,
 )
+from core.results import AnalysisResult
+from core.standard_format import StandardSignal
 
 
 class CalculationWorker(QThread):
@@ -38,6 +40,8 @@ class CalculationWorker(QThread):
         self.ref_window_params: Optional[Dict] = None
         self.per_sample_window_params: Optional[List[Optional[Dict]]] = None
         self.per_sample_thickness: Optional[List[Optional[float]]] = None
+        self.ref_signal: Optional[StandardSignal] = None
+        self.sam_signals: Optional[List[Optional[StandardSignal]]] = None
     
     def set_parameters(
         self,
@@ -49,7 +53,9 @@ class CalculationWorker(QThread):
         use_window: bool = False,
         ref_window_params: Optional[Dict] = None,
         per_sample_window_params: Optional[List[Optional[Dict]]] = None,
-        per_sample_thickness: Optional[List[Optional[float]]] = None
+        per_sample_thickness: Optional[List[Optional[float]]] = None,
+        ref_signal: Optional[StandardSignal] = None,
+        sam_signals: Optional[List[Optional[StandardSignal]]] = None,
     ):
         """设置计算参数"""
         self.ref_file = ref_file
@@ -61,6 +67,8 @@ class CalculationWorker(QThread):
         self.ref_window_params = ref_window_params
         self.per_sample_window_params = per_sample_window_params
         self.per_sample_thickness = per_sample_thickness
+        self.ref_signal = ref_signal
+        self.sam_signals = sam_signals
     
     def _progress_callback(self, current: int, total: int, message: str):
         """进度回调"""
@@ -79,7 +87,9 @@ class CalculationWorker(QThread):
                 ref_window_params=self.ref_window_params,
                 per_sample_window_params=self.per_sample_window_params,
                 per_sample_thickness=self.per_sample_thickness,
-                progress_callback=self._progress_callback
+                progress_callback=self._progress_callback,
+                ref_signal=self.ref_signal,
+                sam_signals=self.sam_signals,
             )
             
             # 发送警告信息（合并为一条，避免连续弹出多个模态框）
@@ -102,15 +112,15 @@ class SaveWorker(QThread):
     
     def __init__(self, parent=None):
         super().__init__(parent)
-        self.results_data: Optional[Dict] = None
+        self.results_data: Optional[AnalysisResult] = None
         self.file_path: str = ""
         self.save_type: str = "optical"  # 'optical' 或 'time_freq'
     
-    def set_parameters(self, results_data: Dict, file_path: str, save_type: str = "optical"):
+    def set_parameters(self, results_data: AnalysisResult, file_path: str, save_type: str = "optical"):
         """设置保存参数
         
         参数:
-            results_data: 结果数据字典
+            results_data: 分析结果数据（AnalysisResult）
             file_path: 保存文件路径
             save_type: 保存类型，'optical'=光学参数, 'time_freq'=时频域数据
         """

@@ -11,6 +11,7 @@
 - **可视化分析**: 时域/频域、光学参数、介电特性三组图表，支持缩放、平移与曲线悬停，结果可在独立子图窗口中对比查看
 - **批量处理**: 同时分析多个样品，自动对比显示，多文件计算经过性能优化
 - **异步计算**: 后台线程计算与保存，界面不卡顿
+- **在线更新检查**: 启动时后台静默检查新版本，支持「帮助 → 检查更新」手动触发；发现新版本后可在应用内下载安装包并启动安装向导（GitHub Releases 托管）
 - **配置管理**: 保存与加载分析配置（厚度历史、窗参数、目录等）
 - **日志系统**: 完整的操作日志记录
 
@@ -126,6 +127,41 @@ optical-parameter-extraction/
 uv sync --extra build
 uv run pyinstaller --onedir --windowed --name THzAnalyzer --distpath output main.py
 ```
+
+## 发布新版本（在线更新）
+
+程序通过 GitHub Releases 检查更新，发布流程如下：
+
+1. 更新 `core/version.py` 中的 `__version__`（版本号唯一来源，界面、安装包均自动同步），并同步更新 `pyproject.toml` 的 `version`
+2. 运行 `.\build_installer.ps1` 构建安装包 `installer-output\install.exe`
+3. 在 GitHub 仓库 `zmor-Yihang/optical_parameter_extraction` 新建 Release（Tag 建议使用版本号，如 `v1.1.0`），上传两个资产：
+   - `install.exe`：安装包本体
+   - `version.json`：版本信息，格式如下
+   ```json
+   {
+     "version": "4.7.0",
+     "download_url": "https://github.com/zmor-Yihang/optical_parameter_extraction/releases/latest/download/install.exe",
+     "release_date": "2026-08-08",
+     "changelog": "- 新增在线更新检查\n- 修复 xxx",
+     "sha256": "install.exe 的 SHA256 校验值（小写十六进制）",
+     "required": false
+   }
+   ```
+   > 计算 SHA256：`Get-FileHash .\installer-output\install.exe -Algorithm SHA256`
+
+程序启动后会自动访问 `releases/latest/download/version.json`，若远端版本高于本地版本则提示更新；`sha256` 缺省时跳过校验，`required` 字段目前仅作预留。
+
+更新源地址可在 `thz_config.json` 的 `update_source` 中覆盖；关闭自动检查可设 `"auto_check_update": false`。
+
+### 版本号规划（语义化版本）
+
+版本号统一采用 `X.Y.Z` 三段格式（更新比较依赖此格式，不能省略段位）：
+
+- **Z（补丁号）**：只修 Bug、不新增功能的微小修复，如 `1.0.0 → 1.0.1`
+- **Y（次版本号）**：向后兼容的新功能或改进，如 `1.0.1 → 1.1.0`
+- **X（主版本号）**：重大重构或不兼容变更，如 `1.1.0 → 2.0.0`
+
+当前以 `1.0.0` 作为首个正式发布。预发布版（如 `1.1.0-beta`）暂不建议使用——更新比较器会忽略 `-beta` 后缀，可能导致预发布版与正式版无法区分。
 
 ## 注意事项
 

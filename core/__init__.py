@@ -43,12 +43,24 @@ from .exceptions import (
     ParameterError,
     SaveError
 )
+from .results import AnalysisResult
+from .version import __version__, APP_VERSION, UPDATE_URL
+from .updater import (
+    UpdateError,
+    UpdateInfo,
+    parse_version,
+    is_newer,
+    fetch_update_info,
+    download_file,
+    sha256_of,
+)
 
 __all__ = [
     'calculate_optical_params',
     'build_result_figures',
     'CalculationResult',
     'CalculationProgress',
+    'AnalysisResult',
     'read_data_file',
     'load_standard_signal',
     'read_table_txt',
@@ -73,5 +85,15 @@ __all__ = [
     'DataLengthMismatchError',
     'CalculationError',
     'ParameterError',
-    'SaveError'
+    'SaveError',
+    '__version__',
+    'APP_VERSION',
+    'UPDATE_URL',
+    'UpdateError',
+    'UpdateInfo',
+    'parse_version',
+    'is_newer',
+    'fetch_update_info',
+    'download_file',
+    'sha256_of'
 ]

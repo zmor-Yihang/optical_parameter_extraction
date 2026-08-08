@@ -4,9 +4,10 @@
 子图详情查看窗口
 
 以非模态窗口展示每个结果子图的标题、放大图表与关键指标摘要：
-- 顶部导航：下拉框 + 「上一个 / 下一个」按钮切换不同子图
-- 中部：当前子图的放大可视化图表
-- 底部：子图标题、轴范围、曲线数量与每条曲线的 min / max / mean 摘要
+- 左侧功能面板：子图切换（下拉框 + 「上一个 / 下一个」+ 当前序号）、
+  坐标范围设置、matplotlib 工具栏，以及子图标题与每条曲线的
+  min / max / mean 关键指标摘要，信息面板常显
+- 右侧：仅图表画布，占满主要区域
 
 窗口为独立顶级窗口，可拖动标题栏、可拖边缘调整大小；以 show() 非模态
 方式弹出，主界面背景保持可见、可继续操作。
@@ -16,6 +17,8 @@
 """
 
 from __future__ import annotations
+
+import html
 
 import numpy as np
 from matplotlib.backends.backend_qtagg import FigureCanvasQTAgg as FigureCanvas
@@ -84,8 +87,8 @@ class SubplotDetailWindow(QWidget):
         self._axis_bar = None
 
         self.setWindowTitle("子图详情")
-        self.setMinimumSize(820, 520)
-        self.resize(1040, 640)
+        self.setMinimumSize(880, 560)
+        self.resize(1120, 680)
         # 独立顶级窗口：可拖动标题栏、可调整大小；非模态，主界面保持可见
         self.setWindowFlags(Qt.WindowType.Window)
         self.setWindowModality(Qt.WindowModality.NonModal)
@@ -106,7 +109,19 @@ class SubplotDetailWindow(QWidget):
         root.setContentsMargins(10, 10, 10, 10)
         root.setSpacing(8)
 
-        # 导航栏
+        # 主体水平分割：左侧功能面板，右侧仅图表
+        splitter = QSplitter(Qt.Orientation.Horizontal)
+        splitter.setChildrenCollapsible(False)
+
+        # 左：功能面板（子图切换 + 坐标范围 + 工具栏 + 标题 + 摘要）
+        self.info_panel = QWidget()
+        self.info_panel.setMinimumWidth(300)
+        info_layout = QVBoxLayout(self.info_panel)
+        info_layout.setContentsMargins(8, 4, 4, 4)
+        info_layout.setSpacing(8)
+        self.info_layout = info_layout
+
+        # 子图切换：下拉框 + 上一个 / 下一个 + 当前序号
         nav = QHBoxLayout()
         nav.setSpacing(6)
         nav.addWidget(QLabel("子图:"))
@@ -120,18 +135,13 @@ class SubplotDetailWindow(QWidget):
         next_btn = QPushButton("下一个")
         next_btn.clicked.connect(lambda: self._step(1))
         nav.addWidget(next_btn)
-        root.addLayout(nav)
 
-        # 左右分割：左边信息，右边图
-        splitter = QSplitter(Qt.Orientation.Horizontal)
-        splitter.setChildrenCollapsible(False)
+        self.index_label = QLabel("0 / 0")
+        self.index_label.setStyleSheet("color: #666666;")
+        nav.addWidget(self.index_label)
+        info_layout.addLayout(nav)
 
-        # 左：信息面板（标题 + 关键指标摘要）
-        info_panel = QWidget()
-        info_layout = QVBoxLayout(info_panel)
-        info_layout.setContentsMargins(4, 4, 8, 4)
-        info_layout.setSpacing(8)
-
+        # 子图标题（坐标范围条与工具栏在图重建时插入其上方）
         self.title_label = QLabel("")
         title_font = self.title_label.font()
         title_font.setBold(True)
@@ -140,9 +150,8 @@ class SubplotDetailWindow(QWidget):
         self.title_label.setStyleSheet("color: #333333;")
         self.title_label.setWordWrap(True)
         info_layout.addWidget(self.title_label)
-        # 弹簧：把标题固定在顶部、摘要固定在底部，避免两者紧贴
-        info_layout.addStretch()
 
+        # 关键指标摘要（常显，占满剩余空间）
         self.summary_text = QTextBrowser()
         self.summary_text.setReadOnly(True)
         self.summary_text.setMinimumWidth(260)
@@ -151,9 +160,9 @@ class SubplotDetailWindow(QWidget):
             " border-radius: 3px; font-size: 10pt; }"
         )
         info_layout.addWidget(self.summary_text, 1)
-        splitter.addWidget(info_panel)
+        splitter.addWidget(self.info_panel)
 
-        # 右：图面板（matplotlib 工具栏 + 图表）
+        # 右：图表区（仅画布）
         self.plot_container = QWidget()
         self.plot_layout = QVBoxLayout(self.plot_container)
         self.plot_layout.setContentsMargins(0, 0, 0, 0)
@@ -161,8 +170,10 @@ class SubplotDetailWindow(QWidget):
 
         splitter.setStretchFactor(0, 0)
         splitter.setStretchFactor(1, 1)
-        splitter.setSizes([320, 720])
+        splitter.setSizes([340, 780])
         root.addWidget(splitter, 1)
+
+        self.splitter = splitter
 
     def _populate_nav(self):
         self.nav_combo.blockSignals(True)
@@ -190,21 +201,23 @@ class SubplotDetailWindow(QWidget):
         entry = self._entries[index]
         self._rebuild_plot(entry)
         self.title_label.setText(entry["title"])
+        self.index_label.setText(f"{index + 1} / {len(self._entries)}")
         self.summary_text.setHtml(self._summary_html(entry))
 
     def _rebuild_plot(self, entry: dict):
-        if self._canvas is not None:
-            self._canvas.setParent(None)
-            self._canvas.deleteLater()
-            self._canvas = None
-        if self._toolbar is not None:
-            self._toolbar.setParent(None)
-            self._toolbar.deleteLater()
-            self._toolbar = None
-        if self._axis_bar is not None:
-            self._axis_bar.setParent(None)
-            self._axis_bar.deleteLater()
-            self._axis_bar = None
+        # 清理旧控件（画布 / 工具栏 / 坐标范围条），并从各自布局中移除
+        for widget in (self._canvas, self._toolbar, self._axis_bar):
+            if widget is None:
+                continue
+            parent = widget.parentWidget()
+            if parent is not None:
+                parent_layout = parent.layout()
+                if parent_layout is not None:
+                    parent_layout.removeWidget(widget)
+            widget.deleteLater()
+        self._canvas = None
+        self._toolbar = None
+        self._axis_bar = None
 
         figure = Figure(figsize=(7.2, 4.6))
         figure.patch.set_facecolor("#FFFFFF")
@@ -240,23 +253,33 @@ class SubplotDetailWindow(QWidget):
         canvas.setSizePolicy(
             QSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Expanding)
         )
+
         # matplotlib 自带导航工具栏：放大 / 缩小 / 拖拽平移 / 复位 / 保存图片
-        toolbar = NavigationToolbar(canvas, self.plot_container)
+        # 放入左侧功能面板，图标模式以适配面板宽度
+        toolbar = NavigationToolbar(canvas, self.info_panel)
+        toolbar.setToolButtonStyle(Qt.ToolButtonStyle.ToolButtonIconOnly)
+        self.info_layout.insertWidget(1, toolbar)
+
         # 自定义坐标范围条：X/Y 量程手动设置（填写后点「应用」生效，「自动」复原）
-        axis_bar = AxisRangeBar(canvas)
-        self.plot_layout.addWidget(toolbar)
-        self.plot_layout.addWidget(axis_bar)
+        # 竖向排布、隐藏内部子图下拉，与左侧面板宽度匹配
+        axis_bar = AxisRangeBar(canvas, vertical=True, show_axes_combo=False)
+        self.info_layout.insertWidget(2, axis_bar)
+
+        # 右侧图表区仅放画布
         self.plot_layout.addWidget(canvas, 1)
         self._toolbar = toolbar
         self._axis_bar = axis_bar
         self._canvas = canvas
 
     def _summary_html(self, entry: dict) -> str:
+        title = html.escape(entry["title"])
         parts = [
-            f"<b>子图标题：</b>{entry['title']}",
-            f"<b>X 范围：</b>[{entry['xlim'][0]:.4g}, {entry['xlim'][1]:.4g}]",
-            f"<b>Y 范围：</b>[{entry['ylim'][0]:.4g}, {entry['ylim'][1]:.4g}]",
-            f"<b>曲线数量：</b>{len(entry['lines'])}",
+            f"<div style='margin-bottom:6px;'><b>子图标题：</b>{title}</div>",
+            "<div style='background-color:#EFF4F8;border:1px solid #D8E4EE;"
+            "border-radius:3px;padding:6px 8px;margin-bottom:8px;'>"
+            f"<b>X 范围：</b>[{entry['xlim'][0]:.4g}, {entry['xlim'][1]:.4g}]<br>"
+            f"<b>Y 范围：</b>[{entry['ylim'][0]:.4g}, {entry['ylim'][1]:.4g}]<br>"
+            f"<b>曲线数量：</b>{len(entry['lines'])}</div>",
         ]
         lines_html = []
         for index, line in enumerate(entry["lines"], start=1):
@@ -264,17 +287,16 @@ class SubplotDetailWindow(QWidget):
             label = str(line["label"])
             if not label or label.startswith("_"):
                 label = f"曲线 {index}"
-            block = [f"• <b>{label}</b>"]
+            label_escaped = html.escape(label)
+            block = [f"<b>{label_escaped}</b>"]
             finite = np.isfinite(values)
             if finite.any():
                 valid = values[finite]
-                block.append(f"&nbsp;&nbsp;点数：{len(values)}")
-                block.append(f"&nbsp;&nbsp;min：{valid.min():.4g}")
-                block.append(f"&nbsp;&nbsp;max：{valid.max():.4g}")
-                block.append(f"&nbsp;&nbsp;mean：{valid.mean():.4g}")
+                block.append(f"点数：{len(values)} &nbsp;min：{valid.min():.4g}")
+                block.append(f"max：{valid.max():.4g} &nbsp;mean：{valid.mean():.4g}")
             else:
-                block.append("&nbsp;&nbsp;无有效数值")
-            lines_html.append("<br>".join(block))
+                block.append("无有效数值")
+            lines_html.append("• " + "<br>&nbsp;&nbsp;".join(block))
         if lines_html:
             parts.append("<b>曲线摘要：</b><br>" + "<br>".join(lines_html))
-        return "<br>".join(parts)
+        return "<br><br>".join(parts)
