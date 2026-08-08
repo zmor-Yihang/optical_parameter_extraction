@@ -8,7 +8,7 @@
 APP_NAME = "THzAnalyzer"
 APP_DISPLAY_NAME = "THz 时域光谱分析系统"
 
-__version__ = "1.0.0"
+__version__ = "1.0.1"
 VERSION = __version__
 APP_VERSION = __version__
 

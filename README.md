@@ -58,6 +58,7 @@ uv run python main.py
 4. **运行分析**: 点击「运行分析」开始计算光学参数
 5. **查看结果**: 右侧标签页分别显示时域/频域、光学参数、介电特性图表，可调整坐标轴范围或在新窗口中查看
 6. **保存结果**: 点击「保存结果」或「保存时频域数据」导出为 txt / Excel
+7. **检查更新（可选）**: 菜单「帮助 → 检查更新」手动检查新版本；程序启动时也会后台自动检查
 
 ## 项目结构
 
@@ -74,15 +75,20 @@ optical-parameter-extraction/
 │   ├── data_io.py               # 结果导出（txt / Excel）
 │   ├── plotting.py              # matplotlib 绘图
 │   ├── window_functions.py      # Tukey 窗函数
+│   ├── version.py               # 版本号与更新源配置（版本号唯一来源）
+│   ├── updater.py               # 在线更新：拉取版本信息、比较、下载与校验
 │   └── exceptions.py            # 自定义异常
 ├── gui/                         # 图形界面
 │   ├── main_window.py           # 主窗口
 │   ├── subplot_window.py        # 结果子图独立窗口
 │   ├── axis_range.py            # 坐标轴范围控制
-│   ├── dialogs.py               # 帮助/关于对话框
+│   ├── dialogs.py               # 帮助/关于/更新提示等对话框
+│   ├── update_checker.py        # 更新检查与下载工作线程
 │   ├── status_bar.py            # 状态栏
 │   ├── styles.py                # QSS 样式定义
 │   └── worker.py                # 后台工作线程（计算/标准化/保存）
+├── scripts/                     # 辅助脚本
+│   └── make_version_json.py     # 生成发布用 version.json（自动填版本号/SHA256）
 ├── utils/                       # 工具
 │   ├── app_paths.py             # 打包/开发环境路径定位
 │   ├── logger.py                # 日志系统
@@ -128,26 +134,26 @@ uv sync --extra build
 uv run pyinstaller --onedir --windowed --name THzAnalyzer --distpath output main.py
 ```
 
-## 发布新版本（在线更新）
+## 发布新版本
 
 程序通过 GitHub Releases 检查更新，发布流程如下：
 
 1. 更新 `core/version.py` 中的 `__version__`（版本号唯一来源，界面、安装包均自动同步），并同步更新 `pyproject.toml` 的 `version`
 2. 运行 `.\build_installer.ps1` 构建安装包 `installer-output\install.exe`
-3. 在 GitHub 仓库 `zmor-Yihang/optical_parameter_extraction` 新建 Release（Tag 建议使用版本号，如 `v1.1.0`），上传两个资产：
+3. 运行 `uv run python scripts/make_version_json.py` 生成 `installer-output\version.json`，再用编辑器把 `changelog` 改为实际更新内容（版本号、下载地址与 SHA256 由脚本自动填写）
+4. 在 GitHub 仓库 `zmor-Yihang/optical_parameter_extraction` 新建 Release（Tag 建议使用版本号，如 `v1.1.0`，注意不要勾选 pre-release），上传两个资产：
    - `install.exe`：安装包本体
    - `version.json`：版本信息，格式如下
    ```json
    {
-     "version": "4.7.0",
+     "version": "1.1.0",
      "download_url": "https://github.com/zmor-Yihang/optical_parameter_extraction/releases/latest/download/install.exe",
      "release_date": "2026-08-08",
-     "changelog": "- 新增在线更新检查\n- 修复 xxx",
-     "sha256": "install.exe 的 SHA256 校验值（小写十六进制）",
+     "changelog": "- 新增 xxx\n- 修复 xxx",
+     "sha256": "脚本自动生成的 SHA256（小写十六进制）",
      "required": false
    }
    ```
-   > 计算 SHA256：`Get-FileHash .\installer-output\install.exe -Algorithm SHA256`
 
 程序启动后会自动访问 `releases/latest/download/version.json`，若远端版本高于本地版本则提示更新；`sha256` 缺省时跳过校验，`required` 字段目前仅作预留。
 

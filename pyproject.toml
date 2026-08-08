@@ -1,6 +1,6 @@
 [project]
 name = "optical-parameter-extraction"
-version = "1.0.0"
+version = "1.0.1"
 description = "THz 时域光谱光学参数提取系统"
 readme = "README.md"
 requires-python = ">=3.11"
