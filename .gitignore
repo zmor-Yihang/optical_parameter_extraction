@@ -22,6 +22,7 @@ standardized/
 # ---- 构建/打包产物 ----
 output/
 output-nuitka/
+installer-output/
 *.spec
 *.manifest
 
