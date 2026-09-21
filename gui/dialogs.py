@@ -8,6 +8,7 @@ import os
 import subprocess
 import tempfile
 from datetime import datetime
+from html import escape
 
 from PyQt6.QtCore import Qt, pyqtSignal
 from PyQt6.QtWidgets import (
@@ -15,7 +16,7 @@ from PyQt6.QtWidgets import (
     QLabel, QGroupBox, QProgressBar, QMessageBox, QPlainTextEdit,
 )
 
-from core.version import APP_VERSION
+from core.version import APP_VERSION, INSTALLER_DOWNLOAD_URL
 from core.updater import UpdateInfo, sha256_of
 from utils import info
 
@@ -247,6 +248,18 @@ class AboutDialog(QDialog):
         layout.addLayout(button_layout)
 
 
+def manual_download_html(prefix: str = "", url: str = "") -> str:
+    """生成含可点击下载地址的富文本（供更新对话框与下载失败提示复用）。
+
+    url 缺省时回退到内置的安装包下载地址；传入 url 可适配自定义更新源。
+    """
+    url = url or INSTALLER_DOWNLOAD_URL
+    return (
+        f'<span style="font-size:9pt; color:#666666;">{prefix}'
+        f'<a href="{url}" style="color:#1565C0;">{url}</a></span>'
+    )
+
+
 class UpdateDialog(QDialog):
     """新版本提示与在线更新对话框。
 
@@ -313,6 +326,17 @@ class UpdateDialog(QDialog):
         )
         cl_layout.addWidget(self.changelog_browser)
         layout.addWidget(changelog_group, 1)
+
+        # 手动下载地址：自动更新失败时用户可直接点击该网址在浏览器中下载安装包
+        self.download_link_label = QLabel(
+            manual_download_html("自动更新失败？可手动下载：", self.update_info.download_url)
+        )
+        self.download_link_label.setOpenExternalLinks(True)
+        self.download_link_label.setTextInteractionFlags(
+            Qt.TextInteractionFlag.TextBrowserInteraction
+        )
+        self.download_link_label.setWordWrap(True)
+        layout.addWidget(self.download_link_label)
 
         self.status_label = QLabel("")
         self.status_label.setVisible(False)
@@ -416,13 +440,23 @@ class UpdateDialog(QDialog):
             self.progress_bar.setRange(0, 0)
 
     def _on_download_error(self, message: str):
-        """下载失败回调。"""
+        """下载失败回调：提示错误并给出可点击的手动下载地址。"""
         self._reset_buttons()
-        QMessageBox.critical(
-            self, "下载失败",
-            f"更新包下载失败：\n{message}\n\n"
-            f"可手动访问以下地址下载安装：\n{self.update_info.download_url}",
+        box = QMessageBox(self)
+        box.setIcon(QMessageBox.Icon.Critical)
+        box.setWindowTitle("下载失败")
+        box.setTextFormat(Qt.TextFormat.RichText)
+        box.setText(f"更新包下载失败：<br>{escape(message)}")
+        box.setInformativeText(
+            manual_download_html("可手动下载安装包：", self.update_info.download_url)
         )
+        # QMessageBox 中的链接默认不可点击，需对每个文本标签开启外部链接
+        for label in box.findChildren(QLabel):
+            label.setOpenExternalLinks(True)
+            label.setTextInteractionFlags(
+                Qt.TextInteractionFlag.TextBrowserInteraction
+            )
+        box.exec()
 
     def _on_download_finished(self, dest_path: str):
         """下载完成：校验完整性，确认后启动安装程序。"""

@@ -45,6 +45,7 @@ from core.plotting import (
     short_display_name,
 )
 from utils import info, warning, error
+from utils.app_paths import get_resource_dir
 from core.version import APP_VERSION, UPDATE_URL
 from core.updater import is_newer
 
@@ -149,9 +150,8 @@ class THzAnalyzerApp(QMainWindow):
         # 设置窗口
         self.setWindowTitle("THz 时域光谱分析系统")
         self.setMinimumSize(1200, 800)
-        icon_path = os.path.join(
-            os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "app.ico"
-        )
+        # 打包后资源文件位于 _MEIPASS (onedir 下为 _internal)，开发环境为项目根目录
+        icon_path = os.path.join(get_resource_dir(), "app.ico")
         if os.path.isfile(icon_path):
             self.setWindowIcon(QIcon(icon_path))
         

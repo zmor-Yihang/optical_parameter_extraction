@@ -125,9 +125,10 @@ optical-parameter-extraction/
 构建流程：
 
 1. 从 `config/release.json` 读取版本号，并同步写入 `pyproject.toml`
-2. 清理旧的 `output/`、`build/`、`installer-output/` 目录
+2. 清理旧的 `output/`、`build/`、`installer-output/` 目录（保留 `version.json` 以复用其中的 changelog）
 3. 使用 PyInstaller 以 onedir + windowed 模式打包（同时打入 `config/release.json`），产物为 `output\THzAnalyzer\THzAnalyzer.exe`
 4. 使用 Inno Setup 编译 `installer.iss`，生成安装包 `installer-output\install.exe`
+5. 调用 `scripts/make_version_json.py` 生成 `installer-output\version.json`（含版本号、下载地址与安装包 SHA256）
 
 安装位置为 `%LOCALAPPDATA%\Thz Analyzer`，无需管理员权限，程序可正常写入 `thz_config.json` 与 `logs/`。若需手动使用 PyInstaller：
 
@@ -141,9 +142,10 @@ uv run pyinstaller --onedir --windowed --name THzAnalyzer --distpath output --ad
 程序通过 GitHub Releases 检查更新，发布流程如下：
 
 1. 更新 `config/release.json` 中的 `version`（版本号唯一来源）。运行 `.\build_installer.ps1` 时会自动同步 `pyproject.toml` 的 `version`，并注入安装包
-2. 运行 `.\build_installer.ps1` 构建安装包 `installer-output\install.exe`
-3. 运行 `uv run python scripts/make_version_json.py` 生成 `installer-output\version.json`，再用编辑器把 `changelog` 改为实际更新内容（版本号、下载地址与 SHA256 由脚本自动填写）
-4. 在 GitHub 仓库 `zmor-Yihang/optical_parameter_extraction` 新建 Release（Tag 建议使用版本号，如 `v1.1.0`，注意不要勾选 pre-release），上传两个资产：
+2. 运行 `.\build_installer.ps1`，一键生成 `installer-output\install.exe` 与 `installer-output\version.json`。更新说明两种写法：
+   - 构建 时传参：`.\build_installer.ps1 -Changelog "- 新增 xxx;- 修复 xxx"`
+   - 不传参时沿用 `version.json` 中同版本的现有 changelog（首次或新版本才是占位文本，可用编辑器补充）
+3. 在 GitHub 仓库 `zmor-Yihang/optical_parameter_extraction` 新建 Release（Tag 建议使用版本号，如 `v1.1.0`，注意不要勾选 pre-release），上传两个资产：
    - `install.exe`：安装包本体
    - `version.json`：版本信息，格式如下
    ```json

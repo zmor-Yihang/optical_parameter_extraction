@@ -30,3 +30,14 @@ def get_app_base_dir() -> str:
     if is_frozen():
         return os.path.dirname(sys.executable)
     return os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+
+
+def get_resource_dir() -> str:
+    """返回只读资源文件 (app.ico、config/release.json 等) 的根目录
+
+    - 打包环境: PyInstaller 解包目录 (_MEIPASS, onedir 下为 _internal)
+    - 开发环境: 项目根目录 (由本文件路径向上两级)
+    """
+    if getattr(sys, 'frozen', False) and hasattr(sys, '_MEIPASS'):
+        return sys._MEIPASS
+    return os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
