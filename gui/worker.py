@@ -11,7 +11,9 @@ from PyQt6.QtCore import QThread, pyqtSignal
 
 from core import calculate_optical_params, CalculationResult
 from core.data_io import (
+    save_frequency_domain_data_to_excel,
     save_results_to_excel,
+    save_time_domain_data_to_excel,
     save_time_freq_domain_data_to_excel,
 )
 from core.results import AnalysisResult
@@ -35,7 +37,6 @@ class CalculationWorker(QThread):
         self.sam_files: List[str] = []
         self.sam_names: List[str] = []
         self.thickness: float = 0.5
-        self.start_row: int = 1
         self.use_window: bool = False
         self.ref_window_params: Optional[Dict] = None
         self.per_sample_window_params: Optional[List[Optional[Dict]]] = None
@@ -49,7 +50,6 @@ class CalculationWorker(QThread):
         sam_files: List[str],
         sam_names: List[str],
         thickness: float,
-        start_row: int = 1,
         use_window: bool = False,
         ref_window_params: Optional[Dict] = None,
         per_sample_window_params: Optional[List[Optional[Dict]]] = None,
@@ -62,7 +62,6 @@ class CalculationWorker(QThread):
         self.sam_files = sam_files
         self.sam_names = sam_names
         self.thickness = thickness
-        self.start_row = start_row
         self.use_window = use_window
         self.ref_window_params = ref_window_params
         self.per_sample_window_params = per_sample_window_params
@@ -82,7 +81,6 @@ class CalculationWorker(QThread):
                 sam_files=self.sam_files,
                 sam_names=self.sam_names,
                 d=self.thickness,
-                start_row=self.start_row,
                 use_window=self.use_window,
                 ref_window_params=self.ref_window_params,
                 per_sample_window_params=self.per_sample_window_params,
@@ -92,7 +90,8 @@ class CalculationWorker(QThread):
                 sam_signals=self.sam_signals,
             )
             
-            # 发送警告信息（合并为一条，避免连续弹出多个模态框）
+            if self.isInterruptionRequested():
+                return
             if result.warnings:
                 self.warning_occurred.emit("\n".join(result.warnings))
             
@@ -114,7 +113,7 @@ class SaveWorker(QThread):
         super().__init__(parent)
         self.results_data: Optional[AnalysisResult] = None
         self.file_path: str = ""
-        self.save_type: str = "optical"  # 'optical' 或 'time_freq'
+        self.save_type: str = "optical"  # 'optical' / 'time' / 'freq' / 'time_freq'
     
     def set_parameters(self, results_data: AnalysisResult, file_path: str, save_type: str = "optical"):
         """设置保存参数
@@ -122,7 +121,9 @@ class SaveWorker(QThread):
         参数:
             results_data: 分析结果数据（AnalysisResult）
             file_path: 保存文件路径
-            save_type: 保存类型，'optical'=光学参数, 'time_freq'=时频域数据
+            save_type: 保存类型，'optical'=光学参数,
+                       'time'=时域数据, 'freq'=频域数据,
+                       'time_freq'=时域+频域（兼容旧入口）
         """
         self.results_data = results_data
         self.file_path = file_path
@@ -140,13 +141,23 @@ class SaveWorker(QThread):
             self.progress_updated.emit(30, 100, "正在写入 Excel 文件...")
             
             # 根据保存类型调用不同的保存函数（每个文件一个工作表，工作表名用文件名）
-            if self.save_type == "time_freq":
+            if self.save_type == "time":
+                saved_path = save_time_domain_data_to_excel(
+                    self.results_data, self.file_path
+                )
+            elif self.save_type == "freq":
+                saved_path = save_frequency_domain_data_to_excel(
+                    self.results_data, self.file_path
+                )
+            elif self.save_type == "time_freq":
                 saved_path = save_time_freq_domain_data_to_excel(
                     self.results_data, self.file_path
                 )
             else:
                 saved_path = save_results_to_excel(self.results_data, self.file_path)
             
+            if self.isInterruptionRequested():
+                return
             self.progress_updated.emit(100, 100, "保存完成")
             self.save_finished.emit(saved_path)
             

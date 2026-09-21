@@ -5,6 +5,7 @@
 #   2. Inno Setup 6（安装：winget install JRSoftware.InnoSetup）
 #
 # 产物：installer-output\install.exe
+# 版本号唯一来源：config\release.json（会同步写入 pyproject.toml）
 
 $ErrorActionPreference = "Stop"
 
@@ -14,13 +15,42 @@ Set-Location $PSScriptRoot
 $AppName = "THzAnalyzer"
 $OutputDir = "output"          # PyInstaller onedir 输出目录
 $InstallerDir = "installer-output"
+$ReleaseConfigPath = "config\release.json"
 
-Write-Host "=== 1/3 清理旧构建产物 ===" -ForegroundColor Cyan
+Write-Host "=== 1/4 读取发布配置并同步版本号 ===" -ForegroundColor Cyan
+if (-not (Test-Path $ReleaseConfigPath)) {
+    throw "未找到发布配置: $ReleaseConfigPath"
+}
+$releaseConfig = Get-Content $ReleaseConfigPath -Raw -Encoding UTF8 | ConvertFrom-Json
+$appVersion = [string]$releaseConfig.version
+if (-not $appVersion) { throw "config/release.json 缺少 version 字段" }
+if ($appVersion -notmatch '^\d+\.\d+\.\d+') {
+    throw "config/release.json 的 version 必须为 X.Y.Z 格式，当前: $appVersion"
+}
+
+$pyprojectPath = Join-Path $PSScriptRoot "pyproject.toml"
+$pyproject = [System.IO.File]::ReadAllText($pyprojectPath)
+$updatedPyproject = [regex]::Replace(
+    $pyproject,
+    '(?m)^version\s*=\s*"[^"]+"',
+    "version = `"$appVersion`""
+)
+if ($updatedPyproject -eq $pyproject -and $pyproject -notmatch ('(?m)^version\s*=\s*"' + [regex]::Escape($appVersion) + '"')) {
+    throw "无法在 pyproject.toml 中定位 version 字段"
+}
+if ($updatedPyproject -ne $pyproject) {
+    $utf8NoBom = New-Object System.Text.UTF8Encoding $false
+    [System.IO.File]::WriteAllText($pyprojectPath, $updatedPyproject, $utf8NoBom)
+    Write-Host "已同步 pyproject.toml version = $appVersion" -ForegroundColor DarkGray
+}
+Write-Host "安装包版本: v$appVersion" -ForegroundColor Cyan
+
+Write-Host "=== 2/4 清理旧构建产物 ===" -ForegroundColor Cyan
 if (Test-Path $OutputDir) { Remove-Item $OutputDir -Recurse -Force }
 if (Test-Path "build") { Remove-Item "build" -Recurse -Force }
 if (Test-Path $InstallerDir) { Remove-Item $InstallerDir -Recurse -Force }
 
-Write-Host "=== 2/3 PyInstaller 打包 (onedir, 无控制台) ===" -ForegroundColor Cyan
+Write-Host "=== 3/4 PyInstaller 打包 (onedir, 无控制台) ===" -ForegroundColor Cyan
 # 确保 pyinstaller 可用（项目通过 auto-py-to-exe 间接依赖它）
 uv run pyinstaller --version | Out-Null
 if ($LASTEXITCODE -ne 0) {
@@ -31,6 +61,7 @@ uv run pyinstaller --noconfirm --clean --onedir --windowed `
     --name $AppName `
     --distpath $OutputDir `
     --icon "app.ico" `
+    --add-data "config\release.json;config" `
     main.py
 
 $exePath = Join-Path $OutputDir "$AppName\$AppName.exe"
@@ -43,7 +74,7 @@ Get-ChildItem -Path $buildDir -Force -ErrorAction SilentlyContinue | Where-Objec
 } | Remove-Item -Recurse -Force -ErrorAction SilentlyContinue
 Write-Host "已清理运行时产物 (logs/, thz_config.json)" -ForegroundColor DarkGray
 
-Write-Host "=== 3/3 Inno Setup 编译安装程序 ===" -ForegroundColor Cyan
+Write-Host "=== 4/4 Inno Setup 编译安装程序 ===" -ForegroundColor Cyan
 # 定位 ISCC.exe：PATH -> 常见安装目录 -> 注册表卸载信息
 $iscc = Get-Command iscc.exe -ErrorAction SilentlyContinue
 if ($iscc) {
@@ -83,12 +114,6 @@ if (-not $isccPath) {
 if (-not $isccPath) {
     throw "未找到 Inno Setup 编译器 (ISCC.exe)。请先安装: winget install JRSoftware.InnoSetup"
 }
-
-# 从 core/version.py 读取版本号，保证安装包版本与程序界面一致
-$versionMatch = Select-String -Path "core\version.py" -Pattern '^__version__\s*=\s*"([^"]+)"'
-if (-not $versionMatch) { throw "无法从 core/version.py 读取版本号" }
-$appVersion = $versionMatch.Matches[0].Groups[1].Value
-Write-Host "安装包版本: v$appVersion" -ForegroundColor Cyan
 
 & $isccPath "/DMyAppVersion=$appVersion" "installer.iss"
 if ($LASTEXITCODE -ne 0) { throw "Inno Setup 编译失败" }

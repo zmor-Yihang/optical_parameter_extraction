@@ -50,7 +50,16 @@ class UpdateDownloadWorker(QThread):
 
     def run(self):
         try:
-            download_file(self.url, self.dest_path, self.progress_updated.emit)
+            download_file(
+                self.url,
+                self.dest_path,
+                self.progress_updated.emit,
+                cancel_callback=self.isInterruptionRequested,
+            )
+            if self.isInterruptionRequested():
+                return
             self.download_finished.emit(self.dest_path)
         except Exception as exc:
+            if self.isInterruptionRequested():
+                return
             self.download_error.emit(str(exc))

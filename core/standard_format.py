@@ -24,6 +24,7 @@
 from __future__ import annotations
 
 import os
+from collections.abc import Sequence
 from dataclasses import dataclass, field
 from datetime import datetime
 
@@ -168,8 +169,19 @@ def is_standard_txt(file_path: str) -> bool:
 def is_thz_scan_txt(file_path: str) -> bool:
     """判断是否为 BT-FTS 系列仪器导出的时域扫描格式。"""
     try:
-        for line in _iter_head_lines(file_path, 60):
-            if "TD Values" in line or line.startswith("Scan Velocity"):
+        for line in _iter_head_lines(file_path, 80):
+            if "TD Values" in line:
+                return True
+    except Exception:
+        return False
+    return False
+
+
+def is_thz_frequency_txt(file_path: str) -> bool:
+    """判断是否为仪器导出的频域文件（本程序不支持）。"""
+    try:
+        for line in _iter_head_lines(file_path, 80):
+            if "FD Values" in line:
                 return True
     except Exception:
         return False
@@ -206,7 +218,7 @@ def _try_float_pair(text: str) -> tuple[bool, float | None, float | None]:
 def detect_data_start_row(
     file_path: str,
     max_probe: int = 30,
-    min_consecutive: int = 2,
+    min_consecutive: int = 5,
 ) -> int:
     """
     自动检测表格类文件的数据起始行（从 1 开始）。
@@ -264,6 +276,21 @@ def detect_data_start_row(
 # 各来源格式的解析
 # ---------------------------------------------------------------------------
 
+def _find_column_index(columns: Sequence[str], *aliases: str) -> int | None:
+    """按列名查找下标，兼容 x0 / x0[um] 这类带单位后缀的写法。"""
+    alias_set = {alias.strip().lower() for alias in aliases}
+    for index, column in enumerate(columns):
+        name = column.strip().lower()
+        if not name:
+            continue
+        if name in alias_set:
+            return index
+        base = name.split("[", 1)[0].strip()
+        if base in alias_set:
+            return index
+    return None
+
+
 def _base_name(file_path: str) -> str:
     return os.path.splitext(os.path.basename(file_path))[0]
 
@@ -287,7 +314,8 @@ def _parse_thz_scan(
     文件结构：若干 key<TAB>value 表头行 -> 空行 -> 含 'TD Values -->' 的列头行
     -> 其后每行为一次扫描（若干元数据列 + 一长串时域幅值）。
 
-    时间轴由元数据列 x0[um] / dx[um] 推导：t[ps] = (x0 + i*dx) * 系数
+    时间轴由元数据列 x0 / dx 推导（列名可能带 [um] 后缀）：
+    t[ps] = (x0 + i*dx) * 系数
 
     参数:
         scan_mode: 'each' 每条扫描生成一条信号；'average' 所有扫描平均为一条
@@ -324,8 +352,8 @@ def _parse_thz_scan(
             if key and value and len(value) <= 120:
                 file_meta[f"src.{key}"] = value
 
-    idx_x0 = columns.index("x0[um]") if "x0[um]" in columns else None
-    idx_dx = columns.index("dx[um]") if "dx[um]" in columns else None
+    idx_x0 = _find_column_index(columns, "x0", "x0[um]")
+    idx_dx = _find_column_index(columns, "dx", "dx[um]")
 
     data_lines = [ln for ln in lines[header_idx + 1:] if ln.strip()]
     if not data_lines:
@@ -487,7 +515,10 @@ def _parse_two_column_table(file_path: str, start_row: int = 1) -> StandardSigna
         rows = _read_excel_rows(file_path)[skip:]
         pairs = [pair for pair in (_row_to_pair(row) for row in rows) if pair]
         if not rows:
-            raise DataReadError(file_path, "数据文件必须至少包含两列：时间和幅值")
+            raise DataReadError(
+                file_path,
+                "Excel 中没有可用数据。请整理为两列（时间 ps、幅值）后另存为 .xlsx 再导入。",
+            )
     else:
         source_format = FORMAT_DELIMITED
         pairs = _read_delimited_pairs(file_path, skip)
@@ -495,7 +526,8 @@ def _parse_two_column_table(file_path: str, start_row: int = 1) -> StandardSigna
     if len(pairs) < 2:
         raise DataReadError(
             file_path,
-            "有效数值行不足，请检查“数据起始行”设置是否正确",
+            "未能识别为两列时域数据。请自行整理为 Excel（.xlsx）或 txt："
+            "第 1 列时间（ps），第 2 列幅值，再重新导入。",
         )
 
     values = np.asarray(pairs, dtype=float)
@@ -595,7 +627,6 @@ def write_standard_txt(signal: StandardSignal, file_path: str) -> str:
 
 def standardize_file(
     file_path: str,
-    start_row: int = 0,
     scan_mode: str = "each",
 ) -> list[StandardSignal]:
     """
@@ -603,10 +634,10 @@ def standardize_file(
 
     参数:
         file_path: 源文件路径
-        start_row: 纯表格类文件的数据起始行（从 1 开始）。
-            设为 0 表示自动检测（默认，推荐）。
-            仅对 Excel / 分隔符文本有效；标准 txt 和 BT-FTS 扫描格式自动忽略此参数。
         scan_mode: 多扫描文件的处理方式，'each' 拆分为多条，'average' 取平均
+
+    表格类文件（Excel / 分隔符文本）的数据起始行自动检测；
+    标准 txt 和 BT-FTS 扫描格式由文件结构自行判定。
 
     返回:
         list[StandardSignal]：多扫描文件可能返回多条
@@ -614,10 +645,15 @@ def standardize_file(
     if not os.path.exists(file_path):
         raise DataReadError(file_path, "文件不存在")
 
-    # 自动检测起始行
-    if start_row <= 0:
-        start_row = detect_data_start_row(file_path)
-        info(f"自动检测起始行: {os.path.basename(file_path)} -> 第 {start_row} 行")
+    if is_thz_frequency_txt(file_path) and not is_thz_scan_txt(file_path):
+        raise DataReadError(
+            file_path,
+            "该文件是频域数据（FD Values）。本程序需要时域扫描文件（含 TD Values），"
+            "请改选仪器导出的 Time / TD 时域文件。",
+        )
+
+    start_row = detect_data_start_row(file_path)
+    info(f"自动检测起始行: {os.path.basename(file_path)} -> 第 {start_row} 行")
 
     try:
         source_format = detect_source_format(file_path)
@@ -641,7 +677,6 @@ def standardize_file(
 
 def standardize_files(
     file_paths,
-    start_row: int = 1,
     scan_mode: str = "each",
 ) -> tuple[list[StandardSignal], list[str]]:
     """批量标准化，返回 (信号列表, 错误信息列表)。"""
@@ -649,7 +684,7 @@ def standardize_files(
     errors: list[str] = []
     for path in file_paths:
         try:
-            signals.extend(standardize_file(path, start_row, scan_mode))
+            signals.extend(standardize_file(path, scan_mode))
         except Exception as exc:  # noqa: BLE001
             errors.append(f"{os.path.basename(path)}: {exc}")
     return signals, errors

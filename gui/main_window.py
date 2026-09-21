@@ -19,20 +19,24 @@ from PyQt6.QtWidgets import (
     QApplication, QMainWindow, QWidget, QVBoxLayout, QHBoxLayout,
     QLabel, QLineEdit, QPushButton, QFileDialog, QGroupBox,
     QMessageBox, QTabWidget, QListWidget, QListWidgetItem, QSplitter,
-    QComboBox, QScrollArea, QDialog, QStyle,
+    QComboBox, QScrollArea, QDialog, QAbstractItemView, QSizePolicy,
 )
-from PyQt6.QtCore import Qt, QTimer
-from PyQt6.QtGui import QAction, QFont, QPalette, QColor, QBrush
+from PyQt6.QtCore import Qt, QTimer, pyqtSignal
+from PyQt6.QtGui import (
+    QAction, QFont, QPalette, QColor, QBrush, QIcon,
+    QDragEnterEvent, QDragMoveEvent, QDropEvent,
+)
 
 from config import load_config, save_config, update_thickness_history
 from core import calculate_optical_params
 from core.calculator import build_result_figures
+from core.exceptions import DataReadError
 from core.standard_format import (
     INPUT_FILE_FILTER,
-    standardize_file,
-    write_standard_txt,
     is_standard_txt,
     read_standard_txt,
+    standardize_file,
+    write_standard_txt,
 )
 from core.plotting import (
     enable_curve_hover,
@@ -47,11 +51,52 @@ from core.updater import is_newer
 from .worker import CalculationWorker, SaveWorker
 from .update_checker import UpdateCheckWorker
 from .log_handler import LogViewHandler, log_line_html
-from .dialogs import HelpDialog, AboutDialog, UpdateDialog, LogDialog
+from .dialogs import HelpDialog, AboutDialog, UpdateDialog, LogDialog, FormatGuideDialog
 from .styles import get_main_window_style, get_menubar_style
 from .status_bar import StatusBar
 from .axis_range import AxisRangeBar
 from .subplot_window import SubplotDetailWindow
+
+
+def _local_file_paths_from_mime(mime_data) -> list[str]:
+    """从拖放 mime 数据中取出本地文件路径。"""
+    if mime_data is None or not mime_data.hasUrls():
+        return []
+    return [
+        url.toLocalFile()
+        for url in mime_data.urls()
+        if url.isLocalFile() and os.path.isfile(url.toLocalFile())
+    ]
+
+
+class FileDropListWidget(QListWidget):
+    """接受外部文件拖入的列表框，发出 filesDropped(paths)。"""
+
+    filesDropped = pyqtSignal(list)
+
+    def __init__(self, parent=None):
+        super().__init__(parent)
+        self.setAcceptDrops(True)
+
+    def dragEnterEvent(self, event: QDragEnterEvent):
+        if _local_file_paths_from_mime(event.mimeData()):
+            event.acceptProposedAction()
+        else:
+            event.ignore()
+
+    def dragMoveEvent(self, event: QDragMoveEvent):
+        if _local_file_paths_from_mime(event.mimeData()):
+            event.acceptProposedAction()
+        else:
+            event.ignore()
+
+    def dropEvent(self, event: QDropEvent):
+        paths = _local_file_paths_from_mime(event.mimeData())
+        if not paths:
+            event.ignore()
+            return
+        self.filesDropped.emit(paths)
+        event.acceptProposedAction()
 
 
 class THzAnalyzerApp(QMainWindow):
@@ -104,12 +149,16 @@ class THzAnalyzerApp(QMainWindow):
         # 设置窗口
         self.setWindowTitle("THz 时域光谱分析系统")
         self.setMinimumSize(1200, 800)
-        self.setWindowIcon(QApplication.style().standardIcon(QStyle.StandardPixmap.SP_ComputerIcon))
+        icon_path = os.path.join(
+            os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "app.ico"
+        )
+        if os.path.isfile(icon_path):
+            self.setWindowIcon(QIcon(icon_path))
         
         # 创建界面
         self._init_ui()
         
-        # 将全局日志流接到左下角日志面板
+        # 将全局日志流接到运行日志窗口
         self._attach_log_handler()
         
         # 绑定窗口关闭事件
@@ -199,13 +248,6 @@ class THzAnalyzerApp(QMainWindow):
         exit_action.triggered.connect(self.close)
         file_menu.addAction(exit_action)
 
-        # 工具菜单：导出当前参考/样品为标准格式
-        tool_menu = menubar.addMenu("工具")
-
-        export_action = QAction("导出标准格式...", self)
-        export_action.triggered.connect(self._export_standard_files)
-        tool_menu.addAction(export_action)
-
         # 日志菜单：查看运行日志
         log_menu = menubar.addMenu("日志")
         view_log_action = QAction("查看运行日志...", self)
@@ -254,7 +296,7 @@ class THzAnalyzerApp(QMainWindow):
         left_layout.addWidget(group_label)
     
     def _attach_log_handler(self):
-        """把全局日志流接到主窗口（经 Qt 信号跨线程安全投递），
+        """把全局日志流接到运行日志窗口（经 Qt 信号跨线程安全投递），
         日志窗口未打开时暂存在内存缓存中。
         注意：handler 不设置 parent，避免主窗口销毁时 Qt 删除其 C++
         对象，导致 logging.shutdown() 在退出时访问已删除对象而报错。"""
@@ -296,7 +338,21 @@ class THzAnalyzerApp(QMainWindow):
         if all(figure is None for figure in figures.values()):
             QMessageBox.information(self, "提示", "请先运行分析生成图表")
             return
+        existing = getattr(self, "subplot_window", None)
+        try:
+            still_open = existing is not None and existing.isVisible()
+        except RuntimeError:
+            still_open = False
+            self.subplot_window = None
+        if still_open:
+            existing.raise_()
+            existing.activateWindow()
+            return
         self.subplot_window = SubplotDetailWindow(figures, self)
+        self.subplot_window.setAttribute(Qt.WidgetAttribute.WA_DeleteOnClose, True)
+        self.subplot_window.destroyed.connect(
+            lambda *_args: setattr(self, "subplot_window", None)
+        )
         self.subplot_window.show()
         info("已打开子图详情窗口")
 
@@ -340,8 +396,7 @@ class THzAnalyzerApp(QMainWindow):
     def _standardized_dir(self) -> str:
         """返回自动标准化临时目录（系统临时目录下，不污染项目目录）。
 
-        仅存放分析用的中间标准 txt（由 write_standard_txt 在写入时自动创建）；
-        需要保留的标准文件通过“工具 → 导出标准格式”导出到用户指定位置。
+        仅存放分析用的中间标准 txt（由 write_standard_txt 在写入时自动创建）。
         """
         return os.path.join(tempfile.gettempdir(), "THzAnalyzer_standardized")
 
@@ -361,11 +416,17 @@ class THzAnalyzerApp(QMainWindow):
         返回的每个信号均通过 metadata["standard_file"] 记录其临时 txt 路径，
         计算时可直接复用内存信号，避免二次标准化。已是标准 txt 则原样读入。
         """
-        if is_standard_txt(raw_path):
-            signal = read_standard_txt(raw_path)
-            return [signal]
+        try:
+            if is_standard_txt(raw_path):
+                signal = read_standard_txt(raw_path)
+                signals = [signal]
+            else:
+                signals = standardize_file(raw_path)
+        except DataReadError:
+            raise
+        except Exception as exc:
+            raise DataReadError(raw_path, str(exc)) from exc
 
-        signals = standardize_file(raw_path, 0)
         if not signals:
             return []
         out_dir = self._standardized_dir()
@@ -389,53 +450,6 @@ class THzAnalyzerApp(QMainWindow):
         item.setToolTip(file_path)
         self.sam_list.addItem(item)
 
-    def _export_standard_files(self):
-        """直接导出参考框与样品框中的标准 txt 到用户选择的目录。
-
-        不经过任何界面配置：点击后弹出目录选择框，
-        将当前参考文件与全部样品文件复制为标准格式 txt 到该目录。
-        """
-        if not self.ref_file:
-            QMessageBox.warning(self, "提示", "请先选择参考文件")
-            return
-        if not self.sam_files:
-            QMessageBox.warning(self, "提示", "请先添加样品文件")
-            return
-
-        initial_dir = (
-            self.config.get("last_save_dir")
-            or self.config.get("last_open_dir")
-            or os.getcwd()
-        )
-        out_dir = QFileDialog.getExistingDirectory(
-            self, "选择标准格式导出目录", initial_dir
-        )
-        if not out_dir:
-            return
-
-        self.config["last_save_dir"] = out_dir
-
-        try:
-            os.makedirs(out_dir, exist_ok=True)
-            exported = []
-            for src in [self.ref_file, *self.sam_files]:
-                if not src or not os.path.isfile(src):
-                    continue
-                stem = os.path.splitext(os.path.basename(src))[0] or "signal"
-                target = _unique_dest(os.path.join(out_dir, f"{stem}.txt"))
-                shutil.copy2(src, target)
-                exported.append(target)
-        except OSError as exc:
-            error(f"导出标准格式失败: {exc}")
-            QMessageBox.critical(self, "导出失败", str(exc))
-            return
-
-        info(f"导出标准格式 {len(exported)} 个文件到 {out_dir}")
-        QMessageBox.information(
-            self, "导出成功",
-            f"已导出 {len(exported)} 个标准 txt 到：\n{out_dir}"
-        )
-    
     def _create_ref_file_section(self, parent_layout):
         """创建参考文件选择区域（框高度与右侧按钮一致）"""
         group = QGroupBox("参考文件")
@@ -452,11 +466,12 @@ class THzAnalyzerApp(QMainWindow):
         btn_col.addStretch()
 
         # 参考仅 1 条，框高度与按钮一致，保留水平滚动条
-        self.ref_list = QListWidget()
+        self.ref_list = FileDropListWidget()
         self.ref_list.setFixedHeight(add_ref_btn.sizeHint().height() + 20)
         self.ref_list.setHorizontalScrollBarPolicy(
             Qt.ScrollBarPolicy.ScrollBarAsNeeded
         )
+        self.ref_list.filesDropped.connect(self._on_ref_files_dropped)
         content.addWidget(self.ref_list, 1)
         content.addLayout(btn_col)
 
@@ -488,9 +503,13 @@ class THzAnalyzerApp(QMainWindow):
         btn_h = add_sam_btn.sizeHint().height()
         spacing = btn_col.spacing() if btn_col.spacing() >= 0 else 6
         col_h = 3 * btn_h + 2 * spacing
-        self.sam_list = QListWidget()
+        self.sam_list = FileDropListWidget()
+        self.sam_list.setSelectionMode(
+            QAbstractItemView.SelectionMode.ExtendedSelection
+        )
         self.sam_list.setMinimumHeight(col_h)
         self.sam_list.setMaximumHeight(240)
+        self.sam_list.filesDropped.connect(self._add_sample_files)
         content.addWidget(self.sam_list, 1)
         content.addLayout(btn_col)
 
@@ -508,10 +527,36 @@ class THzAnalyzerApp(QMainWindow):
         )
         if not file_path:
             return
+        self._set_reference_file(file_path)
 
-        signals = self._auto_standardize(file_path)
+    def _on_ref_files_dropped(self, file_paths: list[str]):
+        """拖入参考框：始终作为参考文件；多个文件时取第一个。"""
+        if not file_paths:
+            return
+        if len(file_paths) > 1:
+            QMessageBox.information(
+                self, "提示",
+                f"参考文件只需 1 个，已使用「{os.path.basename(file_paths[0])}」。"
+            )
+        self._set_reference_file(file_paths[0])
+
+    def _show_format_guide(self, failed_items: list[str] | None = None):
+        """文件无法识别时，引导用户自行转换为标准 Excel / txt。"""
+        dialog = FormatGuideDialog(failed_items, self)
+        dialog.exec()
+
+    def _set_reference_file(self, file_path: str):
+        """将指定文件设为参考（自动标准化）。"""
+        try:
+            signals = self._auto_standardize(file_path)
+        except DataReadError as exc:
+            warning(str(exc))
+            self._show_format_guide(
+                [f"{os.path.basename(file_path)}：{exc.message}"]
+            )
+            return
         if not signals:
-            QMessageBox.warning(self, "提示", "无法解析该文件，请检查格式")
+            self._show_format_guide([os.path.basename(file_path)])
             return
 
         if len(signals) > 1:
@@ -539,11 +584,26 @@ class THzAnalyzerApp(QMainWindow):
         )
         if not file_paths:
             return
+        self._add_sample_files(file_paths)
+
+    def _add_sample_files(self, file_paths: list[str]):
+        """将文件加入样品列表（自动标准化）。拖入样品框时无论几个都作为样品。"""
+        if not file_paths:
+            return
 
         self.config["last_open_dir"] = os.path.dirname(file_paths[0])
         added = 0
+        failed = []
         for raw in file_paths:
-            signals = self._auto_standardize(raw)
+            try:
+                signals = self._auto_standardize(raw)
+            except DataReadError as exc:
+                warning(str(exc))
+                failed.append(f"{os.path.basename(raw)}：{exc.message}")
+                continue
+            if not signals:
+                failed.append(f"{os.path.basename(raw)}：无法解析")
+                continue
             for signal in signals:
                 path = signal.metadata.get("standard_file", raw)
                 self.sam_files.append(path)
@@ -560,6 +620,8 @@ class THzAnalyzerApp(QMainWindow):
             self._refresh_sample_list_colors()
             self._update_status(f"已添加 {added} 个样品文件（已自动标准化）", "ready")
             info(f"添加 {added} 个样品文件（自动标准化）")
+        if failed:
+            self._show_format_guide(failed)
 
     def _refresh_sample_list_colors(self):
         """按样品索引刷新列表颜色标识。"""
@@ -615,6 +677,7 @@ class THzAnalyzerApp(QMainWindow):
         self.set_thickness_btn.setToolTip(
             "为每个样品单独设置厚度 (mm)，留空表示使用左侧全局默认值"
         )
+        self._refresh_window_params_indicator()
         self._update_status("样品文件列表已清空", "ready")
     
     def _create_parameter_section(self, parent_layout):
@@ -631,11 +694,12 @@ class THzAnalyzerApp(QMainWindow):
         self.use_window_switch = QPushButton()
         self.use_window_switch.setFixedSize(36, 16)
         self.use_window_switch.setCheckable(True)
-        self.use_window_switch.setChecked(False)
+        use_window = False  # 启动时默认关闭，不恢复上次的状态
+        self.use_window_switch.setChecked(use_window)
         self.use_window_switch.clicked.connect(
             lambda: self._toggle_window_params(self.use_window_switch.isChecked())
         )
-        self._style_window_switch(False)
+        self._style_window_switch(use_window)
         tukey_layout.addWidget(self.use_window_switch)
 
         tukey_layout.addSpacing(12)
@@ -656,8 +720,8 @@ class THzAnalyzerApp(QMainWindow):
         tukey_layout.addStretch()
         parent_layout.addWidget(tukey_group)
         
-        # 连接信号
-        self._toggle_window_params(False)
+        # 开关初始为关闭状态
+        self._toggle_window_params(use_window)
         
         # 样品厚度设置（全局默认 + 按样品单独设置合并为一行）
         thickness_layout = QHBoxLayout()
@@ -688,46 +752,34 @@ class THzAnalyzerApp(QMainWindow):
         thickness_layout.addWidget(self.set_thickness_btn)
         thickness_layout.addStretch()
         parent_layout.addLayout(thickness_layout)
-        
-        # 起始行设置
-        start_row_layout = QHBoxLayout()
-        start_row_label = QLabel("数据起始行")
-        start_row_label.setStyleSheet("font-weight: bold; color: #444444;")
-        start_row_layout.addWidget(start_row_label)
-        
-        self.start_row_combo = QComboBox()
-        self.start_row_combo.addItems(["1", "2", "3"])
-        self.start_row_combo.setEditable(True)
-        idx = ["1", "2", "3"].index(str(self.config.get("start_row", 1))) if str(self.config.get("start_row", 1)) in ["1", "2", "3"] else -1
-        if idx >= 0:
-            self.start_row_combo.setCurrentIndex(idx)
-        else:
-            self.start_row_combo.setEditText(str(self.config.get("start_row", 1)))
-        start_row_layout.addWidget(self.start_row_combo, 1)
-        start_row_layout.setSpacing(8)
-        
-        parent_layout.addLayout(start_row_layout)
     
     def _create_button_section(self, parent_layout):
         """创建按钮区域"""
         button_layout = QVBoxLayout()
 
         run_row = QHBoxLayout()
-        run_btn = QPushButton("运行分析")
-        run_btn.clicked.connect(self._run_analysis)
-        run_row.addWidget(run_btn)
+        self.run_btn = QPushButton("运行分析")
+        self.run_btn.clicked.connect(self._run_analysis)
+        run_row.addWidget(self.run_btn)
         button_layout.addLayout(run_row)
 
         save_row = QHBoxLayout()
-        self.save_btn = QPushButton("保存结果")
+        self.save_btn = QPushButton("保存光学参数")
         self.save_btn.setEnabled(False)
         self.save_btn.clicked.connect(self._save_results)
         save_row.addWidget(self.save_btn)
-        self.save_tf_btn = QPushButton("保存时频域数据")
-        self.save_tf_btn.setEnabled(False)
-        self.save_tf_btn.clicked.connect(self._save_time_freq_data)
-        save_row.addWidget(self.save_tf_btn)
         button_layout.addLayout(save_row)
+
+        tf_row = QHBoxLayout()
+        self.save_time_btn = QPushButton("保存时域数据")
+        self.save_time_btn.setEnabled(False)
+        self.save_time_btn.clicked.connect(self._save_time_data)
+        tf_row.addWidget(self.save_time_btn)
+        self.save_freq_btn = QPushButton("保存频域数据")
+        self.save_freq_btn.setEnabled(False)
+        self.save_freq_btn.clicked.connect(self._save_freq_data)
+        tf_row.addWidget(self.save_freq_btn)
+        button_layout.addLayout(tf_row)
 
         detail_row = QHBoxLayout()
         self.detail_btn = QPushButton("查看子图详情")
@@ -742,27 +794,65 @@ class THzAnalyzerApp(QMainWindow):
 
         parent_layout.addLayout(button_layout)
 
+    def _busy_worker_running(self) -> bool:
+        """计算或保存线程是否仍在运行。"""
+        calc = getattr(self, "calc_worker", None)
+        save = getattr(self, "save_worker", None)
+        try:
+            if calc is not None and calc.isRunning():
+                return True
+        except RuntimeError:
+            self.calc_worker = None
+        try:
+            if save is not None and save.isRunning():
+                return True
+        except RuntimeError:
+            self.save_worker = None
+        return False
+
+    def _set_analysis_busy(self, busy: bool):
+        """计算/保存期间禁用会冲突的按钮，避免重复启动。"""
+        if hasattr(self, "run_btn"):
+            self.run_btn.setEnabled(not busy)
+        if hasattr(self, "save_btn"):
+            self.save_btn.setEnabled((not busy) and self.results_data is not None)
+        if hasattr(self, "save_time_btn"):
+            self.save_time_btn.setEnabled((not busy) and self.results_data is not None)
+        if hasattr(self, "save_freq_btn"):
+            self.save_freq_btn.setEnabled((not busy) and self.results_data is not None)
+        if hasattr(self, "detail_btn"):
+            self.detail_btn.setEnabled((not busy) and self.results_data is not None)
+
     def _set_popup_buttons_enabled(self, enabled: bool):
         """启用/禁用结果保存按钮（无结果或出错时禁用）。"""
         if hasattr(self, "save_btn"):
             self.save_btn.setEnabled(enabled)
-        if hasattr(self, "save_tf_btn"):
-            self.save_tf_btn.setEnabled(enabled)
+        if hasattr(self, "save_time_btn"):
+            self.save_time_btn.setEnabled(enabled)
+        if hasattr(self, "save_freq_btn"):
+            self.save_freq_btn.setEnabled(enabled)
         if hasattr(self, "detail_btn"):
             self.detail_btn.setEnabled(enabled)
 
     def _save_results(self):
         """保存光学参数结果（Excel，每个样品一个工作表）。"""
-        self._save_with_worker("optical", "保存光学参数结果")
+        self._save_with_worker("optical", "保存光学参数")
 
-    def _save_time_freq_data(self):
-        """保存时域/频域数据（Excel，每个文件一个工作表）。"""
-        self._save_with_worker("time_freq", "保存时域/频域数据")
+    def _save_time_data(self):
+        """保存时域数据（Excel，每个文件一个工作表）。"""
+        self._save_with_worker("time", "保存时域数据")
+
+    def _save_freq_data(self):
+        """保存频域数据（Excel，每个文件一个工作表）。"""
+        self._save_with_worker("freq", "保存频域数据")
 
     def _save_with_worker(self, save_type: str, caption: str):
         """通过后台线程保存结果，避免阻塞界面。"""
         if self.results_data is None:
             QMessageBox.information(self, "提示", "请先运行分析")
+            return
+        if self._busy_worker_running():
+            QMessageBox.information(self, "提示", "正在处理中，请稍候")
             return
         initial_dir = self.config.get("last_save_dir", "")
         file_path, _ = QFileDialog.getSaveFileName(
@@ -774,8 +864,10 @@ class THzAnalyzerApp(QMainWindow):
 
         self.save_worker = SaveWorker(self)
         self.save_worker.set_parameters(self.results_data, file_path, save_type)
+        self.save_worker.progress_updated.connect(self._on_progress_updated)
         self.save_worker.save_finished.connect(self._on_save_finished)
         self.save_worker.save_error.connect(self._on_save_error)
+        self._set_analysis_busy(True)
         self._update_status("正在保存...", "working")
         if self.status_bar:
             self.status_bar.show_progress(True)
@@ -785,13 +877,14 @@ class THzAnalyzerApp(QMainWindow):
         """保存完成回调。"""
         if self.status_bar:
             self.status_bar.show_progress(False)
+        self._set_analysis_busy(False)
         self._update_status("保存完成", "success")
-        QMessageBox.information(self, "保存成功", f"结果已保存到：\n{saved_path}")
 
     def _on_save_error(self, message: str):
         """保存失败回调。"""
         if self.status_bar:
             self.status_bar.show_progress(False)
+        self._set_analysis_busy(False)
         self._update_status("保存失败", "error")
         QMessageBox.critical(self, "保存失败", str(message))
         error(f"保存失败: {message}")
@@ -856,6 +949,19 @@ class THzAnalyzerApp(QMainWindow):
         """切换窗函数参数（左右拨动开关）"""
         self._style_window_switch(enabled)
         self.set_signal_window_btn.setEnabled(enabled)
+        self._refresh_window_params_indicator()
+
+    def _refresh_window_params_indicator(self):
+        """窗函数开启且已保存过参数时显示「参数已设置」。"""
+        has_params = (
+            self.ref_window_params is not None
+            or any(value is not None for value in self.per_sample_window_params.values())
+        )
+        enabled = bool(
+            getattr(self, "use_window_switch", None) and self.use_window_switch.isChecked()
+        )
+        if hasattr(self, "window_params_indicator"):
+            self.window_params_indicator.setVisible(enabled and has_params)
     
     def _open_signal_window_dialog(self):
         """打开窗函数参数设置对话框"""
@@ -1022,15 +1128,10 @@ class THzAnalyzerApp(QMainWindow):
             QMessageBox.warning(self, "警告", "没有可定位的信号文件")
             return
 
-        try:
-            start_row = int(self.start_row_combo.currentText())
-        except (ValueError, AttributeError):
-            start_row = 1
-
         failures = []
         for key, path in targets:
             try:
-                signal = load_standard_signal(path, start_row)
+                signal = load_standard_signal(path)
                 params = suggest_window_params(signal.time, signal.amplitude)
                 edits = self._window_param_edits[key]
                 edits['t_start'].setText(f"{params['t_start']:.2f}")
@@ -1090,7 +1191,7 @@ class THzAnalyzerApp(QMainWindow):
             edit.setPlaceholderText("默认")
             edit.setAlignment(Qt.AlignmentFlag.AlignRight)
             value = self.per_sample_thickness.get(i)
-            if value:
+            if value is not None:
                 edit.setText(f"{value:g}")
             row.addWidget(edit)
             row.addWidget(QLabel("mm"))
@@ -1237,7 +1338,7 @@ class THzAnalyzerApp(QMainWindow):
                     
                     self.per_sample_window_params[i] = {'t_start': t_start, 't_end': t_end, 'alpha': alpha}
             
-            self.window_params_indicator.setVisible(True)
+            self._refresh_window_params_indicator()
             dialog.accept()
             info("窗函数参数已保存")
             
@@ -1253,6 +1354,10 @@ class THzAnalyzerApp(QMainWindow):
         if not self.sam_files:
             QMessageBox.warning(self, "警告", "请添加至少一个样品文件")
             return
+
+        if self._busy_worker_running():
+            QMessageBox.information(self, "提示", "正在处理中，请稍候")
+            return
         
         try:
             # 获取参数
@@ -1260,16 +1365,9 @@ class THzAnalyzerApp(QMainWindow):
             if thickness <= 0:
                 raise ValueError("样品厚度必须为正数")
             
-            start_row = int(self.start_row_combo.currentText())
-            if start_row < 1:
-                raise ValueError("数据起始行必须为大于等于1的整数")
-            
-            self.config["start_row"] = start_row
             self.config = update_thickness_history(self.config, thickness)
             self.config["thickness"] = thickness
-            
-            # 清除之前的图表
-            self._clear_tabs()
+            save_config(self.config)  # 立即保存配置，避免异常退出时丢失
             
             # 获取窗函数参数
             use_window = self.use_window_switch.isChecked()
@@ -1293,7 +1391,6 @@ class THzAnalyzerApp(QMainWindow):
                 sam_files=self.sam_files,
                 sam_names=self.sam_names,
                 thickness=thickness,
-                start_row=start_row,
                 use_window=use_window,
                 ref_window_params=self.ref_window_params,
                 per_sample_window_params=per_sample_params_list,
@@ -1308,7 +1405,8 @@ class THzAnalyzerApp(QMainWindow):
             self.calc_worker.calculation_error.connect(self._on_calculation_error)
             self.calc_worker.warning_occurred.connect(self._on_warning_occurred)
             
-            # 显示进度条并启动计算
+            # 显示进度条并启动计算（旧图保留到成功后再替换）
+            self._set_analysis_busy(True)
             self._update_status("正在计算，请稍候...", "working")
             if self.status_bar:
                 self.status_bar.show_progress(True)
@@ -1328,7 +1426,6 @@ class THzAnalyzerApp(QMainWindow):
     
     def _on_calculation_finished(self, result):
         """计算完成回调（主线程）：在此生成图表，避免 worker 线程创建 Figure。"""
-        # 隐藏进度条
         if self.status_bar:
             self.status_bar.show_progress(False)
         
@@ -1337,31 +1434,31 @@ class THzAnalyzerApp(QMainWindow):
                 self._update_status("正在生成图表...", "working")
                 build_result_figures(result)
             except Exception as exc:
+                self._set_analysis_busy(False)
                 self._update_status("图表生成失败", "error")
                 QMessageBox.critical(self, "图表错误", str(exc))
                 error(f"图表生成失败: {exc}")
-                self._set_popup_buttons_enabled(False)
                 return
 
             self.results_data = result.data
-            # 保存图表引用
+            self._clear_tabs()
             self.fig1 = result.fig1
             self.fig2 = result.fig2
             self.fig3 = result.fig3
             self._display_charts(result.fig1, result.fig2, result.fig3)
-            self._set_popup_buttons_enabled(True)
+            self._set_analysis_busy(False)
             self._update_status("计算完成", "success")
             info("计算完成")
         else:
+            self._set_analysis_busy(False)
             self._update_status("计算失败", "error")
     
     def _on_calculation_error(self, error_message: str):
         """计算错误回调"""
-        # 隐藏进度条
         if self.status_bar:
             self.status_bar.show_progress(False)
         
-        self._set_popup_buttons_enabled(False)
+        self._set_analysis_busy(False)
         self._update_status("计算失败", "error")
         QMessageBox.critical(self, "计算错误", error_message)
         error(f"计算错误: {error_message}")
@@ -1400,34 +1497,26 @@ class THzAnalyzerApp(QMainWindow):
                     pass
                 setattr(self, attr, None)
     
+    def _embed_figure(self, tab, figure):
+        """把 Figure 嵌入标签页：工具栏 + 画布（吃掉剩余高度）+ 坐标范围条。"""
+        canvas = FigureCanvas(figure)
+        enable_responsive_fonts(canvas)
+        enable_curve_hover(canvas)
+        canvas.setSizePolicy(
+            QSizePolicy.Policy.Expanding,
+            QSizePolicy.Policy.Expanding,
+        )
+        toolbar = NavigationToolbar(canvas, tab)
+        layout = tab.layout()
+        layout.addWidget(toolbar)
+        layout.addWidget(canvas, 1)
+        layout.addWidget(AxisRangeBar(canvas))
+
     def _display_charts(self, fig1, fig2, fig3):
         """显示图表"""
-        # 显示时域和频域图表
-        canvas1 = FigureCanvas(fig1)
-        enable_responsive_fonts(canvas1)
-        enable_curve_hover(canvas1)
-        toolbar1 = NavigationToolbar(canvas1, self.tab1)
-        self.tab1.layout().addWidget(toolbar1)
-        self.tab1.layout().addWidget(canvas1)
-        self.tab1.layout().addWidget(AxisRangeBar(canvas1))
-        
-        # 显示光学参数图表
-        canvas2 = FigureCanvas(fig2)
-        enable_responsive_fonts(canvas2)
-        enable_curve_hover(canvas2)
-        toolbar2 = NavigationToolbar(canvas2, self.tab2)
-        self.tab2.layout().addWidget(toolbar2)
-        self.tab2.layout().addWidget(canvas2)
-        self.tab2.layout().addWidget(AxisRangeBar(canvas2))
-        
-        # 显示介电特性图表
-        canvas3 = FigureCanvas(fig3)
-        enable_responsive_fonts(canvas3)
-        enable_curve_hover(canvas3)
-        toolbar3 = NavigationToolbar(canvas3, self.tab3)
-        self.tab3.layout().addWidget(toolbar3)
-        self.tab3.layout().addWidget(canvas3)
-        self.tab3.layout().addWidget(AxisRangeBar(canvas3))
+        self._embed_figure(self.tab1, fig1)
+        self._embed_figure(self.tab2, fig2)
+        self._embed_figure(self.tab3, fig3)
     
     def _show_help_dialog(self):
         """显示帮助对话框"""
@@ -1469,6 +1558,9 @@ class THzAnalyzerApp(QMainWindow):
         self.update_worker.check_finished.connect(
             lambda update_info: self._on_update_check_finished(update_info, manual)
         )
+        self.update_worker.check_not_found.connect(
+            lambda message: self._on_update_check_not_found(message, manual)
+        )
         self.update_worker.check_error.connect(
             lambda message: self._on_update_check_error(message, manual)
         )
@@ -1487,6 +1579,15 @@ class THzAnalyzerApp(QMainWindow):
                 QMessageBox.information(
                     self, "检查更新", f"当前已是最新版本 v{APP_VERSION}"
                 )
+
+    def _on_update_check_not_found(self, message: str, manual: bool):
+        """更新源尚未发布任何版本。"""
+        self.config["last_update_check"] = datetime.now().isoformat(timespec="seconds")
+        self._update_status("暂无可用更新", "ready")
+        if manual:
+            QMessageBox.information(self, "检查更新", message)
+        else:
+            info(f"自动更新检查: {message}")
 
     def _on_update_check_error(self, message: str, manual: bool):
         """更新检查失败回调。"""
@@ -1511,76 +1612,37 @@ class THzAnalyzerApp(QMainWindow):
             self.close()
     
     def dragEnterEvent(self, event):
-        """拖拽进入事件"""
-        if event.mimeData().hasUrls():
+        """拖到窗口空白处时允许放下（实际目标由参考/样品框处理更优先）。"""
+        if _local_file_paths_from_mime(event.mimeData()):
             event.acceptProposedAction()
-    
-    def dropEvent(self, event):
-        """拖放事件：自动标准化并添加到参考/样品列表
-        - 拖入 1 个文件：作为参考文件
-        - 拖入多个文件：全部作为样品文件
-        """
-        if not event.mimeData().hasUrls():
-            return
-        urls = event.mimeData().urls()
-        file_paths = [
-            u.toLocalFile() for u in urls
-            if u.isLocalFile() and os.path.isfile(u.toLocalFile())
-        ]
-        if not file_paths:
-            return
-
-        self.config["last_open_dir"] = os.path.dirname(file_paths[0])
-
-        if len(file_paths) == 1:
-            # 单文件 -> 参考
-            signals = self._auto_standardize(file_paths[0])
-            if not signals:
-                QMessageBox.warning(self, "提示", "无法解析该文件，请检查格式")
-                event.acceptProposedAction()
-                return
-            if len(signals) > 1:
-                QMessageBox.information(
-                    self, "提示",
-                    f"该文件包含 {len(signals)} 条扫描，已自动取第 1 条作为参考。"
-                )
-            self.ref_signal = signals[0]
-            self.ref_file = self.ref_signal.metadata.get("standard_file", file_paths[0])
-            self.ref_list.clear()
-            self._append_ref_list_item(
-                self.ref_file, os.path.basename(self.ref_file), "#2E7D32"
-            )
-            self._update_status("已拖拽添加参考文件（已自动标准化）", "ready")
-            info(f"拖拽添加参考文件（自动标准化）: {self.ref_file}")
         else:
-            # 多文件 -> 样品
-            added = 0
-            for raw in file_paths:
-                signals = self._auto_standardize(raw)
-                for signal in signals:
-                    path = signal.metadata.get("standard_file", raw)
-                    self.sam_files.append(path)
-                    self.sam_signals.append(signal)
-                    name = os.path.splitext(os.path.basename(path))[0]
-                    self.sam_names.append(name)
-                    self._append_sam_list_item(
-                        path, name, sample_color(len(self.sam_list) - 1)
-                    )
-                    self.per_sample_window_params[len(self.sam_names) - 1] = None
-                    self.per_sample_thickness[len(self.sam_names) - 1] = None
-                    added += 1
-            if added:
-                self._refresh_sample_list_colors()
-                self._update_status(
-                    f"已拖拽添加 {added} 个样品文件（已自动标准化）", "ready"
-                )
-                info(f"拖拽添加 {added} 个样品文件（自动标准化）")
+            event.ignore()
 
+    def dragMoveEvent(self, event):
+        if _local_file_paths_from_mime(event.mimeData()):
+            event.acceptProposedAction()
+        else:
+            event.ignore()
+
+    def dropEvent(self, event):
+        """拖到窗口空白处：单文件作为参考，多个文件作为样品。"""
+        file_paths = _local_file_paths_from_mime(event.mimeData())
+        if not file_paths:
+            event.ignore()
+            return
+        if len(file_paths) == 1:
+            self._set_reference_file(file_paths[0])
+        else:
+            self._add_sample_files(file_paths)
         event.acceptProposedAction()
     
     def _on_closing(self, event):
         """窗口关闭事件"""
         try:
+            if not self._stop_background_workers():
+                QMessageBox.information(self, "提示", "正在结束后台任务，请稍候再关闭")
+                event.ignore()
+                return
             # 先从日志器移除界面 handler 并断开信号，避免窗口销毁后仍被写入
             if getattr(self, "log_handler", None) is not None:
                 logger = logging.getLogger("THzAnalyzer")
@@ -1599,16 +1661,27 @@ class THzAnalyzerApp(QMainWindow):
             error(f"关闭程序时出错: {e}")
             event.accept()
 
-
-def _unique_dest(path: str) -> str:
-    """若目标文件已存在，自动追加 _2/_3 序号，返回可用的新路径。"""
-    if not os.path.exists(path):
-        return path
-    stem, ext = os.path.splitext(path)
-    counter = 2
-    while os.path.exists(f"{stem}_{counter}{ext}"):
-        counter += 1
-    return f"{stem}_{counter}{ext}"
+    def _stop_background_workers(self) -> bool:
+        """请求停止后台线程；若短时间内仍未结束则阻止关闭。"""
+        workers = []
+        for attr in ("calc_worker", "save_worker", "update_worker"):
+            worker = getattr(self, attr, None)
+            if worker is None:
+                continue
+            try:
+                if worker.isRunning():
+                    workers.append(worker)
+            except RuntimeError:
+                continue
+        for worker in workers:
+            worker.requestInterruption()
+            worker.wait(1500)
+            try:
+                if worker.isRunning():
+                    return False
+            except RuntimeError:
+                continue
+        return True
 
 
 def _shift_indexed_dict(mapping: dict, removed_index: int) -> dict:

@@ -38,7 +38,7 @@ class AnalysisResult:
     #: 参考与各样品的频域幅值
     reference_fft_magnitude: np.ndarray
     sample_fft_magnitudes: tuple[np.ndarray, ...]
-    #: 加窗后的时域数据
+    #: 预处理后的时域数据（开启 Tukey 时为加窗结果，否则为原始信号）
     time: np.ndarray
     ref_windowed: np.ndarray
     samples_windowed: tuple[np.ndarray, ...]

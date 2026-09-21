@@ -36,14 +36,12 @@ from .standard_format import (
 DELAY_UM_TO_PS = float(delay_um_to_ps(1.0))
 
 
-def read_data_file(file_path, start_row=1):
+def read_data_file(file_path):
     """
     通用数据读取函数，返回统一的两列数据。
 
-    参数:
-        file_path: 文件路径
-        start_row: 数据内容起始行（从1开始，跳过前 start_row-1 行，无表头）
-            注意：对标准 txt 与 BT-FTS 时域扫描格式无效（由文件结构自动判定）
+    表格类文件的数据起始行由 standardize_file 自动检测；
+    标准 txt 与 BT-FTS 时域扫描格式由文件结构自行判定。
 
     返回:
         StandardSignal: 含 .time / .amplitude 两个一维数组
@@ -55,7 +53,7 @@ def read_data_file(file_path, start_row=1):
         - 任意分隔符的两列文本 (.txt/.csv/.dat/.asc)
     """
     try:
-        signals = standardize_file(file_path, start_row=start_row, scan_mode="average")
+        signals = standardize_file(file_path, scan_mode="average")
         info(f"成功读取文件: {file_path}")
         return signals[0]
     except DataReadError:
@@ -65,9 +63,9 @@ def read_data_file(file_path, start_row=1):
         raise DataReadError(file_path, str(e))
 
 
-def load_standard_signal(file_path, start_row=1):
+def load_standard_signal(file_path):
     """读取单个文件并返回 StandardSignal（多扫描取平均）。"""
-    return standardize_file(file_path, start_row=start_row, scan_mode="average")[0]
+    return standardize_file(file_path, scan_mode="average")[0]
 
 
 # ---------------------------------------------------------------------------
@@ -126,9 +124,12 @@ def write_table_csv(file_path, columns, metadata=None):
         return file_path
     except SaveError:
         raise
-    except Exception as e:
-        exception(f"写出 CSV 数据时出错: {e}")
-        raise SaveError(file_path, str(e))
+    except OSError as e:
+        exception(f"无法写入文件 {file_path}: {e}")
+        raise SaveError(file_path, f"文件写入失败: {e}")
+    except (ValueError, TypeError) as e:
+        exception(f"数据格式错误: {e}")
+        raise SaveError(file_path, f"数据格式错误: {e}")
 
 
 def write_table_txt(file_path, columns, metadata=None):
@@ -285,20 +286,26 @@ def _write_excel_workbook(file_path, sheets: dict[str, dict]) -> str:
     if directory:
         os.makedirs(directory, exist_ok=True)
 
-    workbook = Workbook()
-    workbook.remove(workbook.active)  # 删除默认空工作表
-    used_names: set[str] = set()
-    for sheet_name, table in sheets.items():
-        safe_name = _safe_sheet_name(sheet_name, used_names)
-        used_names.add(safe_name)
-        worksheet = workbook.create_sheet(title=safe_name)
-        headers = table.get("headers") or []
-        if headers:
-            worksheet.append(list(headers))
-        for row in table.get("rows") or []:
-            worksheet.append(list(row))
+    try:
+        workbook = Workbook()
+        workbook.remove(workbook.active)  # 删除默认空工作表
+        used_names: set[str] = set()
+        for sheet_name, table in sheets.items():
+            safe_name = _safe_sheet_name(sheet_name, used_names)
+            used_names.add(safe_name)
+            worksheet = workbook.create_sheet(title=safe_name)
+            headers = table.get("headers") or []
+            if headers:
+                worksheet.append(list(headers))
+            for row in table.get("rows") or []:
+                worksheet.append(list(row))
 
-    workbook.save(file_path)
+        workbook.save(file_path)
+    except PermissionError as exc:
+        raise RuntimeError(
+            f"无法写入文件 {file_path},文件可能正被 Excel 打开或没有写权限"
+        ) from exc
+
     info(f"数据已保存到: {file_path} ({len(sheets)} 个工作表)")
     return file_path
 
@@ -371,9 +378,15 @@ def save_results_to_csv(results: AnalysisResult, filename):
     return write_table_csv(target, columns, metadata)
 
 
+def _time_amp_header(name: str, use_window: bool) -> str:
+    """时域幅值列名：开启 Tukey 时标记为 windowed，否则为 amplitude。"""
+    suffix = "windowed" if use_window else "amplitude"
+    return f"{name}|{suffix}"
+
+
 def save_time_freq_domain_data_to_csv(results: AnalysisResult, filename):
     """
-    将加窗后的时域、频域数据分别保存为 CSV。
+    将时域、频域数据分别保存为 CSV。开启 Tukey 时写出加窗后的时域。
 
     参数:
         results: 分析结果数据（AnalysisResult）
@@ -393,23 +406,26 @@ def save_time_freq_domain_data_to_csv(results: AnalysisResult, filename):
     saved = []
 
     if results.time is not None and results.ref_windowed is not None:
-        columns = {"Time[ps]": results.time, "Reference|windowed": results.ref_windowed}
+        columns = {
+            "Time[ps]": results.time,
+            _time_amp_header("Reference", results.use_window): results.ref_windowed,
+        }
         for i, name in enumerate(sam_names):
             if i < len(samples_windowed):
-                columns[f"{name}|windowed"] = samples_windowed[i]
+                columns[_time_amp_header(name, results.use_window)] = samples_windowed[i]
         metadata = _result_metadata(results, {"content": "time-domain"})
         saved.append(write_table_csv(f"{root}_时域.csv", columns, metadata))
 
-    if results.frequency is not None and results.reference_fft_magnitude is not None:
+    if results.frequency is not None:
         columns = {
             "Frequency[THz]": results.frequency,
-            "Reference|magnitude": results.reference_fft_magnitude,
         }
         for i, name in enumerate(sam_names):
             if i < len(samples_fft):
                 columns[f"{name}|magnitude"] = samples_fft[i]
-        metadata = _result_metadata(results, {"content": "frequency-domain"})
-        saved.append(write_table_csv(f"{root}_频域.csv", columns, metadata))
+        if len(columns) > 1:
+            metadata = _result_metadata(results, {"content": "frequency-domain"})
+            saved.append(write_table_csv(f"{root}_频域.csv", columns, metadata))
 
     if not saved:
         raise SaveError(target, "结果中缺少时域/频域数据")
@@ -472,11 +488,102 @@ def save_results_to_excel(results: AnalysisResult, filename):
     return _write_excel_workbook(target, sheets)
 
 
-def save_time_freq_domain_data_to_excel(results: AnalysisResult, filename):
-    """将加窗后的时域、频域数据保存为 Excel，每个文件一个工作表，工作表名使用文件名。
+def _time_domain_sheets(results: AnalysisResult) -> dict:
+    """构造时域 Excel 工作表：每个文件一表，列为 Time[ps] 与幅值。"""
+    sam_names = results.sample_names
+    time_data = results.time
+    ref_windowed = results.ref_windowed
+    samples_windowed = results.samples_windowed or ()
+    source_files = results.source_files
+    ref_title = _source_stem(source_files, "reference", "Reference")
+    use_window = bool(results.use_window)
 
-    每个工作表内先写时域表（Time[ps]、参考加窗、该样品加窗），
-    空一行后写频域表（Frequency[THz]、参考幅度、该样品幅度）。
+    sheets = {}
+    if time_data is not None and ref_windowed is not None:
+        sheets[ref_title] = {
+            "headers": ["Time[ps]", _time_amp_header("Reference", use_window)],
+            "rows": list(zip(time_data, ref_windowed)),
+        }
+    for i, name in enumerate(sam_names):
+        if time_data is None or i >= len(samples_windowed):
+            continue
+        sheet_title = _source_stem(source_files, name, str(name))
+        sheets[sheet_title] = {
+            "headers": ["Time[ps]", _time_amp_header(name, use_window)],
+            "rows": list(zip(time_data, samples_windowed[i])),
+        }
+    return sheets
+
+
+def _frequency_domain_sheets(results: AnalysisResult) -> dict:
+    """构造频域 Excel 工作表：每个文件一表，列为 Frequency[THz] 与幅度。"""
+    sam_names = results.sample_names
+    frequency = results.frequency
+    ref_fft = results.reference_fft_magnitude
+    samples_fft = results.sample_fft_magnitudes or ()
+    source_files = results.source_files
+    ref_title = _source_stem(source_files, "reference", "Reference")
+
+    sheets = {}
+    if frequency is not None and ref_fft is not None:
+        sheets[ref_title] = {
+            "headers": ["Frequency[THz]", "Reference|magnitude"],
+            "rows": list(zip(frequency, ref_fft)),
+        }
+    for i, name in enumerate(sam_names):
+        if frequency is None or i >= len(samples_fft):
+            continue
+        sheet_title = _source_stem(source_files, name, str(name))
+        sheets[sheet_title] = {
+            "headers": ["Frequency[THz]", f"{name}|magnitude"],
+            "rows": list(zip(frequency, samples_fft[i])),
+        }
+    return sheets
+
+
+def save_time_domain_data_to_excel(results: AnalysisResult, filename):
+    """将时域数据保存为 Excel，每个文件一个工作表，工作表名使用文件名。
+
+    开启 Tukey 时写出加窗后的幅值，否则写出原始幅值。
+
+    参数:
+        results: 分析结果数据（AnalysisResult）
+        filename: 保存的文件路径（非 .xlsx 后缀会自动改为 .xlsx）
+
+    返回:
+        str: 实际保存的文件路径
+    """
+    target = _ensure_xlsx_path(filename)
+    info(f"开始保存时域数据到: {target}")
+    sheets = _time_domain_sheets(results)
+    if not sheets:
+        raise SaveError(target, "结果中缺少时域数据")
+    return _write_excel_workbook(target, sheets)
+
+
+def save_frequency_domain_data_to_excel(results: AnalysisResult, filename):
+    """将频域幅度数据保存为 Excel，每个文件一个工作表，工作表名使用文件名。
+
+    参数:
+        results: 分析结果数据（AnalysisResult）
+        filename: 保存的文件路径（非 .xlsx 后缀会自动改为 .xlsx）
+
+    返回:
+        str: 实际保存的文件路径
+    """
+    target = _ensure_xlsx_path(filename)
+    info(f"开始保存频域数据到: {target}")
+    sheets = _frequency_domain_sheets(results)
+    if not sheets:
+        raise SaveError(target, "结果中缺少频域数据")
+    return _write_excel_workbook(target, sheets)
+
+
+def save_time_freq_domain_data_to_excel(results: AnalysisResult, filename):
+    """将时域、频域数据保存为 Excel，每个文件一个工作表，工作表名使用文件名。
+
+    每个工作表内先写时域表（Time[ps]、该样品幅值；开启 Tukey 时为加窗结果），
+    空一行后写频域表（Frequency[THz]、该样品幅度）。
     参考文件单独占一个工作表。
 
     参数:
@@ -499,6 +606,7 @@ def save_time_freq_domain_data_to_excel(results: AnalysisResult, filename):
 
     source_files = results.source_files
     ref_title = _source_stem(source_files, "reference", "Reference")
+    use_window = bool(results.use_window)
 
     sheets = {}
 
@@ -516,21 +624,21 @@ def save_time_freq_domain_data_to_excel(results: AnalysisResult, filename):
     if ref_time_rows is not None or ref_freq_rows is not None:
         sheets[ref_title] = _stack_time_freq_tables(
             ref_time_rows,
-            ["Time[ps]", "Reference|windowed"],
+            ["Time[ps]", _time_amp_header("Reference", use_window)],
             ref_freq_rows,
             ["Frequency[THz]", "Reference|magnitude"],
         )
 
-    # 每个样品一个工作表：时域 + 频域（参考 + 该样品）
+    # 每个样品一个工作表：时域 + 频域（仅该样品自身数据）
     for i, name in enumerate(sam_names):
         time_rows = (
-            list(zip(time_data, ref_windowed, samples_windowed[i]))
-            if time_data is not None and ref_windowed is not None and i < len(samples_windowed)
+            list(zip(time_data, samples_windowed[i]))
+            if time_data is not None and i < len(samples_windowed)
             else None
         )
         freq_rows = (
-            list(zip(frequency, ref_fft, samples_fft[i]))
-            if frequency is not None and ref_fft is not None and i < len(samples_fft)
+            list(zip(frequency, samples_fft[i]))
+            if frequency is not None and i < len(samples_fft)
             else None
         )
         if time_rows is None and freq_rows is None:
@@ -538,9 +646,9 @@ def save_time_freq_domain_data_to_excel(results: AnalysisResult, filename):
         sheet_title = _source_stem(source_files, name, str(name))
         sheets[sheet_title] = _stack_time_freq_tables(
             time_rows,
-            ["Time[ps]", "Reference|windowed", f"{name}|windowed"],
+            ["Time[ps]", _time_amp_header(name, use_window)],
             freq_rows,
-            ["Frequency[THz]", "Reference|magnitude", f"{name}|magnitude"],
+            ["Frequency[THz]", f"{name}|magnitude"],
         )
 
     if not sheets:
@@ -568,6 +676,8 @@ __all__ = [
     "save_results_to_csv",
     "save_time_freq_domain_data_to_csv",
     "save_results_to_excel",
+    "save_time_domain_data_to_excel",
+    "save_frequency_domain_data_to_excel",
     "save_time_freq_domain_data_to_excel",
     "save_results_to_txt",
     "save_time_freq_domain_data_to_txt",

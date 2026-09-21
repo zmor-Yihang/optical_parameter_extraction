@@ -22,6 +22,9 @@ PHASE_FIT_MIN_THZ = 0.1
 #: 估计噪声本底用的高频段 (THz)。BT-FTS5500 的数据在 ~7 THz 以上被数字滤波，
 #: 该段是干净的噪声平台；若频率轴到不了这里则退化为最高频 10%。
 NOISE_BAND_THZ = (5.0, 6.8)
+#: 相位分支拟合和噪声估计所需的最小数据点数
+PHASE_FIT_MIN_POINTS = 8
+NOISE_ESTIMATION_MIN_POINTS = 16
 
 
 @dataclass(frozen=True)
@@ -72,7 +75,7 @@ def calculate_optical_properties(
         raise ValueError("时间采样间隔必须为非零有限值")
 
     frequency = _frequency_axis(point_count, sample_interval_ps)
-    reference_fft = _one_sided_fft(signals.reference, len(frequency))
+    reference_fft = _one_sided_fft(signals.reference)
     reference_fft_magnitude = np.abs(reference_fft / point_count)
 
     noise_floor = _estimate_noise_floor(reference_fft_magnitude, frequency)
@@ -87,7 +90,7 @@ def calculate_optical_properties(
     phase_fit_bands = []
 
     for index, sample in enumerate(signals.samples):
-        sample_fft = _one_sided_fft(sample, len(frequency))
+        sample_fft = _one_sided_fft(sample)
         sample_magnitude = np.abs(sample_fft / point_count)
         sample_fft_magnitudes.append(sample_magnitude)
 
@@ -170,13 +173,14 @@ def _frequency_axis(point_count: int, sample_interval_ps: float) -> np.ndarray:
     return frequency_step_thz * np.arange(point_count // 2 + 1)
 
 
-def _one_sided_fft(signal: np.ndarray, frequency_count: int) -> np.ndarray:
+def _one_sided_fft(signal: np.ndarray) -> np.ndarray:
     """实数信号的单边频谱。
 
     原实现是 np.fft.fft(signal)[:n]，即算完整复数谱再丢一半；
     改用 rfft 后运算量和内存都减半，数值完全等价。
+    rfft 已经只返回单边频谱，无需切片。
     """
-    return np.fft.rfft(signal)[:frequency_count]
+    return np.fft.rfft(signal)
 
 
 # ---------------------------------------------------------------------------
@@ -186,7 +190,7 @@ def _one_sided_fft(signal: np.ndarray, frequency_count: int) -> np.ndarray:
 def _estimate_noise_floor(magnitude: np.ndarray, frequency: np.ndarray) -> float:
     """用高频"无信号"平台估计噪声本底幅度。"""
     mask = (frequency >= NOISE_BAND_THZ[0]) & (frequency <= NOISE_BAND_THZ[1])
-    if mask.sum() < 16:
+    if mask.sum() < NOISE_ESTIMATION_MIN_POINTS:
         mask = frequency >= frequency[-1] * 0.9
     if not mask.any():
         return 0.0
@@ -203,7 +207,7 @@ def _suggest_phase_band(
 
     厚样品/强吸收样品会自动得到更窄的区间，避免用噪声段去拟合分支。
     """
-    if frequency.size < 8:
+    if frequency.size < PHASE_FIT_MIN_POINTS:
         return (0.0, 0.0)
 
     good = frequency >= PHASE_FIT_MIN_THZ
@@ -212,7 +216,7 @@ def _suggest_phase_band(
         good &= sample_magnitude > noise_floor * 10 ** (PHASE_FIT_SNR_DB / 20.0)
 
     index = np.flatnonzero(good)
-    if index.size < 8:
+    if index.size < PHASE_FIT_MIN_POINTS:
         # 退化：取谱峰附近 1/4 频段
         peak = int(np.argmax(reference_magnitude))
         lo = max(1, peak // 2)
@@ -254,7 +258,7 @@ def _unwrap_phase(
         return phase
 
     mask = (frequency >= low) & (frequency <= high)
-    if mask.sum() < 8:
+    if mask.sum() < PHASE_FIT_MIN_POINTS:
         return phase
 
     x = frequency[mask]

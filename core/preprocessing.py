@@ -13,6 +13,8 @@ WindowParameters = Mapping[str, float]
 
 #: 估计基线时最多取主脉冲之前多少比例的采样点
 BASELINE_MAX_FRACTION = 0.05
+#: 未单独设置窗口时，Tukey 的默认 alpha
+DEFAULT_WINDOW_ALPHA = 0.5
 
 
 @dataclass(frozen=True)
@@ -75,17 +77,17 @@ def preprocess_measurements(
     )
     if remove_dc:
         reference_original = remove_baseline(reference_original)
-    ref_params = ref_window_params if use_window else None
+    ref_params = _resolve_window_params(use_window, ref_window_params, time)
     window_warnings.extend(_check_window_covers_pulse(time, reference_original, ref_params, "参考信号"))
     reference = _apply_configured_window(time, reference_original, ref_params)
 
     prepared_samples_list = []
     for index, sample in enumerate(measurements.samples):
         amplitude = _prepare_amplitude(sample.amplitude, target_length, remove_dc)
-        params = (
-            _sample_window_params(per_sample_window_params, index)
-            if use_window
-            else None
+        params = _resolve_window_params(
+            use_window,
+            _sample_window_params(per_sample_window_params, index),
+            time,
         )
         window_warnings.extend(
             _check_window_covers_pulse(time, amplitude, params, sample.name)
@@ -161,6 +163,32 @@ def _sample_window_params(
     return parameters[index]
 
 
+def _resolve_window_params(
+    use_window: bool,
+    parameters: WindowParameters | None,
+    time: np.ndarray,
+) -> dict[str, float] | None:
+    """Tukey 开关打开时始终给出窗参数；关闭时返回 None（不加窗）。
+
+    未单独设置起止时间时，默认覆盖整段时域，alpha 取 0.5。
+    """
+    if not use_window:
+        return None
+    t_start = float(time[0])
+    t_end = float(time[-1])
+    if parameters is None:
+        return {
+            "t_start": t_start,
+            "t_end": t_end,
+            "alpha": DEFAULT_WINDOW_ALPHA,
+        }
+    return {
+        "t_start": float(parameters.get("t_start", t_start)),
+        "t_end": float(parameters.get("t_end", t_end)),
+        "alpha": float(parameters.get("alpha", DEFAULT_WINDOW_ALPHA)),
+    }
+
+
 def _apply_configured_window(
     time: np.ndarray,
     amplitude: np.ndarray,
@@ -188,4 +216,7 @@ def _prepare_amplitude(
 
 
 def _copy_prefix(values: np.ndarray, length: int) -> np.ndarray:
-    return np.array(values[:length], dtype=float, copy=True)
+    """复制数组前 length 个元素，避免不必要的复制操作。"""
+    if length >= len(values):
+        return values.astype(float, copy=True)
+    return np.array(values[:length], dtype=float)

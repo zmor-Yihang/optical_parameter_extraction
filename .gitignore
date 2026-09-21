@@ -64,3 +64,4 @@ desktop.ini
 # ---- 其他 ----
 .cache/
 *.log.bak
+thz_config.json

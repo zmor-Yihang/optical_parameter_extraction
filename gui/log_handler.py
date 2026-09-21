@@ -3,7 +3,7 @@
 """
 日志界面桥接模块
 
-把 'THzAnalyzer' logger 的日志流转发到主窗口左下角的日志面板。
+把 'THzAnalyzer' logger 的日志流转发到运行日志窗口。
 日志可能来自工作线程（如计算/保存线程），通过 Qt 信号投递到主线程，
 保证 QPlainTextEdit 只在主线程被写入。
 """

@@ -92,6 +92,7 @@ class SubplotDetailWindow(QWidget):
         # 独立顶级窗口：可拖动标题栏、可调整大小；非模态，主界面保持可见
         self.setWindowFlags(Qt.WindowType.Window)
         self.setWindowModality(Qt.WindowModality.NonModal)
+        self.setAttribute(Qt.WidgetAttribute.WA_DeleteOnClose, True)
 
         self._setup_ui()
         self._populate_nav()

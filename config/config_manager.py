@@ -36,7 +36,6 @@ def load_config():
         "thickness_history": [0.5],  # 历史厚度值
         "last_open_dir": "",         # 上次打开文件的路径
         "last_save_dir": "",         # 上次保存文件的路径
-        "start_row": 1,              # 数据起始行，默认1
         "use_window": False,         # 是否使用Tukey窗函数
         "window_t_start": 0.0,       # Tukey窗起始时间
         "window_t_end": 30.0,        # Tukey窗结束时间

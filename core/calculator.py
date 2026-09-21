@@ -63,7 +63,6 @@ def calculate_optical_params(
     sam_files: Sequence[str],
     sam_names: Sequence[str],
     d: float,
-    start_row: int = 1,
     use_window: bool = False,
     ref_window_params: dict[str, float] | None = None,
     per_sample_window_params: Sequence[dict[str, float] | None] | None = None,
@@ -95,7 +94,6 @@ def calculate_optical_params(
             ref_file=ref_file,
             sam_files=sam_files,
             sam_names=sam_names,
-            start_row=start_row,
             progress_reporter=progress.update,
             ref_signal=ref_signal,
             sam_signals=sam_signals,
@@ -109,8 +107,10 @@ def calculate_optical_params(
             per_sample_window_params=per_sample_window_params,
         )
         _record_warnings(result, prepared_signals.warnings)
-        if use_window and ref_window_params:
-            info("参考信号窗函数已应用")
+        if use_window:
+            info("Tukey 窗已启用，时域信号按窗口加窗")
+        else:
+            info("未启用 Tukey 窗，使用原始时域信号")
 
         progress.update("执行FFT及光学参数计算...")
         properties = calculate_optical_properties(

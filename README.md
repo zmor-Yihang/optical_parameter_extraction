@@ -51,21 +51,22 @@ uv run python main.py
 ## 使用说明
 
 1. **选择参考/样品文件**: 在左侧「参考文件」「样品文件」区域点击添加，或直接拖放文件
-   - 支持多种原始格式，选中后自动转换为标准两列 txt（暂存于系统临时目录，不污染项目目录）
+   - 支持 BT-FTS 时域扫描 txt，以及两列 Excel（.xlsx）/ txt / csv（第 1 列时间 ps，第 2 列幅值）
+   - 若程序无法识别，会提示自行转换为上述标准格式后再导入
    - 多扫描文件自动拆分为多条；样品支持批量添加、删除、清空
-2. **导出标准 TXT（可选）**: 菜单「工具 → 导出标准格式」将当前文件导出到指定目录
-3. **设置参数**: 数据起始行（自动检测）、样品厚度（mm，支持逐样品设置）、Tukey 窗函数参数
-4. **运行分析**: 点击「运行分析」开始计算光学参数
-5. **查看结果**: 右侧标签页分别显示时域/频域、光学参数、介电特性图表，可调整坐标轴范围或在新窗口中查看
-6. **保存结果**: 点击「保存结果」或「保存时频域数据」导出为 txt / Excel
-7. **检查更新（可选）**: 菜单「帮助 → 检查更新」手动检查新版本；程序启动时也会后台自动检查
+2. **设置参数**: 样品厚度（mm，支持逐样品设置）、Tukey 窗函数参数
+3. **运行分析**: 点击「运行分析」开始计算光学参数
+4. **查看结果**: 右侧标签页分别显示时域/频域、光学参数、介电特性图表，可调整坐标轴范围或在新窗口中查看
+5. **保存结果**: 点击「保存光学参数」导出光学参数，「保存时域数据」「保存频域数据」分别导出对应 Excel
+6. **检查更新（可选）**: 菜单「帮助 → 检查更新」手动检查新版本；程序启动时也会后台自动检查
 
 ## 项目结构
 
 ```
 optical-parameter-extraction/
 ├── config/                      # 配置管理
-│   └── config_manager.py        # 配置读写（thz_config.json）
+│   ├── config_manager.py        # 配置读写（thz_config.json）
+│   └── release.json             # 打包/更新配置（版本号唯一来源）
 ├── core/                        # 核心业务逻辑
 │   ├── calculator.py            # 分析流程编排（加载→预处理→计算→组装结果）
 │   ├── physics.py               # 光学参数物理计算（相位分支校正等）
@@ -75,7 +76,7 @@ optical-parameter-extraction/
 │   ├── data_io.py               # 结果导出（txt / Excel）
 │   ├── plotting.py              # matplotlib 绘图
 │   ├── window_functions.py      # Tukey 窗函数
-│   ├── version.py               # 版本号与更新源配置（版本号唯一来源）
+│   ├── version.py               # 从 config/release.json 读取版本号与更新源
 │   ├── updater.py               # 在线更新：拉取版本信息、比较、下载与校验
 │   └── exceptions.py            # 自定义异常
 ├── gui/                         # 图形界面
@@ -123,22 +124,23 @@ optical-parameter-extraction/
 
 构建流程：
 
-1. 清理旧的 `output/`、`build/`、`installer-output/` 目录
-2. 使用 PyInstaller 以 onedir + windowed 模式打包，产物为 `output\THzAnalyzer\THzAnalyzer.exe`
-3. 使用 Inno Setup 编译 `installer.iss`，生成安装包 `installer-output\install.exe`
+1. 从 `config/release.json` 读取版本号，并同步写入 `pyproject.toml`
+2. 清理旧的 `output/`、`build/`、`installer-output/` 目录
+3. 使用 PyInstaller 以 onedir + windowed 模式打包（同时打入 `config/release.json`），产物为 `output\THzAnalyzer\THzAnalyzer.exe`
+4. 使用 Inno Setup 编译 `installer.iss`，生成安装包 `installer-output\install.exe`
 
 安装位置为 `%LOCALAPPDATA%\Thz Analyzer`，无需管理员权限，程序可正常写入 `thz_config.json` 与 `logs/`。若需手动使用 PyInstaller：
 
 ```powershell
 uv sync --extra build
-uv run pyinstaller --onedir --windowed --name THzAnalyzer --distpath output main.py
+uv run pyinstaller --onedir --windowed --name THzAnalyzer --distpath output --add-data "config\release.json;config" main.py
 ```
 
 ## 发布新版本
 
 程序通过 GitHub Releases 检查更新，发布流程如下：
 
-1. 更新 `core/version.py` 中的 `__version__`（版本号唯一来源，界面、安装包均自动同步），并同步更新 `pyproject.toml` 的 `version`
+1. 更新 `config/release.json` 中的 `version`（版本号唯一来源）。运行 `.\build_installer.ps1` 时会自动同步 `pyproject.toml` 的 `version`，并注入安装包
 2. 运行 `.\build_installer.ps1` 构建安装包 `installer-output\install.exe`
 3. 运行 `uv run python scripts/make_version_json.py` 生成 `installer-output\version.json`，再用编辑器把 `changelog` 改为实际更新内容（版本号、下载地址与 SHA256 由脚本自动填写）
 4. 在 GitHub 仓库 `zmor-Yihang/optical_parameter_extraction` 新建 Release（Tag 建议使用版本号，如 `v1.1.0`，注意不要勾选 pre-release），上传两个资产：

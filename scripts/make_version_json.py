@@ -6,6 +6,7 @@
 用法（在项目根目录下执行）：
     uv run python scripts/make_version_json.py
 
+版本号与下载地址来自 config/release.json（经 core.version 读取）。
 前置条件：已运行 .\\build_installer.ps1，生成了 installer-output\\install.exe。
 生成后请用编辑器打开 installer-output\\version.json，把 changelog 改成实际更新内容，
 然后到 GitHub Releases 页面上传 install.exe 与 version.json 两个文件。

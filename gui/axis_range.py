@@ -23,20 +23,19 @@ from PyQt6.QtWidgets import (
     QHBoxLayout,
     QLabel,
     QLineEdit,
+    QMessageBox,
     QPushButton,
+    QSizePolicy,
     QWidget,
 )
 
 
 def _parse_float(text: str) -> float | None:
-    """把输入框文本解析为浮点数；空串或非法值返回 None（表示保持当前）。"""
+    """把输入框文本解析为浮点数；空串返回 None（表示保持当前）。非法值抛 ValueError。"""
     text = (text or "").strip()
     if not text:
         return None
-    try:
-        return float(text)
-    except ValueError:
-        return None
+    return float(text)
 
 
 class AxisRangeBar(QWidget):
@@ -64,6 +63,8 @@ class AxisRangeBar(QWidget):
             " border-radius: 3px; }"
             "AxisRangeBar QLineEdit { background-color: #FFFFFF; }"
         )
+        # 只按内容高度占位，剩余空间交给上方画布
+        self.setSizePolicy(QSizePolicy.Policy.Preferred, QSizePolicy.Policy.Maximum)
         self._setup_ui()
         if self._show_axes_combo:
             self._refresh_axes_combo()
@@ -247,11 +248,21 @@ class AxisRangeBar(QWidget):
         """把输入框中的范围应用到选中的子图。"""
         if self._updating:
             return
-        xmin = _parse_float(self.xmin_edit.text())
-        xmax = _parse_float(self.xmax_edit.text())
-        ymin = _parse_float(self.ymin_edit.text())
-        ymax = _parse_float(self.ymax_edit.text())
+        try:
+            xmin = _parse_float(self.xmin_edit.text())
+            xmax = _parse_float(self.xmax_edit.text())
+            ymin = _parse_float(self.ymin_edit.text())
+            ymax = _parse_float(self.ymax_edit.text())
+        except ValueError:
+            QMessageBox.warning(self, "坐标范围", "请输入有效的数字")
+            return
         if xmin is None and xmax is None and ymin is None and ymax is None:
+            return
+        if xmin is not None and xmax is not None and xmin >= xmax:
+            QMessageBox.warning(self, "坐标范围", "X 轴最小值必须小于最大值")
+            return
+        if ymin is not None and ymax is not None and ymin >= ymax:
+            QMessageBox.warning(self, "坐标范围", "Y 轴最小值必须小于最大值")
             return
 
         for ax in self._selected_axes():
@@ -263,6 +274,9 @@ class AxisRangeBar(QWidget):
                     hi = xmax
                 if lo < hi:
                     ax.set_xlim(lo, hi)
+                else:
+                    QMessageBox.warning(self, "坐标范围", "X 轴最小值必须小于最大值")
+                    return
             if ymin is not None or ymax is not None:
                 lo, hi = ax.get_ylim()
                 if ymin is not None:
@@ -271,6 +285,9 @@ class AxisRangeBar(QWidget):
                     hi = ymax
                 if lo < hi:
                     ax.set_ylim(lo, hi)
+                else:
+                    QMessageBox.warning(self, "坐标范围", "Y 轴最小值必须小于最大值")
+                    return
         self.canvas.draw_idle()
 
     def _auto(self):

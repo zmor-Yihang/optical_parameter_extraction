@@ -1,19 +1,46 @@
 """
 应用版本与更新源配置。
 
-版本号唯一权威来源：pyproject.toml、installer.iss、界面显示均以此为准。
-打包脚本（build_installer.ps1）也会读取 __version__ 注入安装包。
+版本号唯一权威来源：config/release.json。
+打包脚本（build_installer.ps1）会读取该文件注入安装包，并同步 pyproject.toml。
 """
+
+import json
+import os
+import sys
 
 APP_NAME = "THzAnalyzer"
 APP_DISPLAY_NAME = "THz 时域光谱分析系统"
 
-__version__ = "1.0.1"
+_DEFAULT_GITHUB_REPO = "zmor-Yihang/optical_parameter_extraction"
+_DEFAULT_VERSION = "1.0.1"
+
+
+def _resource_root() -> str:
+    """开发环境为项目根目录；PyInstaller 打包后为 _MEIPASS。"""
+    if getattr(sys, "frozen", False) and hasattr(sys, "_MEIPASS"):
+        return sys._MEIPASS
+    return os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+
+
+def _load_release_config() -> dict:
+    path = os.path.join(_resource_root(), "config", "release.json")
+    try:
+        with open(path, encoding="utf-8") as fh:
+            data = json.load(fh)
+        if not isinstance(data, dict):
+            raise ValueError("release.json 格式不正确")
+        return data
+    except Exception:
+        return {}
+
+
+_release = _load_release_config()
+
+__version__ = str(_release.get("version") or _DEFAULT_VERSION).strip()
 VERSION = __version__
 APP_VERSION = __version__
 
-# GitHub Releases：发布新版本时，将 install.exe 与 version.json 作为 Release 资产上传，
-# 以下 latest/download 链接会自动指向最新版本。
-GITHUB_REPO = "zmor-Yihang/optical_parameter_extraction"
+GITHUB_REPO = str(_release.get("github_repo") or _DEFAULT_GITHUB_REPO).strip()
 UPDATE_URL = f"https://github.com/{GITHUB_REPO}/releases/latest/download/version.json"
 INSTALLER_DOWNLOAD_URL = f"https://github.com/{GITHUB_REPO}/releases/latest/download/install.exe"

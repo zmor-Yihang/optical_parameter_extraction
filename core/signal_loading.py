@@ -36,7 +36,6 @@ def load_measurements(
     ref_file: str,
     sam_files: Sequence[str],
     sam_names: Sequence[str],
-    start_row: int = 1,
     progress_reporter: ProgressReporter | None = None,
     ref_signal: StandardSignal | None = None,
     sam_signals: Sequence[StandardSignal | None] | None = None,
@@ -59,7 +58,6 @@ def load_measurements(
     reference = _load_signal(
         ref_file,
         "参考信号",
-        start_row,
         in_memory=ref_signal,
     )
     info(f"参考信号读取完成，数据点数: {len(reference.time)}")
@@ -70,7 +68,7 @@ def load_measurements(
         in_memory = None
         if sam_signals is not None and index < len(sam_signals):
             in_memory = sam_signals[index]
-        sample = _load_signal(file_path, name, start_row, in_memory=in_memory)
+        sample = _load_signal(file_path, name, in_memory=in_memory)
         samples.append(sample)
         info(f"样品 {name} 读取完成")
 
@@ -80,13 +78,12 @@ def load_measurements(
 def _load_signal(
     file_path: str,
     name: str,
-    start_row: int,
     in_memory: StandardSignal | None = None,
 ) -> LoadedSignal:
     if in_memory is not None:
         time, amplitude = in_memory.to_arrays()
     else:
-        signal = read_data_file(file_path, start_row)
+        signal = read_data_file(file_path)
         time, amplitude = signal.to_arrays()
     return LoadedSignal(
         name=name,

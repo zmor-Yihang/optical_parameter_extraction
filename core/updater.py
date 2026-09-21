@@ -108,6 +108,7 @@ def download_file(
     dest_path: str,
     progress_callback: Optional[Callable[[int, int], None]] = None,
     chunk_size: int = 64 * 1024,
+    cancel_callback: Optional[Callable[[], bool]] = None,
 ) -> str:
     """流式下载文件到 dest_path，并通过 progress_callback(已下载字节, 总字节) 回报进度。"""
     try:
@@ -116,6 +117,8 @@ def download_file(
             downloaded = 0
             with open(dest_path, "wb") as fh:
                 while True:
+                    if cancel_callback and cancel_callback():
+                        raise UpdateError("下载已取消")
                     chunk = resp.read(chunk_size)
                     if not chunk:
                         break
@@ -123,6 +126,8 @@ def download_file(
                     downloaded += len(chunk)
                     if progress_callback:
                         progress_callback(downloaded, total)
+    except UpdateError:
+        raise
     except Exception as exc:
         raise UpdateError(f"下载失败: {exc}") from exc
     info(f"更新包下载完成: {dest_path}")

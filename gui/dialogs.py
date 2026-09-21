@@ -7,6 +7,7 @@
 import os
 import subprocess
 import tempfile
+from datetime import datetime
 
 from PyQt6.QtCore import Qt, pyqtSignal
 from PyQt6.QtWidgets import (
@@ -46,11 +47,10 @@ class HelpDialog(QDialog):
 
 <h3 style="color: #444444;">基本流程</h3>
 <ol style="line-height: 1.7; margin-left: 16px;">
-    <li><b>选择参考/样品文件</b>：在左侧「参考文件」「样品文件」区域点击「添加」，或直接拖放文件；支持 BT-FTS txt、Excel、CSV 等格式，选择后自动转换为标准两列数据</li>
-    <li><b>设置参数</b>：数据起始行（自动检测）、样品厚度（mm，支持逐样品设置）；如需去除多次反射，可开启 Tukey 窗函数并设置范围</li>
+    <li><b>选择参考/样品文件</b>：在左侧「参考文件」「样品文件」区域点击「添加」，或把文件拖进对应列表框；支持 BT-FTS 时域 txt、两列 Excel / txt。若程序无法识别，请先自行整理为两列标准格式（时间 ps、幅值）后再导入</li>
+    <li><b>设置参数</b>：样品厚度（mm，支持逐样品设置）；如需去除多次反射，可开启 Tukey 窗函数并设置范围</li>
     <li><b>运行分析</b>：点击「运行分析」开始计算，右侧三个标签页分别显示时域/频域、光学参数、介电特性图表</li>
-    <li><b>保存结果</b>：「保存结果」导出光学参数表，「保存时频域数据」导出时域/频域数据（txt / Excel）</li>
-    <li><b>导出标准格式（可选）</b>：菜单「工具 → 导出标准格式」将当前文件导出为标准 txt</li>
+    <li><b>保存结果</b>：「保存光学参数」导出光学参数表，「保存时域数据」「保存频域数据」分别导出时域/频域 Excel</li>
 </ol>
 
 <h3 style="color: #444444;">其他</h3>
@@ -60,7 +60,7 @@ class HelpDialog(QDialog):
 
 <h3 style="color: #444444;">注意事项</h3>
 <p style="line-height: 1.7; margin-left: 8px;">
-• 数据文件第一列为时间（ps），第二列为电场振幅<br>
+• 标准数据为两列：第一列时间（ps），第二列电场振幅，可保存为 Excel（.xlsx）或 txt<br>
 • 参考与样品文件的采样点数应一致，不一致时程序自动截断并给出警告<br>
 • 样品厚度单位为毫米（mm）
 </p>
@@ -72,6 +72,84 @@ class HelpDialog(QDialog):
         button_layout = QHBoxLayout()
         button_layout.addStretch()
         ok_btn = QPushButton("确定")
+        ok_btn.setStyleSheet("""
+            QPushButton {
+                background-color: #F5F5F5;
+                color: #333333;
+                border: 1px solid #D0D0D0;
+                border-radius: 3px;
+                padding: 6px 24px;
+            }
+            QPushButton:hover {
+                background-color: #EBEBEB;
+            }
+        """)
+        ok_btn.clicked.connect(self.accept)
+        button_layout.addWidget(ok_btn)
+        button_layout.addStretch()
+        layout.addLayout(button_layout)
+
+
+STANDARD_FORMAT_GUIDE_HTML = """
+<h3 style="color: #333333; margin-top: 0;">请先整理为两列数据</h3>
+<p style="line-height: 1.7; color: #555555;">
+只需两列：第 1 列时间，第 2 列幅值。保存为 Excel（.xlsx）或 txt / csv 后重新添加。
+</p>
+<table border="1" cellspacing="0" cellpadding="6" style="border-collapse: collapse; color: #333333;">
+    <tr style="background-color: #EFEFEF;">
+        <th>时间 Time[ps]</th>
+        <th>幅值 Amplitude</th>
+    </tr>
+    <tr><td align="right">0.000</td><td align="right">-1.23e-04</td></tr>
+    <tr><td align="right">0.033</td><td align="right">2.45e-03</td></tr>
+    <tr><td align="right">0.066</td><td align="right">3.10e-03</td></tr>
+    <tr><td align="right">0.099</td><td align="right">1.87e-03</td></tr>
+</p>
+"""
+
+
+class FormatGuideDialog(QDialog):
+    """文件格式无法识别时，引导用户自行转换为标准 Excel / txt。"""
+
+    def __init__(self, failed_items: list[str] | None = None, parent=None):
+        super().__init__(parent)
+        self.setWindowTitle("请转换为标准格式")
+        self.setMinimumSize(560, 460)
+        self.setStyleSheet("QDialog { background-color: #FFFFFF; }")
+        self._failed_items = [item for item in (failed_items or []) if item]
+        self._setup_ui()
+
+    def _setup_ui(self):
+        layout = QVBoxLayout(self)
+        layout.setContentsMargins(16, 16, 16, 16)
+        layout.setSpacing(10)
+
+        browser = QTextBrowser()
+        browser.setOpenExternalLinks(False)
+        browser.setStyleSheet(
+            "QTextBrowser { border: none; background-color: #FFFFFF; font-size: 10pt; color: #333333; }"
+        )
+        parts = [STANDARD_FORMAT_GUIDE_HTML]
+        if self._failed_items:
+            preview = "<br>".join(
+                f"• {item}" for item in self._failed_items[:8]
+            )
+            extra = (
+                f"<br>…另有 {len(self._failed_items) - 8} 个文件"
+                if len(self._failed_items) > 8
+                else ""
+            )
+            parts.insert(
+                0,
+                "<p style='color:#B85C5C; line-height:1.7;'>"
+                f"<b>以下文件无法识别：</b><br>{preview}{extra}</p>",
+            )
+        browser.setHtml("".join(parts))
+        layout.addWidget(browser, 1)
+
+        button_layout = QHBoxLayout()
+        button_layout.addStretch()
+        ok_btn = QPushButton("知道了")
         ok_btn.setStyleSheet("""
             QPushButton {
                 background-color: #F5F5F5;
@@ -137,11 +215,15 @@ class AboutDialog(QDialog):
 </div>
 
 <p style="text-align: center; margin-top: 16px; color: #999999; font-size: 9pt;">
-© 2025 THz光学参数分析系统. All rights reserved.
+© @YEAR@ THz光学参数分析系统. All rights reserved.
 </p>
 """
 
-        text_browser.setHtml(about_html.replace("@VERSION@", APP_VERSION))
+        text_browser.setHtml(
+            about_html.replace("@VERSION@", APP_VERSION).replace(
+                "@YEAR@", str(datetime.now().year)
+            )
+        )
         layout.addWidget(text_browser)
 
         button_layout = QHBoxLayout()
@@ -303,6 +385,25 @@ class UpdateDialog(QDialog):
         self.download_worker.download_finished.connect(self._on_download_finished)
         self.download_worker.download_error.connect(self._on_download_error)
         self.download_worker.start()
+
+    def _is_downloading(self) -> bool:
+        worker = self.download_worker
+        try:
+            return worker is not None and worker.isRunning()
+        except RuntimeError:
+            return False
+
+    def reject(self):
+        if self._is_downloading():
+            self.download_worker.requestInterruption()
+            self.download_worker.wait(1500)
+        super().reject()
+
+    def closeEvent(self, event):
+        if self._is_downloading():
+            self.download_worker.requestInterruption()
+            self.download_worker.wait(1500)
+        super().closeEvent(event)
 
     def _on_download_progress(self, downloaded: int, total: int):
         """下载进度回调。"""
