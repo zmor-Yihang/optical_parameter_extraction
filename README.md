@@ -178,3 +178,4 @@ uv run pyinstaller --onedir --windowed --name THzAnalyzer --distpath output --ad
 - 样品厚度单位为毫米（mm），支持为每个样品单独设置
 - 频率轴默认显示 0–5 THz，可通过图表工具栏调整
 - 首次构建安装包较慢，此后增量编译较快
+
