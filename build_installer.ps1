@@ -74,6 +74,19 @@ Get-ChildItem -Path $buildDir -Force -ErrorAction SilentlyContinue | Where-Objec
 } | Remove-Item -Recurse -Force -ErrorAction SilentlyContinue
 Write-Host "已清理运行时产物 (logs/, thz_config.json)" -ForegroundColor DarkGray
 
+# 校验 release.json 已打入产物且版本一致。
+# 程序运行时从该文件读取版本号；若缺失会回退到代码里的后备版本，
+# 导致升级后仍显示旧版本并反复提示更新。
+$packedRelease = Join-Path $buildDir "_internal\config\release.json"
+if (-not (Test-Path $packedRelease)) {
+    throw "打包产物缺少 config\release.json: $packedRelease"
+}
+$packedVersion = (Get-Content $packedRelease -Raw -Encoding UTF8 | ConvertFrom-Json).version
+if ($packedVersion -ne $appVersion) {
+    throw "打包产物版本不一致：release.json=$appVersion，产物=$packedVersion"
+}
+Write-Host "已校验产物版本: v$packedVersion" -ForegroundColor DarkGray
+
 Write-Host "=== 4/4 Inno Setup 编译安装程序 ===" -ForegroundColor Cyan
 # 定位 ISCC.exe：PATH -> 常见安装目录 -> 注册表卸载信息
 $iscc = Get-Command iscc.exe -ErrorAction SilentlyContinue

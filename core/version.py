@@ -13,7 +13,9 @@ APP_NAME = "THzAnalyzer"
 APP_DISPLAY_NAME = "THz 时域光谱分析系统"
 
 _DEFAULT_GITHUB_REPO = "zmor-Yihang/optical_parameter_extraction"
-_DEFAULT_VERSION = "1.0.1"
+#: release.json 缺失时的后备版本号。需与 config/release.json 保持一致，
+#: 否则打包遗漏该文件时程序会自称旧版本，导致升级后仍反复提示更新。
+_DEFAULT_VERSION = "1.1.0"
 
 
 def _resource_root() -> str:
