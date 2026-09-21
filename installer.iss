@@ -6,7 +6,7 @@
 #define MyAppName "Thz Analyzer"
 ; 版本号由 build_installer.ps1 从 core/version.py 读取并以 /D 参数注入
 #ifndef MyAppVersion
-#define MyAppVersion "1.0.0"
+#define MyAppVersion "1.0.1"
 #endif
 #define MyAppPublisher "THz"
 #define MyAppExeName "THzAnalyzer.exe"

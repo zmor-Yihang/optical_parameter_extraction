@@ -246,6 +246,12 @@ class THzAnalyzerApp(QMainWindow):
         param_group = self._create_param_group()
         left_layout.addWidget(param_group)
         left_layout.addStretch()
+
+        # 版权信息（浅色小字）
+        group_label = QLabel(f"NUAA THz Group  v{APP_VERSION}")
+        group_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        group_label.setStyleSheet("color: #AAAAAA; font-size: 10px;")
+        left_layout.addWidget(group_label)
     
     def _attach_log_handler(self):
         """把全局日志流接到主窗口（经 Qt 信号跨线程安全投递），
