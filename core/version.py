@@ -1,7 +1,7 @@
 """
 应用版本与更新源配置。
 
-版本号唯一权威来源：config/release.json。
+版本号唯一权威来源：项目根目录下的 release.json。
 打包脚本（build_installer.ps1）会读取该文件注入安装包，并同步 pyproject.toml。
 """
 
@@ -13,7 +13,7 @@ APP_NAME = "THzAnalyzer"
 APP_DISPLAY_NAME = "THz 时域光谱分析系统"
 
 _DEFAULT_GITHUB_REPO = "zmor-Yihang/optical_parameter_extraction"
-#: release.json 缺失时的后备版本号。需与 config/release.json 保持一致，
+#: release.json 缺失时的后备版本号。需与项目根目录的 release.json 保持一致，
 #: 否则打包遗漏该文件时程序会自称旧版本，导致升级后仍反复提示更新。
 _DEFAULT_VERSION = "1.1.0"
 
@@ -26,7 +26,7 @@ def _resource_root() -> str:
 
 
 def _load_release_config() -> dict:
-    path = os.path.join(_resource_root(), "config", "release.json")
+    path = os.path.join(_resource_root(), "release.json")
     try:
         with open(path, encoding="utf-8") as fh:
             data = json.load(fh)

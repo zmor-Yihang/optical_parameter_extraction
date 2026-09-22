@@ -319,24 +319,22 @@ class UpdateDialog(QDialog):
         """)
         cl_layout = QVBoxLayout(changelog_group)
         self.changelog_browser = QTextBrowser()
-        self.changelog_browser.setOpenExternalLinks(False)
-        self.changelog_browser.setPlainText(self.update_info.changelog or "暂无更新说明")
+        self.changelog_browser.setOpenExternalLinks(True)
+        # 更新内容 + 可点击的手动下载地址，同处一个提示框内
+        changelog_text = escape(
+            self.update_info.changelog or "暂无更新说明"
+        ).replace("\n", "<br>")
+        self.changelog_browser.setHtml(
+            f"<div>{changelog_text}</div>"
+            f"<div style=\"margin-top:8px;\">"
+            + manual_download_html("自动更新失败？可手动下载：", self.update_info.download_url)
+            + "</div>"
+        )
         self.changelog_browser.setStyleSheet(
             "QTextBrowser { border: none; background-color: #FAFAFA; font-size: 10pt; color: #333333; }"
         )
         cl_layout.addWidget(self.changelog_browser)
         layout.addWidget(changelog_group, 1)
-
-        # 手动下载地址：自动更新失败时用户可直接点击该网址在浏览器中下载安装包
-        self.download_link_label = QLabel(
-            manual_download_html("自动更新失败？可手动下载：", self.update_info.download_url)
-        )
-        self.download_link_label.setOpenExternalLinks(True)
-        self.download_link_label.setTextInteractionFlags(
-            Qt.TextInteractionFlag.TextBrowserInteraction
-        )
-        self.download_link_label.setWordWrap(True)
-        layout.addWidget(self.download_link_label)
 
         self.status_label = QLabel("")
         self.status_label.setVisible(False)

@@ -8,7 +8,7 @@
     uv run python scripts/make_version_json.py
     uv run python scripts/make_version_json.py --changelog "- 新增 xxx;- 修复 xxx"
 
-版本号与下载地址来自 config/release.json（经 core.version 读取）。
+版本号与下载地址来自项目根目录的 release.json（经 core.version 读取）。
 前置条件：installer-output\\install.exe 已存在（由 build_installer.ps1 生成）。
 
 changelog 取值优先级：

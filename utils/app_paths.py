@@ -33,7 +33,7 @@ def get_app_base_dir() -> str:
 
 
 def get_resource_dir() -> str:
-    """返回只读资源文件 (app.ico、config/release.json 等) 的根目录
+    """返回只读资源文件 (app.ico、release.json 等) 的根目录
 
     - 打包环境: PyInstaller 解包目录 (_MEIPASS, onedir 下为 _internal)
     - 开发环境: 项目根目录 (由本文件路径向上两级)

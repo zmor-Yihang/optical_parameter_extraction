@@ -65,8 +65,8 @@ uv run python main.py
 ```
 optical-parameter-extraction/
 ├── config/                      # 配置管理
-│   ├── config_manager.py        # 配置读写（thz_config.json）
-│   └── release.json             # 打包/更新配置（版本号唯一来源）
+│   └── config_manager.py        # 配置读写（thz_config.json）
+├── release.json                 # 打包/更新配置（版本号唯一来源）
 ├── core/                        # 核心业务逻辑
 │   ├── calculator.py            # 分析流程编排（加载→预处理→计算→组装结果）
 │   ├── physics.py               # 光学参数物理计算（相位分支校正等）
@@ -76,7 +76,7 @@ optical-parameter-extraction/
 │   ├── data_io.py               # 结果导出（txt / Excel）
 │   ├── plotting.py              # matplotlib 绘图
 │   ├── window_functions.py      # Tukey 窗函数
-│   ├── version.py               # 从 config/release.json 读取版本号与更新源
+│   ├── version.py               # 从根目录 release.json 读取版本号与更新源
 │   ├── updater.py               # 在线更新：拉取版本信息、比较、下载与校验
 │   └── exceptions.py            # 自定义异常
 ├── gui/                         # 图形界面
@@ -124,9 +124,9 @@ optical-parameter-extraction/
 
 构建流程：
 
-1. 从 `config/release.json` 读取版本号，并同步写入 `pyproject.toml`
+1. 从根目录 `release.json` 读取版本号，并同步写入 `pyproject.toml`
 2. 清理旧的 `output/`、`build/`、`installer-output/` 目录（保留 `version.json` 以复用其中的 changelog）
-3. 使用 PyInstaller 以 onedir + windowed 模式打包（同时打入 `config/release.json`），产物为 `output\THzAnalyzer\THzAnalyzer.exe`
+3. 使用 PyInstaller 以 onedir + windowed 模式打包（同时打入 `release.json`），产物为 `output\THzAnalyzer\THzAnalyzer.exe`
 4. 使用 Inno Setup 编译 `installer.iss`，生成安装包 `installer-output\install.exe`
 5. 调用 `scripts/make_version_json.py` 生成 `installer-output\version.json`（含版本号、下载地址与安装包 SHA256）
 
@@ -134,14 +134,14 @@ optical-parameter-extraction/
 
 ```powershell
 uv sync --extra build
-uv run pyinstaller --onedir --windowed --name THzAnalyzer --distpath output --add-data "config\release.json;config" main.py
+uv run pyinstaller --onedir --windowed --name THzAnalyzer --distpath output --add-data "release.json;." main.py
 ```
 
 ## 发布新版本
 
 程序通过 GitHub Releases 检查更新，发布流程如下：
 
-1. 更新 `config/release.json` 中的 `version`（版本号唯一来源）。运行 `.\build_installer.ps1` 时会自动同步 `pyproject.toml` 的 `version`，并注入安装包
+1. 更新根目录 `release.json` 中的 `version`（版本号唯一来源）。运行 `.\build_installer.ps1` 时会自动同步 `pyproject.toml` 的 `version`，并注入安装包
 2. 运行 `.\build_installer.ps1`，一键生成 `installer-output\install.exe` 与 `installer-output\version.json`。更新说明两种写法：
    - 构建 时传参：`.\build_installer.ps1 -Changelog "- 新增 xxx;- 修复 xxx"`
    - 不传参时沿用 `version.json` 中同版本的现有 changelog（首次或新版本才是占位文本，可用编辑器补充）

@@ -4,7 +4,7 @@
 ; 使用方式：用 Inno Setup Compiler 打开本文件编译，或直接运行 build_installer.ps1
 
 #define MyAppName "Thz Analyzer"
-; 版本号由 build_installer.ps1 从 config/release.json 读取并以 /D 参数注入
+; 版本号由 build_installer.ps1 从 release.json 读取并以 /D 参数注入
 #ifndef MyAppVersion
 #define MyAppVersion "1.1.0"
 #endif

@@ -1529,17 +1529,9 @@ class THzAnalyzerApp(QMainWindow):
         dialog.exec()
 
     def _check_updates_auto(self):
-        """启动后自动检查更新：受自动检查开关与 24 小时频率限制，失败静默。"""
+        """启动后自动检查更新：受自动检查开关控制，每次启动都检查，失败静默。"""
         if not self.config.get("auto_check_update", True):
             return
-        last_check = self.config.get("last_update_check", "")
-        if last_check:
-            try:
-                last_dt = datetime.fromisoformat(last_check)
-                if (datetime.now() - last_dt).total_seconds() < 24 * 3600:
-                    return
-            except ValueError:
-                pass
         self._check_for_updates(manual=False)
 
     def _check_for_updates(self, manual: bool):

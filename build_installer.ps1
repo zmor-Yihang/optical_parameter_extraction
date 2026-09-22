@@ -13,7 +13,7 @@
 #   .\build_installer.ps1 -Changelog "- 新增 xxx;- 修复 xxx"
 # 不传 -Changelog 时，会沿用上一次 version.json 中同版本的更新说明（若有）。
 #
-# 版本号唯一来源：config\release.json（会同步写入 pyproject.toml）
+# 版本号唯一来源：根目录 release.json（会同步写入 pyproject.toml）
 
 param(
     [string]$Changelog = ""
@@ -27,7 +27,7 @@ Set-Location $PSScriptRoot
 $AppName = "THzAnalyzer"
 $OutputDir = "output"          # PyInstaller onedir 输出目录
 $InstallerDir = "installer-output"
-$ReleaseConfigPath = "config\release.json"
+$ReleaseConfigPath = "release.json"
 
 Write-Host "=== 1/5 读取发布配置并同步版本号 ===" -ForegroundColor Cyan
 if (-not (Test-Path $ReleaseConfigPath)) {
@@ -35,9 +35,9 @@ if (-not (Test-Path $ReleaseConfigPath)) {
 }
 $releaseConfig = Get-Content $ReleaseConfigPath -Raw -Encoding UTF8 | ConvertFrom-Json
 $appVersion = [string]$releaseConfig.version
-if (-not $appVersion) { throw "config/release.json 缺少 version 字段" }
+if (-not $appVersion) { throw "release.json 缺少 version 字段" }
 if ($appVersion -notmatch '^\d+\.\d+\.\d+') {
-    throw "config/release.json 的 version 必须为 X.Y.Z 格式，当前: $appVersion"
+    throw "release.json 的 version 必须为 X.Y.Z 格式，当前: $appVersion"
 }
 
 $pyprojectPath = Join-Path $PSScriptRoot "pyproject.toml"
@@ -78,7 +78,7 @@ uv run pyinstaller --noconfirm --clean --onedir --windowed `
     --name $AppName `
     --distpath $OutputDir `
     --icon "app.ico" `
-    --add-data "config\release.json;config" `
+    --add-data "release.json;." `
     --add-data "app.ico;." `
     main.py
 
@@ -95,9 +95,9 @@ Write-Host "已清理运行时产物 (logs/, thz_config.json)" -ForegroundColor 
 # 校验 release.json 已打入产物且版本一致。
 # 程序运行时从该文件读取版本号；若缺失会回退到代码里的后备版本，
 # 导致升级后仍显示旧版本并反复提示更新。
-$packedRelease = Join-Path $buildDir "_internal\config\release.json"
+$packedRelease = Join-Path $buildDir "_internal\release.json"
 if (-not (Test-Path $packedRelease)) {
-    throw "打包产物缺少 config\release.json: $packedRelease"
+    throw "打包产物缺少 release.json: $packedRelease"
 }
 # app.ico 用于运行时的窗口/任务栏图标（界面左上角图标），缺失会退回默认图标
 if (-not (Test-Path (Join-Path $buildDir "_internal\app.ico"))) {
