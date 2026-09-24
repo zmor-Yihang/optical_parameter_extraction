@@ -229,8 +229,10 @@ class THzAnalyzerApp(QMainWindow):
         palette.setColor(QPalette.ColorRole.HighlightedText, QColor("#FFFFFF"))
         self.setPalette(palette)
         
-        # 设置全局字体
-        app_font = QFont("微软雅黑", 9)
+        # 英文、数字和符号用 Arial；汉字不在该字体中，回退到微软雅黑
+        app_font = QFont()
+        app_font.setFamilies(["Arial", "Microsoft YaHei", "微软雅黑"])
+        app_font.setPointSize(9)
         QApplication.setFont(app_font)
         
         # 设置全局样式表
@@ -279,7 +281,10 @@ class THzAnalyzerApp(QMainWindow):
         # 程序标题
         title_label = QLabel("THz 时域光谱分析系统")
         title_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        title_font = QFont("微软雅黑", 12, QFont.Weight.Bold)
+        title_font = QFont()
+        title_font.setFamilies(["Arial", "Microsoft YaHei", "微软雅黑"])
+        title_font.setPointSize(12)
+        title_font.setWeight(QFont.Weight.Bold)
         title_label.setFont(title_font)
         title_label.setStyleSheet("color: #333333; margin-bottom: 6px;")
         left_layout.addWidget(title_label)

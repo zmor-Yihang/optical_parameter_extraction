@@ -246,7 +246,7 @@ class SubplotDetailWindow(QWidget):
             if line["label"] and not str(line["label"]).startswith("_")
         ]
         if labels and len(labels) <= LEGEND_LIMIT:
-            axis.legend(loc="best", fontsize=8)
+            axis.legend(loc="best", fontsize=7)
         figure.tight_layout()
 
         canvas = FigureCanvas(figure)

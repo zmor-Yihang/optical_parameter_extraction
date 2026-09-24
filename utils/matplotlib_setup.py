@@ -3,15 +3,15 @@ import matplotlib.pyplot as plt
 
 def setup_matplotlib():
     """设置matplotlib支持中文显示和浅色主题样式"""
-    # 设置matplotlib支持中文显示
-    plt.rcParams['font.sans-serif'] = ['KaiTi', 'SimHei', 'Microsoft YaHei', 'SimSun', 'Arial Unicode MS']
+    # 英文、数字和符号优先 Arial；缺字（汉字）再回退到微软雅黑
+    plt.rcParams['font.family'] = ['Arial', 'Microsoft YaHei', 'SimHei']
     plt.rcParams['axes.unicode_minus'] = False  # 解决负号显示问题
-    plt.rcParams['font.size'] = 12  # 设置全局字体大小
-    plt.rcParams['axes.labelsize'] = 14  # 设置坐标轴标签字体大小
-    plt.rcParams['axes.titlesize'] = 16  # 设置标题字体大小
-    plt.rcParams['xtick.labelsize'] = 12  # 设置x轴刻度标签字体大小
-    plt.rcParams['ytick.labelsize'] = 12  # 设置y轴刻度标签字体大小
-    plt.rcParams['legend.fontsize'] = 12  # 设置图例字体大小
+    plt.rcParams['font.size'] = 10
+    plt.rcParams['axes.labelsize'] = 11  # 坐标轴标签
+    plt.rcParams['axes.titlesize'] = 12  # 子图标题
+    plt.rcParams['xtick.labelsize'] = 9  # x 轴刻度
+    plt.rcParams['ytick.labelsize'] = 9  # y 轴刻度
+    plt.rcParams['legend.fontsize'] = 9
     
     # 设置浅色主题
     plt.rcParams['figure.facecolor'] = '#F5F5F5'  # 图形背景色

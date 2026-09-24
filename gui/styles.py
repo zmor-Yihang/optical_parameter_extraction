@@ -10,6 +10,10 @@
 def get_main_window_style() -> str:
     """获取主窗口样式表"""
     return """
+        QWidget {
+            font-family: "Arial", "Microsoft YaHei", "微软雅黑";
+        }
+
         QMainWindow {
             background-color: #FFFFFF;
         }
@@ -215,6 +219,7 @@ def get_menubar_style() -> str:
             background-color: #FAFAFA;
             color: #333333;
             border-bottom: 1px solid #D0D0D0;
+            font-family: "Arial", "Microsoft YaHei", "微软雅黑";
         }
         QMenuBar::item {
             padding: 4px 10px;

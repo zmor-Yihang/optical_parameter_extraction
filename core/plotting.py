@@ -13,8 +13,8 @@ from matplotlib.lines import Line2D
 from .physics import OpticalPropertyData
 from .preprocessing import PreparedSignals
 
-# 统一图表标题字号（默认 large≈12pt，此处调小）
-matplotlib.rcParams["axes.titlesize"] = 10
+# 与 utils.matplotlib_setup 保持一致，避免本模块导入时把标题字号改回去
+matplotlib.rcParams["axes.titlesize"] = 12
 
 COLORS = (
     "red",
@@ -455,7 +455,7 @@ def _apply_shared_legend(figure: Figure, sample_count: int) -> None:
         handles,
         labels,
         loc="upper right",
-        fontsize=8,
+        fontsize=9,
         framealpha=0.9,
         borderaxespad=0.4,
     )
