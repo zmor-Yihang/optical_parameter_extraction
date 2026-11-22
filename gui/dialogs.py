@@ -30,7 +30,6 @@ class HelpDialog(QDialog):
         super().__init__(parent)
         self.setWindowTitle("使用说明")
         self.setMinimumSize(650, 550)
-        self.setStyleSheet("QDialog { background-color: #FFFFFF; }")
         self._setup_ui()
 
     def _setup_ui(self):
@@ -39,27 +38,26 @@ class HelpDialog(QDialog):
 
         text_browser = QTextBrowser()
         text_browser.setOpenExternalLinks(True)
-        text_browser.setStyleSheet(
-            "QTextBrowser { border: none; background-color: #FFFFFF; font-size: 10pt; color: #333333; }"
-        )
+        text_browser.setProperty("uiRole", "dialogBody")
 
         help_html = """
-<h2 style="color: #333333; text-align: center; margin-bottom: 16px;">THz 时域光谱分析系统 - 使用说明</h2>
+<h2 style="text-align: center; margin-bottom: 16px;">THz 时域光谱分析系统 - 使用说明</h2>
 
-<h3 style="color: #444444;">基本流程</h3>
+<h3 style="">基本流程</h3>
 <ol style="line-height: 1.7; margin-left: 16px;">
     <li><b>选择参考/样品文件</b>：在左侧「参考文件」「样品文件」区域点击「添加」，或把文件拖进对应列表框；支持 BT-FTS 时域 txt、两列 Excel / txt。若程序无法识别，请先自行整理为两列标准格式（时间 ps、幅值）后再导入</li>
     <li><b>设置参数</b>：样品厚度（mm，支持逐样品设置）；如需去除多次反射，可开启 Tukey 窗函数并设置范围</li>
     <li><b>运行分析</b>：点击「运行分析」开始计算，右侧三个标签页分别显示时域/频域、光学参数、介电特性图表</li>
-    <li><b>保存结果</b>：「保存光学参数」导出光学参数表，「保存时域数据」「保存频域数据」分别导出时域/频域 Excel</li>
+    <li><b>查看曲线</b>：默认一次显示一张大图，点击图表上方的指标标签切换；「多图总览」可同时查看同组子图，双击子图可放大；「专注图表」可隐藏左侧设置以扩大绘图区</li>
+    <li><b>保存结果</b>：点击结果区右上角的「导出 Excel」，选择保存光学参数、时域数据或频域数据</li>
 </ol>
 
-<h3 style="color: #444444;">其他</h3>
+<h3 style="">其他</h3>
 <p style="line-height: 1.7; margin-left: 8px;">
 • <b>检查更新</b>：菜单「帮助 → 检查更新」
 </p>
 
-<h3 style="color: #444444;">注意事项</h3>
+<h3 style="">注意事项</h3>
 <p style="line-height: 1.7; margin-left: 8px;">
 • 标准数据为两列：第一列时间（ps），第二列电场振幅，可保存为 Excel（.xlsx）或 txt<br>
 • 参考与样品文件的采样点数应一致，不一致时程序自动截断并给出警告<br>
@@ -73,18 +71,7 @@ class HelpDialog(QDialog):
         button_layout = QHBoxLayout()
         button_layout.addStretch()
         ok_btn = QPushButton("确定")
-        ok_btn.setStyleSheet("""
-            QPushButton {
-                background-color: #F5F5F5;
-                color: #333333;
-                border: 1px solid #D0D0D0;
-                border-radius: 3px;
-                padding: 6px 24px;
-            }
-            QPushButton:hover {
-                background-color: #EBEBEB;
-            }
-        """)
+        ok_btn.setMinimumWidth(84)
         ok_btn.clicked.connect(self.accept)
         button_layout.addWidget(ok_btn)
         button_layout.addStretch()
@@ -92,12 +79,12 @@ class HelpDialog(QDialog):
 
 
 STANDARD_FORMAT_GUIDE_HTML = """
-<h3 style="color: #333333; margin-top: 0;">请先整理为两列数据</h3>
-<p style="line-height: 1.7; color: #555555;">
+<h3 style="margin-top: 0;">请先整理为两列数据</h3>
+<p style="line-height: 1.7; ">
 只需两列：第 1 列时间，第 2 列幅值。保存为 Excel（.xlsx）或 txt / csv 后重新添加。
 </p>
-<table border="1" cellspacing="0" cellpadding="6" style="border-collapse: collapse; color: #333333;">
-    <tr style="background-color: #EFEFEF;">
+<table border="1" cellspacing="0" cellpadding="6">
+    <tr>
         <th>时间 Time[ps]</th>
         <th>幅值 Amplitude</th>
     </tr>
@@ -105,7 +92,7 @@ STANDARD_FORMAT_GUIDE_HTML = """
     <tr><td align="right">0.033</td><td align="right">2.45e-03</td></tr>
     <tr><td align="right">0.066</td><td align="right">3.10e-03</td></tr>
     <tr><td align="right">0.099</td><td align="right">1.87e-03</td></tr>
-</p>
+</table>
 """
 
 
@@ -116,7 +103,6 @@ class FormatGuideDialog(QDialog):
         super().__init__(parent)
         self.setWindowTitle("请转换为标准格式")
         self.setMinimumSize(560, 460)
-        self.setStyleSheet("QDialog { background-color: #FFFFFF; }")
         self._failed_items = [item for item in (failed_items or []) if item]
         self._setup_ui()
 
@@ -127,9 +113,7 @@ class FormatGuideDialog(QDialog):
 
         browser = QTextBrowser()
         browser.setOpenExternalLinks(False)
-        browser.setStyleSheet(
-            "QTextBrowser { border: none; background-color: #FFFFFF; font-size: 10pt; color: #333333; }"
-        )
+        browser.setProperty("uiRole", "dialogBody")
         parts = [STANDARD_FORMAT_GUIDE_HTML]
         if self._failed_items:
             preview = "<br>".join(
@@ -151,18 +135,7 @@ class FormatGuideDialog(QDialog):
         button_layout = QHBoxLayout()
         button_layout.addStretch()
         ok_btn = QPushButton("知道了")
-        ok_btn.setStyleSheet("""
-            QPushButton {
-                background-color: #F5F5F5;
-                color: #333333;
-                border: 1px solid #D0D0D0;
-                border-radius: 3px;
-                padding: 6px 24px;
-            }
-            QPushButton:hover {
-                background-color: #EBEBEB;
-            }
-        """)
+        ok_btn.setMinimumWidth(84)
         ok_btn.clicked.connect(self.accept)
         button_layout.addWidget(ok_btn)
         button_layout.addStretch()
@@ -176,7 +149,6 @@ class AboutDialog(QDialog):
         super().__init__(parent)
         self.setWindowTitle("关于")
         self.setMinimumSize(500, 420)
-        self.setStyleSheet("QDialog { background-color: #FFFFFF; }")
         self._setup_ui()
 
     def _setup_ui(self):
@@ -185,37 +157,35 @@ class AboutDialog(QDialog):
 
         text_browser = QTextBrowser()
         text_browser.setOpenExternalLinks(True)
-        text_browser.setStyleSheet(
-            "QTextBrowser { border: none; background-color: #FFFFFF; font-size: 10pt; color: #333333; }"
-        )
+        text_browser.setProperty("uiRole", "dialogBody")
 
         about_html = """
 <div style="text-align: center;">
-    <h2 style="color: #333333; margin-bottom: 8px;">THz 时域光谱分析系统</h2>
-    <p style="color: #777777; font-size: 11pt;">太赫兹时域光谱（THz-TDS）光学参数提取工具</p>
+    <h2 style="margin-bottom: 8px;">THz 时域光谱分析系统</h2>
+    <p style="font-size: 11pt;">太赫兹时域光谱（THz-TDS）光学参数提取工具</p>
 </div>
 
-<hr style="border: 1px solid #EEEEEE; margin: 12px 0;">
+<hr>
 
 <table style="width: 100%; margin: 8px 0;">
-    <tr><td style="width: 100px; color: #666666;"><b>版本</b></td><td>v@VERSION@</td></tr>
-    <tr><td style="color: #666666;"><b>开发框架</b></td><td>Python 3 + PyQt6 + Matplotlib</td></tr>
+    <tr><td style="width: 100px; "><b>版本</b></td><td>v@VERSION@</td></tr>
+    <tr><td style=""><b>开发框架</b></td><td>Python 3 + PyQt6 + Matplotlib</td></tr>
 </table>
 
-<h3 style="color: #444444; margin-top: 12px;">简介</h3>
-<p style="line-height: 1.6; margin-left: 8px; color: #555555;">
+<h3 style="margin-top: 12px;">简介</h3>
+<p style="line-height: 1.6; margin-left: 8px; ">
 基于 THz-TDS 技术，通过比较参考与样品信号的传输函数，提取折射率、消光系数、吸收系数及介电特性，支持批量分析与结果导出。
 </p>
 
-<hr style="border: 1px solid #EEEEEE; margin: 12px 0;">
+<hr>
 
 <div style="text-align: center; margin-top: 12px;">
-    <p style="color: #444444; font-weight: bold; font-size: 11pt;">南京航空航天大学</p>
-    <p style="color: #666666;">高电压与绝缘技术实验室</p>
-    <p style="color: #888888; font-size: 9pt; margin-top: 4px;">Nanjing University of Aeronautics and Astronautics</p>
+    <p style="font-weight: bold; font-size: 11pt;">南京航空航天大学</p>
+    <p style="">高电压与绝缘技术实验室</p>
+    <p style="font-size: 9pt; margin-top: 4px;">Nanjing University of Aeronautics and Astronautics</p>
 </div>
 
-<p style="text-align: center; margin-top: 16px; color: #999999; font-size: 9pt;">
+<p style="text-align: center; margin-top: 16px; font-size: 9pt;">
 © @YEAR@ THz光学参数分析系统. All rights reserved.
 </p>
 """
@@ -230,18 +200,7 @@ class AboutDialog(QDialog):
         button_layout = QHBoxLayout()
         button_layout.addStretch()
         ok_btn = QPushButton("确定")
-        ok_btn.setStyleSheet("""
-            QPushButton {
-                background-color: #F5F5F5;
-                color: #333333;
-                border: 1px solid #D0D0D0;
-                border-radius: 3px;
-                padding: 6px 24px;
-            }
-            QPushButton:hover {
-                background-color: #EBEBEB;
-            }
-        """)
+        ok_btn.setMinimumWidth(84)
         ok_btn.clicked.connect(self.accept)
         button_layout.addWidget(ok_btn)
         button_layout.addStretch()
@@ -255,8 +214,8 @@ def manual_download_html(prefix: str = "", url: str = "") -> str:
     """
     url = url or INSTALLER_DOWNLOAD_URL
     return (
-        f'<span style="font-size:9pt; color:#666666;">{prefix}'
-        f'<a href="{url}" style="color:#1565C0;">{url}</a></span>'
+        f'<span style="font-size:9pt;">{prefix}'
+        f'<a href="{url}">{url}</a></span>'
     )
 
 
@@ -275,7 +234,6 @@ class UpdateDialog(QDialog):
         self.download_worker = None
         self.setWindowTitle("发现新版本")
         self.setMinimumSize(540, 460)
-        self.setStyleSheet("QDialog { background-color: #FFFFFF; }")
         self._setup_ui()
 
     def _setup_ui(self):
@@ -285,41 +243,25 @@ class UpdateDialog(QDialog):
 
         header = QLabel(f"发现新版本 v{self.update_info.version}")
         header.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        header.setStyleSheet("font-size: 15pt; font-weight: bold; color: #2E7D32;")
+        header.setStyleSheet("font-size: 15pt; font-weight: bold;")
         layout.addWidget(header)
 
         current_label = QLabel(f"当前版本 v{APP_VERSION}")
         current_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        current_label.setStyleSheet("color: #777777; font-size: 10pt;")
+        current_label.setProperty("uiRole", "hint")
         layout.addWidget(current_label)
 
         if self.update_info.release_date:
             date_label = QLabel(f"发布日期：{self.update_info.release_date}")
             date_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
-            date_label.setStyleSheet("color: #666666; font-size: 9pt;")
+            date_label.setProperty("uiRole", "hint")
             layout.addWidget(date_label)
 
         changelog_group = QGroupBox("更新内容")
-        changelog_group.setStyleSheet("""
-            QGroupBox {
-                font-weight: bold;
-                border: 1px solid #D0D0D0;
-                border-radius: 4px;
-                margin-top: 8px;
-                padding-top: 8px;
-                background-color: #FFFFFF;
-                color: #333333;
-            }
-            QGroupBox::title {
-                subcontrol-origin: margin;
-                left: 8px;
-                padding: 0 4px;
-                color: #555555;
-            }
-        """)
         cl_layout = QVBoxLayout(changelog_group)
         self.changelog_browser = QTextBrowser()
         self.changelog_browser.setOpenExternalLinks(True)
+        self.changelog_browser.setProperty("uiRole", "dialogBody")
         # 更新内容 + 可点击的手动下载地址，同处一个提示框内
         changelog_text = escape(
             self.update_info.changelog or "暂无更新说明"
@@ -330,59 +272,30 @@ class UpdateDialog(QDialog):
             + manual_download_html("自动更新失败？可手动下载：", self.update_info.download_url)
             + "</div>"
         )
-        self.changelog_browser.setStyleSheet(
-            "QTextBrowser { border: none; background-color: #FAFAFA; font-size: 10pt; color: #333333; }"
-        )
         cl_layout.addWidget(self.changelog_browser)
         layout.addWidget(changelog_group, 1)
 
         self.status_label = QLabel("")
         self.status_label.setVisible(False)
-        self.status_label.setStyleSheet("color: #666666; font-size: 9pt;")
+        self.status_label.setProperty("uiRole", "hint")
         layout.addWidget(self.status_label)
 
         self.progress_bar = QProgressBar()
         self.progress_bar.setVisible(False)
         self.progress_bar.setFixedHeight(14)
+        self.progress_bar.setTextVisible(False)
         layout.addWidget(self.progress_bar)
 
         button_layout = QHBoxLayout()
         button_layout.addStretch()
         self.later_btn = QPushButton("稍后")
-        self.later_btn.setStyleSheet("""
-            QPushButton {
-                background-color: #F5F5F5;
-                color: #333333;
-                border: 1px solid #D0D0D0;
-                border-radius: 3px;
-                padding: 6px 24px;
-            }
-            QPushButton:hover {
-                background-color: #EBEBEB;
-            }
-            QPushButton:disabled {
-                color: #A0A0A0;
-            }
-        """)
+        self.later_btn.setMinimumWidth(84)
         self.later_btn.clicked.connect(self.reject)
         button_layout.addWidget(self.later_btn)
 
         self.update_btn = QPushButton("立即更新")
-        self.update_btn.setStyleSheet("""
-            QPushButton {
-                background-color: #2E7D32;
-                color: #FFFFFF;
-                border: none;
-                border-radius: 3px;
-                padding: 6px 24px;
-            }
-            QPushButton:hover {
-                background-color: #256B29;
-            }
-            QPushButton:disabled {
-                background-color: #A0A0A0;
-            }
-        """)
+        self.update_btn.setMinimumWidth(84)
+        self.update_btn.setProperty("uiRole", "primary")
         self.update_btn.clicked.connect(self._start_download)
         button_layout.addWidget(self.update_btn)
         button_layout.addStretch()
@@ -524,16 +437,7 @@ class LogDialog(QDialog):
         self.log_view = QPlainTextEdit()
         self.log_view.setReadOnly(True)
         self.log_view.setMaximumBlockCount(2000)
-        self.log_view.setStyleSheet("""
-            QPlainTextEdit {
-                background-color: #FFFFFF;
-                color: #333333;
-                font-family: Consolas, "Courier New", monospace;
-                font-size: 11px;
-                border: 1px solid #D0D0D0;
-                border-radius: 3px;
-            }
-        """)
+        self.log_view.setObjectName("runLog")
         layout.addWidget(self.log_view, 1)
 
         btn_row = QHBoxLayout()

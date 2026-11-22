@@ -80,6 +80,7 @@ uv run pyinstaller --noconfirm --clean --onedir --windowed `
     --icon "app.ico" `
     --add-data "release.json;." `
     --add-data "app.ico;." `
+    --add-data "THIRD_PARTY_NOTICES.txt;." `
     main.py
 
 $exePath = Join-Path $OutputDir "$AppName\$AppName.exe"

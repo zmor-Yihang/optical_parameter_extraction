@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from collections.abc import Sequence
+from collections.abc import Callable, Sequence
 
 import matplotlib
 import numpy as np
@@ -55,12 +55,11 @@ def create_time_frequency_figure(
 ) -> Figure:
     """创建时域与频域信号图。"""
     figure = Figure(figsize=(9, 7))
-    figure.patch.set_facecolor("#F5F5F5")
 
     short_names = tuple(short_display_name(name) for name in signals.sample_names)
+    reference_color = matplotlib.rcParams.get("text.color", "#17263B")
 
     time_axis = figure.add_subplot(2, 1, 1)
-    time_axis.set_facecolor("#F8F8F8")
     for index, sample in enumerate(signals.samples):
         time_axis.plot(
             signals.time,
@@ -73,7 +72,7 @@ def create_time_frequency_figure(
     time_axis.plot(
         signals.time,
         signals.reference,
-        "k",
+        color=reference_color,
         linewidth=2,
         label="参考信号",
         gid="参考信号",
@@ -84,11 +83,10 @@ def create_time_frequency_figure(
     time_axis.set_ylabel("振幅")
 
     frequency_axis = figure.add_subplot(2, 1, 2)
-    frequency_axis.set_facecolor("#F8F8F8")
     frequency_axis.plot(
         properties.frequency,
         _magnitude_to_db(properties.reference_fft_magnitude),
-        "k",
+        color=reference_color,
         linewidth=2,
         label="参考信号",
         gid="参考信号",
@@ -109,8 +107,7 @@ def create_time_frequency_figure(
     frequency_axis.set_xlim(0, 5)
     frequency_axis.autoscale(axis="y")
 
-    _apply_shared_legend(figure, sample_count=len(signals.samples))
-    figure.tight_layout()
+    _layout_figure(figure, sample_count=len(signals.samples))
     return figure
 
 
@@ -120,7 +117,6 @@ def create_optical_parameters_figure(
 ) -> Figure:
     """创建折射率、消光系数和吸收系数图。"""
     figure = Figure(figsize=(9, 10))
-    figure.patch.set_facecolor("#F5F5F5")
     short_names = tuple(short_display_name(name) for name in sample_names)
 
     _plot_comparison_axis(
@@ -154,8 +150,7 @@ def create_optical_parameters_figure(
         with_labels=False,
     )
 
-    _apply_shared_legend(figure, sample_count=len(sample_names))
-    figure.tight_layout()
+    _layout_figure(figure, sample_count=len(sample_names))
     return figure
 
 
@@ -165,7 +160,6 @@ def create_dielectric_figure(
 ) -> Figure:
     """创建介电常数和介电损耗图。"""
     figure = Figure(figsize=(9, 10))
-    figure.patch.set_facecolor("#F5F5F5")
     short_names = tuple(short_display_name(name) for name in sample_names)
 
     _plot_comparison_axis(
@@ -199,8 +193,7 @@ def create_dielectric_figure(
         with_labels=False,
     )
 
-    _apply_shared_legend(figure, sample_count=len(sample_names))
-    figure.tight_layout()
+    _layout_figure(figure, sample_count=len(sample_names))
     return figure
 
 
@@ -217,9 +210,7 @@ def create_single_series_figure(
 ) -> Figure:
     """创建弹出窗口用的单图（复用图例策略）。"""
     figure = Figure(figsize=(10, 6))
-    figure.patch.set_facecolor("#F5F5F5")
     axis = figure.add_subplot(1, 1, 1)
-    axis.set_facecolor("#F8F8F8")
 
     reference_labels = {"参考信号"}
 
@@ -267,139 +258,49 @@ def create_single_series_figure(
         axis.set_xlim(*xlim)
         axis.autoscale(axis="y")
 
-    _apply_shared_legend(figure, sample_count=sample_count)
-    figure.tight_layout()
+    _layout_figure(figure, sample_count=sample_count)
     return figure
 
 
-def enable_responsive_fonts(canvas) -> None:
-    """让图表文字随画布尺寸自适应缩放，防止小窗口时文字重叠。
-
-    以画布首次出现时的尺寸为基准，之后窗口放大/缩小时按比例调整
-    标题、轴标签、刻度与图例的字号，并重新做紧凑布局。
-    """
-    figure = canvas.figure
-    state: dict = {"base": None, "sizes": None}
-
-    def _collect_base_sizes() -> None:
-        axes = list(figure.axes)
-        if not axes:
-            return
-        sizes = {"title": 0.0, "xlabel": 0.0, "ylabel": 0.0, "tick": 0.0, "legend": 0.0}
-        sizes["title"] = max(ax.title.get_fontsize() for ax in axes)
-        sizes["xlabel"] = max(ax.xaxis.label.get_fontsize() for ax in axes)
-        sizes["ylabel"] = max(ax.yaxis.label.get_fontsize() for ax in axes)
-        tick_sizes = [
-            label.get_fontsize()
-            for ax in axes
-            for label in list(ax.get_xticklabels()) + list(ax.get_yticklabels())
-        ]
-        if tick_sizes:
-            sizes["tick"] = max(tick_sizes)
-        legend_sizes = [
-            text.get_fontsize()
-            for ax in axes
-            if ax.get_legend() is not None
-            for text in ax.get_legend().get_texts()
-        ]
-        legend_sizes += [
-            text.get_fontsize() for legend in figure.legends for text in legend.get_texts()
-        ]
-        if legend_sizes:
-            sizes["legend"] = max(legend_sizes)
-        state["sizes"] = sizes
-
-    def on_resize(event) -> None:
-        width, height = figure.get_size_inches()
-        if state["base"] is None:
-            # 首次布局：记录基准尺寸与各元素字号
-            state["base"] = (width, height)
-            _collect_base_sizes()
-            return
-        sizes = state["sizes"]
-        if sizes is None:
-            return
-        base_w, base_h = state["base"]
-        scale = min(width / base_w, height / base_h)
-        scale = max(0.6, min(scale, 2.5))
-        for ax in figure.axes:
-            ax.title.set_fontsize(sizes["title"] * scale)
-            ax.xaxis.label.set_fontsize(sizes["xlabel"] * scale)
-            ax.yaxis.label.set_fontsize(sizes["ylabel"] * scale)
-            for label in list(ax.get_xticklabels()) + list(ax.get_yticklabels()):
-                label.set_fontsize(sizes["tick"] * scale)
-            legend = ax.get_legend()
-            if legend is not None:
-                for text in legend.get_texts():
-                    text.set_fontsize(sizes["legend"] * scale)
-        for legend in figure.legends:
-            for text in legend.get_texts():
-                text.set_fontsize(sizes["legend"] * scale)
-        try:
-            figure.tight_layout()
-        except Exception:
-            pass
-        figure.canvas.draw_idle()
-
-    canvas.mpl_connect("resize_event", on_resize)
-
-
-def enable_curve_hover(canvas) -> None:
-    """为画布上的曲线启用悬停显示样品全名。"""
-    figure = canvas.figure
-    annotation = figure.text(
+def enable_curve_hover(canvas) -> Callable[[], None]:
+    """悬停显示样品全名，并返回切换视图时可用的清除函数。"""
+    annotation = canvas.figure.text(
         0.02,
-        0.98,
+        0.96,
         "",
-        transform=figure.transFigure,
         va="top",
         ha="left",
         fontsize=9,
-        color="#222222",
-        bbox={
-            "boxstyle": "round,pad=0.3",
-            "facecolor": "#FFFFEE",
-            "edgecolor": "#CCCCCC",
-            "alpha": 0.92,
-        },
+        bbox={"boxstyle": "round,pad=0.3", "facecolor": "white", "edgecolor": "#D5DFEB"},
         visible=False,
         zorder=1000,
     )
-    state = {"annotation": annotation, "last_label": None}
+    annotation.set_in_layout(False)
+
+    def clear(_event=None) -> None:
+        if annotation.get_visible():
+            annotation.set_visible(False)
+            canvas.draw_idle()
 
     def on_move(event: MouseEvent) -> None:
-        if event.inaxes is None:
-            if state["annotation"].get_visible():
-                state["annotation"].set_visible(False)
-                state["last_label"] = None
-                canvas.draw_idle()
-            return
-
-        matched_label = None
-        for line in event.inaxes.get_lines():
-            if not line.get_visible():
-                continue
-            contains, _ = line.contains(event)
-            if contains:
-                matched_label = line.get_gid() or line.get_label()
-                break
-
-        if matched_label is None:
-            if state["annotation"].get_visible():
-                state["annotation"].set_visible(False)
-                state["last_label"] = None
-                canvas.draw_idle()
-            return
-
-        if matched_label == state["last_label"] and state["annotation"].get_visible():
-            return
-
-        state["last_label"] = matched_label
-        state["annotation"].set_text(str(matched_label))
-        state["annotation"].set_visible(True)
-        canvas.draw_idle()
+        axis = event.inaxes
+        if axis is not None and axis.get_visible():
+            for line in axis.get_lines():
+                if not line.get_visible() or not line.contains(event)[0]:
+                    continue
+                label = str(line.get_gid() or line.get_label())
+                if (not annotation.get_visible() or annotation.get_text() != label
+                        or annotation.get_transform() is not axis.transAxes):
+                    annotation.set_text(label)
+                    annotation.set_transform(axis.transAxes)
+                    annotation.set_visible(True)
+                    canvas.draw_idle()
+                return
+        clear()
 
     canvas.mpl_connect("motion_notify_event", on_move)
+    canvas.mpl_connect("figure_leave_event", clear)
+    return clear
 
 
 def _plot_comparison_axis(
@@ -412,7 +313,6 @@ def _plot_comparison_axis(
     ylabel: str,
     with_labels: bool,
 ) -> None:
-    axis.set_facecolor("#F8F8F8")
     for index, sample_values in enumerate(values):
         axis.plot(
             frequency,
@@ -430,8 +330,9 @@ def _plot_comparison_axis(
     axis.autoscale(axis="y")
 
 
-def _apply_shared_legend(figure: Figure, sample_count: int) -> None:
-    """一张 Figure 最多一个公共图例；样品过多时不绘制图例。"""
+def _layout_figure(figure: Figure, sample_count: int) -> None:
+    """自适应留出标题、刻度和图例空间，不随窗口缩小字号。"""
+    figure.set_layout_engine("constrained", w_pad=0.12, h_pad=0.07, hspace=0.02)
     if sample_count > LEGEND_INLINE_LIMIT:
         return
 
@@ -451,13 +352,16 @@ def _apply_shared_legend(figure: Figure, sample_count: int) -> None:
     if not handles:
         return
 
+    # 多样品时把图例放到右侧，避免在总览中占用多行子图的高度。
+    use_side_legend = len(labels) > 4
     figure.legend(
         handles,
         labels,
-        loc="upper right",
+        loc="outside right upper" if use_side_legend else "outside upper right",
+        ncols=1 if use_side_legend else min(2, len(labels)),
         fontsize=9,
-        framealpha=0.9,
-        borderaxespad=0.4,
+        columnspacing=1.2,
+        borderaxespad=0.5,
     )
 
 

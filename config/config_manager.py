@@ -43,6 +43,7 @@ def load_config():
         "standardized_dir": "",      # 阶段一标准 txt 输出目录
         "scan_mode": "each",         # 多扫描文件处理方式: each / average
         "auto_check_update": True,   # 启动时自动检查更新
+        "theme": "light",            # 界面主题: light / dark
         "last_update_check": "",     # 上次检查更新时间（ISO 格式，仅作记录）
         "update_source": UPDATE_URL  # 更新源地址（version.json）
     }

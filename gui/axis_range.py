@@ -58,18 +58,15 @@ class AxisRangeBar(QWidget):
         self._default_limits = {
             ax: (ax.get_xlim(), ax.get_ylim()) for ax in self.figure.axes
         }
-        self.setStyleSheet(
-            "AxisRangeBar { background-color: #F7F7F7; border: 1px solid #E0E0E0;"
-            " border-radius: 3px; }"
-            "AxisRangeBar QLineEdit { background-color: #FFFFFF; }"
-        )
+        self.setObjectName("axisRange")
+        self.setAttribute(Qt.WidgetAttribute.WA_StyledBackground, True)
         # 只按内容高度占位，剩余空间交给上方画布
         self.setSizePolicy(QSizePolicy.Policy.Preferred, QSizePolicy.Policy.Maximum)
         self._setup_ui()
         if self._show_axes_combo:
             self._refresh_axes_combo()
         else:
-            self._sync_from_axes()
+            self.sync_limits()
 
     # ------------------------------------------------------------------
     # UI 构建
@@ -81,48 +78,37 @@ class AxisRangeBar(QWidget):
             self._setup_horizontal_ui()
 
     # ------------------------------------------------------------------
-    # 横向布局（默认）：标题 + 子图下拉 + X/Y 范围 + 应用 / 自动
+    # 横向布局（默认）：子图下拉 + X/Y 范围 + 应用 / 自动
     # ------------------------------------------------------------------
     def _setup_horizontal_ui(self):
         layout = QHBoxLayout(self)
-        layout.setContentsMargins(6, 3, 6, 3)
+        layout.setContentsMargins(8, 5, 8, 5)
         layout.setSpacing(5)
 
-        title = QLabel("坐标范围")
-        title.setToolTip(
-            "手动设置图表显示范围：\n"
-            "· X 轴范围 / Y 轴范围 分组，每组最小/最大值可独立填写，留空表示保持当前\n"
-            "· 填写后点「应用」生效，输入过程不改变图表\n"
-            "· 「子图」可选择要设置范围的单个子图\n"
-            "· 「自动」恢复绘图时的初始默认显示范围"
-        )
-        title.setStyleSheet("color: #555555; font-weight: bold;")
-        layout.addWidget(title)
-
-        layout.addWidget(QLabel("子图:"))
         self.axes_combo = QComboBox()
-        self.axes_combo.setMinimumWidth(110)
-        self.axes_combo.currentIndexChanged.connect(
-            lambda _index: self._sync_from_axes()
-        )
+        self.axes_combo.setMinimumWidth(126)
+        self.axes_combo.setAccessibleName("选择要调整坐标范围的子图")
+        self.axes_combo.setToolTip("选择子图后，可分别设置 X 轴和 Y 轴的最小值与最大值")
+        self.axes_combo.currentIndexChanged.connect(self.sync_limits)
         layout.addWidget(self.axes_combo)
 
-        layout.addSpacing(8)
-        x_label = QLabel("X 轴范围:")
-        x_label.setStyleSheet("color: #555555;")
+        layout.addSpacing(2)
+        x_label = QLabel("X 轴:")
+        x_label.setProperty("uiRole", "hint")
         layout.addWidget(x_label)
         self.xmin_edit = self._make_edit(layout, "Xmin", "X 轴最小值（留空 = 保持当前）")
         self.xmax_edit = self._make_edit(layout, "Xmax", "X 轴最大值（留空 = 保持当前）")
 
         layout.addSpacing(4)
-        y_label = QLabel("Y 轴范围:")
-        y_label.setStyleSheet("color: #555555;")
+        y_label = QLabel("Y 轴:")
+        y_label.setProperty("uiRole", "hint")
         layout.addWidget(y_label)
         self.ymin_edit = self._make_edit(layout, "Ymin", "Y 轴最小值（留空 = 保持当前）")
         self.ymax_edit = self._make_edit(layout, "Ymax", "Y 轴最大值（留空 = 保持当前）")
 
-        layout.addSpacing(8)
+        layout.addSpacing(4)
         apply_btn = QPushButton("应用")
+        apply_btn.setProperty("uiRole", "soft")
         apply_btn.clicked.connect(self._apply)
         layout.addWidget(apply_btn)
 
@@ -149,7 +135,7 @@ class AxisRangeBar(QWidget):
             "· 填写后点「应用」生效，输入过程不改变图表\n"
             "· 「自动」恢复绘图时的初始默认显示范围"
         )
-        title.setStyleSheet("color: #555555; font-weight: bold;")
+        title.setProperty("uiRole", "sectionTitle")
         layout.addWidget(title, 0, 0, 1, 4)
 
         row = 1
@@ -157,14 +143,12 @@ class AxisRangeBar(QWidget):
             layout.addWidget(QLabel("子图:"), row, 0)
             self.axes_combo = QComboBox()
             self.axes_combo.setMinimumWidth(110)
-            self.axes_combo.currentIndexChanged.connect(
-                lambda _index: self._sync_from_axes()
-            )
+            self.axes_combo.currentIndexChanged.connect(self.sync_limits)
             layout.addWidget(self.axes_combo, row, 1, 1, 3)
             row += 1
 
-        x_label = QLabel("X 轴范围:")
-        x_label.setStyleSheet("color: #555555;")
+        x_label = QLabel("X 轴:")
+        x_label.setProperty("uiRole", "hint")
         layout.addWidget(x_label, row, 0)
         self.xmin_edit = self._make_edit(
             layout, "Xmin", "X 轴最小值（留空 = 保持当前）", row, 1
@@ -174,8 +158,8 @@ class AxisRangeBar(QWidget):
         )
 
         row += 1
-        y_label = QLabel("Y 轴范围:")
-        y_label.setStyleSheet("color: #555555;")
+        y_label = QLabel("Y 轴:")
+        y_label.setProperty("uiRole", "hint")
         layout.addWidget(y_label, row, 0)
         self.ymin_edit = self._make_edit(
             layout, "Ymin", "Y 轴最小值（留空 = 保持当前）", row, 1
@@ -186,6 +170,7 @@ class AxisRangeBar(QWidget):
 
         row += 1
         apply_btn = QPushButton("应用")
+        apply_btn.setProperty("uiRole", "soft")
         apply_btn.clicked.connect(self._apply)
         layout.addWidget(apply_btn, row, 1)
 
@@ -205,8 +190,16 @@ class AxisRangeBar(QWidget):
         col: int | None = None,
     ) -> QLineEdit:
         edit = QLineEdit()
-        edit.setFixedWidth(58)
+        metrics = edit.fontMetrics()
+        full_width = metrics.horizontalAdvance("-1.23456e+123") + 14
+        if row is None:
+            # 紧凑窗口优先保留坐标控件，常用数值依然完整可见。
+            edit.setMinimumWidth(metrics.horizontalAdvance("-0.123456") + 14)
+            edit.setMaximumWidth(full_width)
+        else:
+            edit.setFixedWidth(full_width)
         edit.setPlaceholderText(short)
+        edit.setAccessibleName(long_tip)
         edit.setToolTip(long_tip)
         edit.setAlignment(Qt.AlignmentFlag.AlignRight)
         if row is not None and col is not None:
@@ -230,7 +223,21 @@ class AxisRangeBar(QWidget):
                 self.axes_combo.addItem(text, ax)
         finally:
             self._updating = False
-        self._sync_from_axes()
+        self.sync_limits()
+
+    @property
+    def subplot_index(self) -> int:
+        combo = getattr(self, "axes_combo", None)
+        return max(0, combo.currentIndex()) if combo is not None else 0
+
+    def focus_subplot(self, index: int | None) -> None:
+        """单图模式固定目标并隐藏下拉框，总览时恢复子图选择。"""
+        combo = self.axes_combo
+        combo.setVisible(index is None)
+        if index is not None and index != combo.currentIndex():
+            combo.setCurrentIndex(index)
+        else:
+            self.sync_limits()
 
     def _selected_axes(self) -> list:
         """返回当前选择要应用的 Axes 列表（仅单个子图；无子图下拉时应用全部）。"""
@@ -303,9 +310,9 @@ class AxisRangeBar(QWidget):
                 ax.autoscale(enable=True, axis="both")
                 ax.autoscale_view()
         self.canvas.draw_idle()
-        self._sync_from_axes()
+        self.sync_limits()
 
-    def _sync_from_axes(self):
+    def sync_limits(self):
         """把当前选中子图的真实显示范围回填到输入框。"""
         self._updating = True
         try:
