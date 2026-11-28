@@ -19,6 +19,8 @@ powershell -NoProfile -ExecutionPolicy Bypass -File .\build_installer.ps1
 
 安装包位于 `dist/`；发布 EXE 位于 `target/release/`。正式分发前应整理 Rust 依赖声明，可通过 `-DependencyNotices` 随安装包附带。
 
+THzLab 安装成功后，会自动调用由旧版安装器注册的 Python 版卸载程序。不会卸载便携版或手工部署的副本，也不会主动删除旧版运行时生成的配置和日志或将它们导入 THzLab。
+
 ## 功能与兼容性
 
 - 左侧设置、右侧三组结果，界面固定为浅色，支持专注模式；默认单图，总览双击可打开单图。图表采用 Matplotlib 式导航：默认只读图；「平移」模式左键拖动；「框选缩放」模式左键框选放大、右键框选缩小。再次点击工具或按 Esc 退出；「初始视图 / 后退 / 前进」按子图管理范围历史。仍可悬停读值、手动输入坐标范围和查看数据表。
