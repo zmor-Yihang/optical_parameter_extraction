@@ -23,6 +23,9 @@ standardized/
 output/
 output-nuitka/
 installer-output/
+rust-app/target/
+rust-app/dist/
+
 *.spec
 *.manifest
 
